@@ -22,6 +22,20 @@ fun TryIsRecursive() {
     println()
 }
 
+fun TryHowManyParameters() {
+    println(HowManyParameters("factorial").build(source))
+    println()
+
+    println(HowManyParameters("square").build(source))
+    println()
+
+    println(HowManyParameters("sum").build(source))
+    println()
+
+    println(HowManyParameters("hello").build(source))
+    println()
+}
+
 fun TryHowManyVariables() {
     println(HowManyVariables("factorial").build(source))
     println()
@@ -39,20 +53,6 @@ fun TryHowManyVariables() {
     println()
 
     println(HowManyVariables("printHelloNTimes").build(source))
-    println()
-}
-
-fun TryHowManyParameters() {
-    println(HowManyParameters("factorial").build(source))
-    println()
-
-    println(HowManyParameters("square").build(source))
-    println()
-
-    println(HowManyParameters("sum").build(source))
-    println()
-
-    println(HowManyParameters("hello").build(source))
     println()
 }
 
@@ -83,8 +83,8 @@ fun TryCallsOtherFunctions() {
 
 fun main(){
     //TryIsRecursive()
-    //TryHowManyVariables()
     //TryHowManyParameters()
+    //TryHowManyVariables()
     //TryHowManyLoops()
     //TryCallsOtherFunctions()
 }
