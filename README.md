@@ -13,4 +13,26 @@
 
 <br>
 
+## Question Types
+
+- [X] CallsOtherFunctions
+- [ ] HowManyFunctions
+- [ ] WhichFunctions
+- [X] IsRecursive
+- [X] HowManyParams
+- [ ] WhichParameters
+- [x] HowManyVariables
+- [ ] WhatVariables
+- [ ] WhichVariableHoldsReturn
+- [ ] WhichFixedVariables
+- [ ] WhichVariableRole
+- [X] HowManyLoops
+- [ ] HowDeepCallStack
+- [ ] HowManyFunctionCalls
+- [ ] HowManyVariableAssignments
+- [ ] WhichVariableValues
+- [ ] WhatIsResult
+
+<br>
+
 ## Examples
