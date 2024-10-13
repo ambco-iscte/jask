@@ -81,10 +81,22 @@ fun TryCallsOtherFunctions() {
     println()
 }
 
+fun TryLanguages(){
+    println(CallsOtherFunctions("factorial").build(source, PORTUGUESE_LANGUAGE))
+    println()
+
+    println(CallsOtherFunctions("factorial").build(source, ENGLISH_LANGUAGE))
+    println()
+
+    println(CallsOtherFunctions("factorial").build(source))
+    println()
+}
+
 fun main(){
     //TryIsRecursive()
     //TryHowManyParameters()
     //TryHowManyVariables()
     //TryHowManyLoops()
     //TryCallsOtherFunctions()
+    TryLanguages()
 }
