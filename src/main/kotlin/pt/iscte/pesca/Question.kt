@@ -71,8 +71,6 @@ open class QuestionAboutAMethodInTheCode(private val methodInCode: String, sourc
 
     /**
      * Gets the method with the given name from a Java source code.
-     * @param methodName Method's name.
-     * @param source Source code of a Java class.
      * @return The method with the given name
      */
     val method: MethodDeclaration
