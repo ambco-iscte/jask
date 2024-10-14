@@ -48,4 +48,8 @@ public class HelloWorld {
             }
         }
     }
+
+    public static String printTimesN(String text, int times){
+        return text.repeat(times);
+    }
 }

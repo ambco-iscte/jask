@@ -19,8 +19,10 @@ data class HowManyParameters(val methodName: String): StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                textEN = "How many parameters does the $signature method take?",
-                textPT = "Quantos parâmetros tem o método $signature?"
+                mutableMapOf(
+                    ENGLISH_LANGUAGE to "How many parameters does the $signature method take?",
+                    PORTUGUESE_LANGUAGE to "Quantos parâmetros tem o método $signature?"
+                )
             ),
             getNearValuesAndNoneOfTheAbove(parameters),
             language = language
@@ -44,9 +46,11 @@ data class IsRecursive(val methodName: String) : StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                textEN = "Is the method $signature recursive?",
-                textPT = "O método $signature é recursivo?"
-                ),
+                mutableMapOf(
+                    ENGLISH_LANGUAGE to "Is the method $signature recursive?",
+                    PORTUGUESE_LANGUAGE to "O método $signature é recursivo?"
+                )
+            ),
             getTrueOrFalse(isRecursive),
             language = language
         )
@@ -64,15 +68,16 @@ data class HowManyVariables(val methodName: String): StaticQuestion{
 
         return QuestionData(
             SimpleTextStatement(
-                textEN = "How many variables (not including parameters) does the function $signature have?",
-                textPT = "Quantas variáveis (excluindo os parâmetros) têm a função $signature?"
+                mutableMapOf(
+                    ENGLISH_LANGUAGE to "How many variables (not including parameters) does the function $signature have?",
+                    PORTUGUESE_LANGUAGE to "Quantas variáveis (excluindo os parâmetros) têm a função $signature?"
+                )
             ),
             getNearValuesAndNoneOfTheAbove(howManyVariables),
             language = language
         )
     }
 }
-
 
 data class HowManyLoops(val methodName: String): StaticQuestion{
     override fun build(source: String, language: String): QuestionData {
@@ -90,8 +95,10 @@ data class HowManyLoops(val methodName: String): StaticQuestion{
 
         return QuestionData(
             SimpleTextStatement(
-                textEN = "How many loops does function $signature have?",
-                textPT = "Quantos loops tem a função $signature?"
+                mutableMapOf(
+                    ENGLISH_LANGUAGE to "How many loops does function $signature have?",
+                    PORTUGUESE_LANGUAGE to "Quantos loops tem a função $signature?"
+                )
             ),
             getNearValuesAndNoneOfTheAbove(howManyLoops),
             language = language
@@ -113,15 +120,44 @@ data class CallsOtherFunctions(val methodName: String) : StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                textEN = "Does function $signature depend on other functions?",
-                textPT = "A função $signature depende de outras funções?"),
+                mutableMapOf(
+                    ENGLISH_LANGUAGE to "Does function $signature depend on other functions?",
+                    PORTUGUESE_LANGUAGE to "A função $signature depende de outras funções?"
+                )
+            ),
             getTrueOrFalse(callsOtherFunctions),
             language = language
         )
     }
 }
 
+data class CanCallAMethodWithGivenArguments(val methodName: String, val args: List<Any>): StaticQuestion {
 
+    override fun build(source: String, language: String): QuestionData {
+
+        val method = getMethod(methodName = methodName, source = source)
+
+        val signature = "${method.nameAsString}(${method.parameters.joinToString()})"
+
+        val canCallAMethodWithGivenArguments = canCallJavaMethodWithArgs(method,args)
+
+        val arguments = args.withIndex().joinToString(separator = ", ") { (index, arg) ->
+            "\n${method.parameters.get(index).name}: " + formattedArg(arg)
+        }
+
+        return QuestionData(
+            SimpleTextStatement(
+                mutableMapOf(
+                    ENGLISH_LANGUAGE to "Can the method $signature be called with these arguments: $arguments?",
+                    PORTUGUESE_LANGUAGE to "O método $signature pode ser chamado com os seguintes argumentos?$arguments"
+                )
+            ),
+            getTrueOrFalse(canCallAMethodWithGivenArguments),
+            language = language
+        )
+    }
+
+}
 
 
 

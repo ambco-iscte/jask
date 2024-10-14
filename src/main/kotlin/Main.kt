@@ -92,11 +92,35 @@ fun TryLanguages(){
     println()
 }
 
+fun TryLanguagesAux(){
+    println(CallsOtherFunctions("factorial").buildPT(source))
+    println()
+
+    println(CallsOtherFunctions("factorial").buildEN(source))
+    println()
+
+    println(CallsOtherFunctions("factorial").build(source))
+    println()
+}
+
+fun TryCanCallAMethodWithGivenArguments(){
+    println(CanCallAMethodWithGivenArguments("factorial", listOf(2)).buildPT(source))
+    println()
+
+    println(CanCallAMethodWithGivenArguments("printTimesN", listOf("Hello", 3)).build(source,PORTUGUESE_LANGUAGE))
+    println()
+
+    println(CanCallAMethodWithGivenArguments("printTimesN", listOf(3, "Hello")).build(source,PORTUGUESE_LANGUAGE))
+    println()
+}
+
 fun main(){
     //TryIsRecursive()
     //TryHowManyParameters()
     //TryHowManyVariables()
     //TryHowManyLoops()
     //TryCallsOtherFunctions()
-    TryLanguages()
+    //TryLanguages()
+    //TryLanguagesAux()
+    TryCanCallAMethodWithGivenArguments()
 }

@@ -3,54 +3,35 @@ package pt.iscte.pt.iscte.pesca
 import java.io.File
 
 interface QuestionType{
-    var textPT:String
-    var textEN:String
-    val languageToOptionMapping : Map<String,String>
-        get() = mutableMapOf(
-            ENGLISH_LANGUAGE to textEN,
-            PORTUGUESE_LANGUAGE to textPT
-        )
+    var languageToOptionMapping : Map<String,String>
 
-    fun getENText():String = getText(ENGLISH_LANGUAGE)
-    fun getPTText():String = getText(PORTUGUESE_LANGUAGE)
+    fun getText()=languageToOptionMapping[DEFAULT_LANGUAGE].toString()
     fun getText(language: String) = languageToOptionMapping[language].toString()
 
 }
 
 data class SimpleTextStatement(
-    override var textPT: String,
-    override var textEN: String,
+    override var languageToOptionMapping: Map<String,String>
 ): QuestionType {
-    constructor(valuePT: Any,valueEN: Any): this(textPT=valuePT.toString(),textEN=valueEN.toString())
-    constructor(value: Any): this(value.toString(),value.toString())
+    constructor(value: Any): this(mutableMapOf(DEFAULT_LANGUAGE to value.toString()) )
 
     override fun toString() = languageToOptionMapping[DEFAULT_LANGUAGE].toString()
 }
 
 
 interface OptionData{
-    var textPT:String
-    var textEN:String
-    val languageToOptionMapping : Map<String,String>
-        get() = mutableMapOf(
-            ENGLISH_LANGUAGE to textEN,
-            PORTUGUESE_LANGUAGE to textPT
-        )
-    fun getENText():String = getText(ENGLISH_LANGUAGE)
-    fun getPTText():String = getText(PORTUGUESE_LANGUAGE)
-    fun getText(language: String) = languageToOptionMapping[language].toString()
+    var languageToOptionMapping : Map<String,String>
 
+    fun getText(language: String) = languageToOptionMapping[language].toString()
+    fun getText() = languageToOptionMapping[DEFAULT_LANGUAGE].toString()
 }
 
 data class SimpleTextOptionData(
-    override var textPT: String,
-    override var textEN: String,
+    override var languageToOptionMapping: Map<String, String>
 ): OptionData {
-    constructor(valuePT: Any,valueEN: Any): this(textPT=valuePT.toString(),textEN=valueEN.toString())
-    constructor(value: Any): this(value.toString(),value.toString())
+    constructor(value: Any): this(mutableMapOf(DEFAULT_LANGUAGE to value.toString()) )
 
     override fun toString() = languageToOptionMapping[DEFAULT_LANGUAGE].toString()
-
 
 }
 
