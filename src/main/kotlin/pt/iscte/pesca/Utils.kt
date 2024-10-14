@@ -2,6 +2,7 @@ package pt.iscte.pt.iscte.pesca
 
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.body.MethodDeclaration
+import java.lang.reflect.Method
 
 
 //Supported Languages
@@ -88,4 +89,32 @@ fun formattedArg(arg: Any): String {
         is Char -> "\'$arg\'"     // Adiciona aspas simples se for um Char
         else -> arg.toString()    // Deixa como está para outros tipos
     }
+}
+
+val PRIMITIVE_JAVA_TYPES_EXCLUDING_VOID = setOf(
+    "int", "boolean", "byte", "char", "short", "long", "float", "double"
+)
+
+fun isMethodReturningObject(methodDeclaration: MethodDeclaration): Boolean {
+    val returnType = methodDeclaration.type.asString()  // Get the return type as a string
+
+    // Check if the return type is an array or a String
+    return when {
+        returnType in PRIMITIVE_JAVA_TYPES_EXCLUDING_VOID -> true
+        returnType.endsWith("[]") -> true
+        returnType == "String" -> true
+        else -> false
+    }
+}
+
+
+fun callMethodWithArgs(instance: Any?, methodName: String, args: List<Any>): Any? {
+    val argClasses = args.map { it::class.java.boxed() }.toTypedArray()  // Get the classes of the arguments
+
+    // Find the method by its name and argument types
+    val method: Method = instance?.javaClass?.getMethod(methodName, *argClasses)
+        ?: throw NoSuchMethodException("Method not found: $methodName with args: $argClasses")
+
+    // Invoke the method with the given arguments
+    return method.invoke(instance, *args.toTypedArray())
 }

@@ -6,7 +6,13 @@ interface QuestionType{
     var languageToOptionMapping : Map<String,String>
 
     fun getText()=languageToOptionMapping[DEFAULT_LANGUAGE].toString()
-    fun getText(language: String) = languageToOptionMapping[language].toString()
+    fun getText(language: String):String{
+        if (!languageToOptionMapping.containsKey(language)){
+            return languageToOptionMapping[DEFAULT_LANGUAGE].toString()
+        }
+        return languageToOptionMapping[language].toString()
+
+    }
 
 }
 
@@ -22,7 +28,12 @@ data class SimpleTextStatement(
 interface OptionData{
     var languageToOptionMapping : Map<String,String>
 
-    fun getText(language: String) = languageToOptionMapping[language].toString()
+    fun getText(language: String): String {
+        if (!languageToOptionMapping.containsKey(language)){
+            return languageToOptionMapping[DEFAULT_LANGUAGE].toString()
+        }
+        return languageToOptionMapping[language].toString()
+    }
     fun getText() = languageToOptionMapping[DEFAULT_LANGUAGE].toString()
 }
 

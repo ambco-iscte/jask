@@ -114,6 +114,17 @@ fun TryCanCallAMethodWithGivenArguments(){
     println()
 }
 
+fun TryWhatsTheReturnType(){
+    println(WhatsTheReturnType("factorial").build(source))
+    println()
+
+    println(WhatsTheReturnType("printTimesN").buildPT(source))
+    println()
+
+    println(WhatsTheReturnType("printHelloNTimes").build(source, ENGLISH_LANGUAGE))
+    println()
+}
+
 fun main(){
     //TryIsRecursive()
     //TryHowManyParameters()
@@ -122,5 +133,6 @@ fun main(){
     //TryCallsOtherFunctions()
     //TryLanguages()
     //TryLanguagesAux()
-    TryCanCallAMethodWithGivenArguments()
+    //TryCanCallAMethodWithGivenArguments()
+    TryWhatsTheReturnType()
 }

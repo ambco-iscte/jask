@@ -159,6 +159,43 @@ data class CanCallAMethodWithGivenArguments(val methodName: String, val args: Li
 
 }
 
+data class WhatsTheReturnType(val methodName: String) : StaticQuestion {
+
+    override fun build(source: String, language: String): QuestionData {
+
+        val method = getMethod(methodName = methodName, source = source)
+
+        val signature = "${method.nameAsString}(${method.parameters.joinToString()})"
+
+        val whatsTheReturnType = method.type.asString()
+
+        val otherTypes = PRIMITIVE_JAVA_TYPES_EXCLUDING_VOID.filter { it != whatsTheReturnType }.shuffled().take(3)
+
+        val options = mutableMapOf<OptionData,Boolean>(
+            SimpleTextOptionData(otherTypes[0]) to false,
+            SimpleTextOptionData(otherTypes[1]) to false,
+            SimpleTextOptionData(otherTypes[2]) to false,
+        )
+
+        if (!isMethodReturningObject(method)) {
+            options[NONE_OF_THE_ABOVE_OPTION] = true
+        } else {
+            options[SimpleTextOptionData(whatsTheReturnType)] = true
+        }
+
+        return QuestionData(
+            SimpleTextStatement(
+                mutableMapOf(
+                    ENGLISH_LANGUAGE to "What is the return type of the function $signature?",
+                    PORTUGUESE_LANGUAGE to "Qual o tipo devolvido pela função $signature?"
+                )
+            ),
+            options,
+            language = language
+        )
+    }
+}
+
 
 
 
