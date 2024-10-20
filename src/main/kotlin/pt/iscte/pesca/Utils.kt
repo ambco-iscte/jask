@@ -1,120 +1,74 @@
 package pt.iscte.pt.iscte.pesca
 
 import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.nodeTypes.NodeWithBody
+import com.github.javaparser.ast.stmt.DoStmt
+import com.github.javaparser.ast.stmt.ForEachStmt
+import com.github.javaparser.ast.stmt.ForStmt
+import com.github.javaparser.ast.stmt.WhileStmt
+import com.github.javaparser.ast.type.PrimitiveType
+import pt.iscte.pt.iscte.pesca.questions.*
 import java.lang.reflect.Method
+import java.util.*
 
-
-//Supported Languages
-val PORTUGUESE_LANGUAGE = "pt"
-val ENGLISH_LANGUAGE = "en"
-val DEFAULT_LANGUAGE = "pt"
-
-//Options that are always below the others
-val NONE_OF_THE_ABOVE_OPTION = SimpleTextOptionData(mutableMapOf( ENGLISH_LANGUAGE to "None of the above.", PORTUGUESE_LANGUAGE to  "Nenhuma das anteriores."))
-val ALL_OF_THE_ABOVE_OPTION = SimpleTextOptionData(mutableMapOf( ENGLISH_LANGUAGE to "All of the above.", PORTUGUESE_LANGUAGE to "Todas as anteriores."))
-val YES_OPTION = SimpleTextOptionData(mutableMapOf( ENGLISH_LANGUAGE to "Yes", PORTUGUESE_LANGUAGE to "Sim"))
-val NO_OPTION = SimpleTextOptionData(mutableMapOf( ENGLISH_LANGUAGE to "No", PORTUGUESE_LANGUAGE to "Não"))
-val LAST_UNSHUFFLED_OPTIONS: MutableList<OptionData> = mutableListOf<OptionData>(
-    NONE_OF_THE_ABOVE_OPTION,
-    ALL_OF_THE_ABOVE_OPTION,
-    YES_OPTION,
-    NO_OPTION
-)
-
-fun getNearValuesAndNoneOfTheAbove(correctValue: Int):Map<OptionData, Boolean>{
+fun getNearValuesAndNoneOfTheAbove(correctValue: Int): Map<OptionData, Boolean>{
     return mutableMapOf(
         SimpleTextOptionData(correctValue) to true,
         SimpleTextOptionData(correctValue + 1) to false,
         SimpleTextOptionData(if (correctValue == 0) 2 else correctValue - 1) to false,
-        NONE_OF_THE_ABOVE_OPTION to false
+        NONE_OF_THE_ABOVE to false
     )
 }
 
-fun getTrueOrFalse(correctValue: Boolean):Map<OptionData, Boolean>{
-    return mapOf(
-        YES_OPTION to correctValue,
-        NO_OPTION to !correctValue
-    )
-}
+fun getTrueOrFalse(correctValue: Boolean):Map<OptionData, Boolean> =
+    mapOf(YES to correctValue, NO to !correctValue)
 
-fun getMethod(source: String, methodName: String): MethodDeclaration {
-    val unit = StaticJavaParser.parse(source)
+fun getMethod(source: String, methodName: String): MethodDeclaration =
+    StaticJavaParser.parse(source).findAll(MethodDeclaration::class.java).firstOrNull { it.nameAsString == methodName }
+        ?: throw NoSuchMethodException("Method not found: $methodName")
 
-    val method = unit.findAll(MethodDeclaration::class.java).firstOrNull { it.nameAsString == methodName }
-    if (method == null)
-        throw NoSuchMethodException("Method not found: $methodName")
-    return method
-}
+val Class<*>.wrapper: Class<*>
+    get() = this.kotlin.javaObjectType
 
+val MethodDeclaration.prettySignature: String
+    get() = "$typeAsString $nameAsString(${parameters.joinToString()})"
 
-
-// A helper function to convert primitive Java types to their boxed equivalents
-fun Class<*>.boxed(): Class<*> = when (this) {
-    java.lang.Byte.TYPE -> java.lang.Byte::class.java
-    java.lang.Short.TYPE -> java.lang.Short::class.java
-    java.lang.Integer.TYPE -> java.lang.Integer::class.java
-    java.lang.Long.TYPE -> java.lang.Long::class.java
-    java.lang.Float.TYPE -> java.lang.Float::class.java
-    java.lang.Double.TYPE -> java.lang.Double::class.java
-    java.lang.Character.TYPE -> java.lang.Character::class.java
-    java.lang.Boolean.TYPE -> java.lang.Boolean::class.java
-    else -> this
-}
-
-fun canCallJavaMethodWithArgs(methodDeclaration: MethodDeclaration, args: List<Any>): Boolean {
-    // Obter os tipos dos parâmetros como string qualificada (ex.: "java.lang.String", "int")
-    val paramTypes = methodDeclaration.parameters.map { it.type.asString() }
-
-    // Se o número de parâmetros não corresponder ao número de argumentos, retorna falso
-    if (paramTypes.size != args.size) return false
-
-    return paramTypes.zip(args).all { (paramType, arg) ->
-        val argClass = arg::class.java.boxed().name  // Obter a versão boxed da classe do argumento
-
-        // Comparar o tipo do parâmetro com a classe do argumento
-        paramType == argClass || paramType == arg::class.java.simpleName ||
-                (paramType == "int" && argClass == "java.lang.Integer") ||
-                (paramType == "float" && argClass == "java.lang.Float") ||
-                (paramType == "double" && argClass == "java.lang.Double") ||
-                (paramType == "boolean" && argClass == "java.lang.Boolean") ||
-                (paramType == "char" && argClass == "java.lang.Character")
-        // Adiciona mais verificações para outros tipos primitivos se necessário
+fun MethodDeclaration.accepts(arguments: List<Any>): Boolean {
+    val paramTypes = this.parameters.map { it.type }
+    if (paramTypes.size != arguments.size)
+        return false
+    return paramTypes.zip(arguments.map { it::class.java }).all { (parameterType, argumentType) ->
+        val parameterTypeName =
+            if (parameterType.isPrimitiveType) parameterType.asPrimitiveType().toBoxedType().nameAsString
+            else parameterType.asString()
+        parameterTypeName == argumentType.wrapper.name || parameterTypeName == argumentType.simpleName
     }
 }
 
-fun formattedArg(arg: Any): String {
-    return when (arg) {
-        is String -> "\"$arg\""   // Adiciona aspas duplas se for uma String
-        is Char -> "\'$arg\'"     // Adiciona aspas simples se for um Char
-        else -> arg.toString()    // Deixa como está para outros tipos
+fun Node.getLoopControlStructures(): List<NodeWithBody<*>> =
+    findAll(ForStmt::class.java) +
+    findAll(DoStmt::class.java) +
+    findAll(WhileStmt::class.java) +
+    findAll(ForEachStmt::class.java)
+
+val Any?.formatted: String
+    get() = when (this) {
+        is String -> "\"$this\""    // Strings are placed within "
+        is Char -> "'$this'"        // Characters are placed within '
+        else -> this.toString()     // Otherwise, value remains unchanged
     }
-}
 
-val PRIMITIVE_JAVA_TYPES_EXCLUDING_VOID = setOf(
-    "int", "boolean", "byte", "char", "short", "long", "float", "double"
-)
+val JAVA_PRIMITIVE_TYPES: Set<String> =
+    PrimitiveType.Primitive.values().map { it.name.lowercase(Locale.getDefault()) }.toSet()
 
-fun isMethodReturningObject(methodDeclaration: MethodDeclaration): Boolean {
-    val returnType = methodDeclaration.type.asString()  // Get the return type as a string
+fun MethodDeclaration.returnsPrimitiveOrArrayOrString(): Boolean =
+    type.isPrimitiveType || type.isArrayType || type.toString() == String::class.simpleName
 
-    // Check if the return type is an array or a String
-    return when {
-        returnType in PRIMITIVE_JAVA_TYPES_EXCLUDING_VOID -> true
-        returnType.endsWith("[]") -> true
-        returnType == "String" -> true
-        else -> false
-    }
-}
-
-
-fun callMethodWithArgs(instance: Any?, methodName: String, args: List<Any>): Any? {
-    val argClasses = args.map { it::class.java.boxed() }.toTypedArray()  // Get the classes of the arguments
-
-    // Find the method by its name and argument types
-    val method: Method = instance?.javaClass?.getMethod(methodName, *argClasses)
-        ?: throw NoSuchMethodException("Method not found: $methodName with args: $argClasses")
-
-    // Invoke the method with the given arguments
-    return method.invoke(instance, *args.toTypedArray())
+fun Any.call(methodName: String, arguments: List<Any>): Any? {
+    val argumentTypes = arguments.map { it::class.java.wrapper }.toTypedArray()
+    val method: Method = this.javaClass.getMethod(methodName, *argumentTypes)
+        ?: throw NoSuchMethodException("Method not found: $methodName(${argumentTypes.joinToString { it.simpleName }})")
+    return method.invoke(this, *arguments.toTypedArray())
 }

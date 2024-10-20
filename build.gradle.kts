@@ -10,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    testApi("org.junit.jupiter:junit-jupiter-api:5.9.2")
+    testApi("org.junit.platform:junit-platform-suite:1.9.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     api(project(":strudel"))
 }

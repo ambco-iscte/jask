@@ -5,33 +5,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/Main.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/DynamicQuestions.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Question.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/StaticQuestions.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/HelloWorld.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/vm/impl/ProcedureInterpreter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/vm/impl/ProcedureInterpreter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestLoadingErrors.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestLoadingErrors.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestWeirdStudentBugs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestWeirdStudentBugs.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/Defaults.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/DynamicQuestions.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/AllTests.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/BaseTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/staticquestions/TestCallsOtherFunctions.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/staticquestions/TestCanCallAMethodWithGivenArguments.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/staticquestions/TestHowManyLoops.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/staticquestions/TestHowManyParameters.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/staticquestions/TestHowManyVariables.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/staticquestions/TestIsRecursive.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/staticquestions/TestWhatIsTheReturnType.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/resources/Example.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Main.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/DynamicQuestions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Languages.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Question.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/Question.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/StaticQuestions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/StaticQuestions.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Utils.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="repository" />
+    </option>
   </component>
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
@@ -44,6 +47,7 @@
         <option value="Kotlin Object" />
         <option value="Kotlin Interface" />
         <option value="Kotlin File" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -51,18 +55,18 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="SYNC" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "ambco-iscte"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;ambco-iscte&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/andre-santos-pt/strudel.git",
-    "accountId": "0ffddd3d-9e3b-4179-806b-483eb89a368a"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/andre-santos-pt/strudel.git&quot;,
+    &quot;accountId&quot;: &quot;0ffddd3d-9e3b-4179-806b-483eb89a368a&quot;
   }
-}]]></component>
+}</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -82,9 +86,12 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
     "jdk.selected.JAVA_MODULE": "17",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/ASUS/IdeaProjects/pesca/src/test/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -96,7 +103,42 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\ASUS\IdeaProjects\pesca\src\test\resources" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ASUS\IdeaProjects\pesca\src\main\kotlin\pt\iscte\pesca\questions" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="staticquestions" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.AllTests">
+    <configuration name="AllTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;AllTests&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="pt.iscte.MainKt" />
       <module name="pesca.main" />
@@ -119,6 +161,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.AllTests" />
         <item itemvalue="Kotlin.MainKt" />
       </list>
     </recent_temporary>
@@ -143,10 +186,37 @@
       <workItem from="1728049348614" duration="2713000" />
       <workItem from="1728682764981" duration="27000" />
       <workItem from="1728745336277" duration="3540000" />
+      <workItem from="1729418897030" duration="8898000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.javaparser/javaparser-core/3.25.1/bf7970eee6514a2c5936549781e659381ee89680/javaparser-core-3.25.1-sources.jar!/com/github/javaparser/ast/type/Type.java</url>
+          <line>191</line>
+          <properties class="com.github.javaparser.ast.type.Type" method="isPrimitiveType">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

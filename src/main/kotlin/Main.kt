@@ -1,6 +1,7 @@
 package pt.iscte
 
 import pt.iscte.pt.iscte.pesca.*
+import pt.iscte.pt.iscte.pesca.questions.*
 import java.io.File
 
 val source = File("src/main/resources/HelloWorld.java")
@@ -82,10 +83,10 @@ fun TryCallsOtherFunctions() {
 }
 
 fun TryLanguages(){
-    println(CallsOtherFunctions("factorial").build(source, PORTUGUESE_LANGUAGE))
+    println(CallsOtherFunctions("factorial").build(source, PORTUGUESE))
     println()
 
-    println(CallsOtherFunctions("factorial").build(source, ENGLISH_LANGUAGE))
+    println(CallsOtherFunctions("factorial").build(source, ENGLISH))
     println()
 
     println(CallsOtherFunctions("factorial").build(source))
@@ -107,21 +108,21 @@ fun TryCanCallAMethodWithGivenArguments(){
     println(CanCallAMethodWithGivenArguments("factorial", listOf(2)).buildPT(source))
     println()
 
-    println(CanCallAMethodWithGivenArguments("printTimesN", listOf("Hello", 3)).build(source,PORTUGUESE_LANGUAGE))
+    println(CanCallAMethodWithGivenArguments("printTimesN", listOf("Hello", 3)).build(source,PORTUGUESE))
     println()
 
-    println(CanCallAMethodWithGivenArguments("printTimesN", listOf(3, "Hello")).build(source,PORTUGUESE_LANGUAGE))
+    println(CanCallAMethodWithGivenArguments("printTimesN", listOf(3, "Hello")).build(source,PORTUGUESE))
     println()
 }
 
 fun TryWhatsTheReturnType(){
-    println(WhatsTheReturnType("factorial").build(source))
+    println(WhatIsTheReturnType("factorial").build(source))
     println()
 
-    println(WhatsTheReturnType("printTimesN").buildPT(source))
+    println(WhatIsTheReturnType("printTimesN").buildPT(source))
     println()
 
-    println(WhatsTheReturnType("printHelloNTimes").build(source, ENGLISH_LANGUAGE))
+    println(WhatIsTheReturnType("printHelloNTimes").build(source, ENGLISH))
     println()
 }
 
