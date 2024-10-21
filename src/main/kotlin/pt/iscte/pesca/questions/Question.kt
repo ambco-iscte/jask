@@ -1,6 +1,8 @@
 package pt.iscte.pt.iscte.pesca.questions
 
 import pt.iscte.pt.iscte.pesca.Language
+import pt.iscte.pt.iscte.pesca.Language.ENGLISH
+import pt.iscte.pt.iscte.pesca.Language.PORTUGUESE
 import java.io.File
 
 interface LocalisedObject {
@@ -61,7 +63,7 @@ data class QuestionData (
 
     init {
         require(options.size >= 2) { "Question must have at least two options!" }
-        require(options.any { option -> option.value }) { "Question must have at least one correct option!" }
+        require(solution.isNotEmpty()) { "Question must have at least one correct option!" }
     }
 
     override fun toString(): String = "${statement.getText(language)}\n${shuffledOptions.toList().joinToString(System.lineSeparator()) { 
@@ -91,13 +93,13 @@ sealed interface Question {
 
     fun isApplicable(file: File): Boolean = isApplicable(file.readText())
 
-    fun buildPT(source: String): QuestionData = build(source, Language.PORTUGUESE)
+    fun buildPT(source: String): QuestionData = build(source, PORTUGUESE)
 
-    fun buildEN(source: String): QuestionData = build(source, Language.ENGLISH)
+    fun buildEN(source: String): QuestionData = build(source, ENGLISH)
 
-    fun buildPT(file: File): QuestionData = build(file.readText(), Language.PORTUGUESE)
+    fun buildPT(file: File): QuestionData = build(file.readText(), PORTUGUESE)
 
-    fun buildEN(file: File): QuestionData = build(file.readText(), Language.ENGLISH)
+    fun buildEN(file: File): QuestionData = build(file.readText(), ENGLISH)
 
 }
 

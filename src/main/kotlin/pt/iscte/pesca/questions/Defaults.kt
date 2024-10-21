@@ -1,26 +1,27 @@
 package pt.iscte.pt.iscte.pesca.questions
 
-import pt.iscte.pt.iscte.pesca.Language
+import pt.iscte.pt.iscte.pesca.Language.ENGLISH
+import pt.iscte.pt.iscte.pesca.Language.PORTUGUESE
 
 // Options that are always below the others
 val NONE_OF_THE_ABOVE = SimpleTextOptionData(
-    Language.ENGLISH to "None of the above.",
-    Language.PORTUGUESE to  "Nenhuma das anteriores."
+    ENGLISH to "None of the above.",
+    PORTUGUESE to  "Nenhuma das anteriores."
 )
 
 val ALL_OF_THE_ABOVE = SimpleTextOptionData(
-    Language.ENGLISH to "All of the above.",
-    Language.PORTUGUESE to "Todas as anteriores."
+    ENGLISH to "All of the above.",
+    PORTUGUESE to "Todas as anteriores."
 )
 
 val YES = SimpleTextOptionData(
-    Language.ENGLISH to "Yes",
-    Language.PORTUGUESE to "Sim"
+    ENGLISH to "Yes",
+    PORTUGUESE to "Sim"
 )
 
 val NO = SimpleTextOptionData(
-    Language.ENGLISH to "No",
-    Language.PORTUGUESE to "Não"
+    ENGLISH to "No",
+    PORTUGUESE to "Não"
 )
 
 val LAST_UNSHUFFLED_OPTIONS: MutableList<OptionData> =

@@ -122,9 +122,10 @@ fun TryWhatsTheReturnType(){
     println(WhatIsTheReturnType("printTimesN").buildPT(source))
     println()
 
-    println(WhatIsTheReturnType("printHelloNTimes").build(source, Language.ENGLISH))
+    println(WhatIsTheReturnType("printHelloNTimes").build(source,  Language.fromCode("pt") ))
     println()
 }
+
 
 fun main(){
     //TryIsRecursive()

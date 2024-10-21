@@ -3,6 +3,8 @@ package pt.iscte.pt.iscte.pesca.questions
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import pt.iscte.pt.iscte.pesca.*
+import pt.iscte.pt.iscte.pesca.Language.ENGLISH
+import pt.iscte.pt.iscte.pesca.Language.PORTUGUESE
 
 data class HowManyParameters(val methodName: String): StaticQuestion {
 
@@ -14,8 +16,8 @@ data class HowManyParameters(val methodName: String): StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                Language.ENGLISH to "How many parameters does the $signature method take?",
-                Language.PORTUGUESE to "Quantos parâmetros tem o método $signature?"
+                ENGLISH to "How many parameters does the $signature method take?",
+                PORTUGUESE to "Quantos parâmetros tem o método $signature?"
             ),
             getNearValuesAndNoneOfTheAbove(parameters),
             language = language
@@ -35,8 +37,8 @@ data class IsRecursive(val methodName: String) : StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                Language.ENGLISH to "Is the method $signature recursive?",
-                Language.PORTUGUESE to "O método $signature é recursivo?"
+                ENGLISH to "Is the method $signature recursive?",
+                PORTUGUESE to "O método $signature é recursivo?"
             ),
             getTrueOrFalse(isRecursive),
             language = language
@@ -57,8 +59,8 @@ data class HowManyVariables(val methodName: String): StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                Language.ENGLISH to "How many variables (not including parameters) does the method $signature have?",
-                Language.PORTUGUESE to "Quantas variáveis (excluindo os parâmetros) tem o método $signature?"
+                ENGLISH to "How many variables (not including parameters) does the method $signature have?",
+                PORTUGUESE to "Quantas variáveis (excluindo os parâmetros) tem o método $signature?"
             ),
             getNearValuesAndNoneOfTheAbove(howManyVariables),
             language = language
@@ -76,8 +78,8 @@ data class HowManyLoops(val methodName: String): StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                Language.ENGLISH to "How many loops does method $signature have?",
-                Language.PORTUGUESE to "Quantos ciclos tem o método $signature?"
+                ENGLISH to "How many loops does method $signature have?",
+                PORTUGUESE to "Quantos ciclos tem o método $signature?"
             ),
             getNearValuesAndNoneOfTheAbove(howManyLoops),
             language = language
@@ -100,8 +102,8 @@ data class CallsOtherFunctions(val methodName: String) : StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                Language.ENGLISH to "Does the method $signature depend on other methods?",
-                Language.PORTUGUESE to "O método $signature depende de outros métodos?"
+                ENGLISH to "Does the method $signature depend on other methods?",
+                PORTUGUESE to "O método $signature depende de outros métodos?"
             ),
             getTrueOrFalse(callsOtherFunctions),
             language = language
@@ -123,8 +125,8 @@ data class CanCallAMethodWithGivenArguments(val methodName: String, val argument
 
         return QuestionData(
             SimpleTextStatement(
-                Language.ENGLISH to "Can the method $signature be called with the arguments ($args)?",
-                Language.PORTUGUESE to "O método $signature pode ser chamado com os argumentos ($args)?"
+                ENGLISH to "Can the method $signature be called with the arguments ($args)?",
+                PORTUGUESE to "O método $signature pode ser chamado com os argumentos ($args)?"
             ),
             getTrueOrFalse(canCallAMethodWithGivenArguments),
             language = language
@@ -152,8 +154,8 @@ data class WhatIsTheReturnType(val methodName: String) : StaticQuestion {
 
         return QuestionData(
             SimpleTextStatement(
-                Language.ENGLISH to "What is the return type of the method $signature?",
-                Language.PORTUGUESE to "Qual o tipo de retorno do método $signature?"
+                ENGLISH to "What is the return type of the method $signature?",
+                PORTUGUESE to "Qual o tipo de retorno do método $signature?"
             ),
             options,
             language = language

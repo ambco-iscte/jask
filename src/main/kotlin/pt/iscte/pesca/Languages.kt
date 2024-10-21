@@ -7,5 +7,9 @@ enum class Language(private val code: String) {
 
     companion object {
         val DEFAULT = ENGLISH
+
+        fun fromCode(code: String): Language {
+            return valueOf(values().firstOrNull { it.code == code }?.name ?: DEFAULT.name)
+        }
     }
 }
