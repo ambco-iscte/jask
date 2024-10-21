@@ -1,37 +1,35 @@
 package pt.iscte.pt.iscte.pesca.questions
 
-import pt.iscte.pt.iscte.pesca.DEFAULT_LANGUAGE
-import pt.iscte.pt.iscte.pesca.ENGLISH
-import pt.iscte.pt.iscte.pesca.PORTUGUESE
+import pt.iscte.pt.iscte.pesca.Language
 import java.io.File
 
 interface LocalisedObject {
-    val translations : Map<String, String>
+    val translations : Map<Language, String>
 
-    fun getText(): String = translations[DEFAULT_LANGUAGE].toString()
+    fun getText(): String = translations[Language.DEFAULT].toString()
 
-    fun getText(language: String): String =
-        (translations[language] ?: translations[DEFAULT_LANGUAGE]).toString()
+    fun getText(language: Language): String =
+        (translations[language] ?: translations[Language.DEFAULT]).toString()
 }
 
 interface QuestionType : LocalisedObject
 
-data class SimpleTextStatement(override var translations: Map<String, String>): QuestionType {
+data class SimpleTextStatement(override var translations: Map<Language, String>): QuestionType {
 
-    constructor(value: Any): this(mutableMapOf(DEFAULT_LANGUAGE to value.toString()) )
+    constructor(value: Any): this(mutableMapOf(Language.DEFAULT to value.toString()) )
 
-    constructor(vararg translations: Pair<String, String>) : this(translations.toMap())
+    constructor(vararg translations: Pair<Language, String>) : this(translations.toMap())
 
     override fun toString() = getText()
 }
 
 interface OptionData : LocalisedObject
 
-data class SimpleTextOptionData(override var translations: Map<String, String>): OptionData {
+data class SimpleTextOptionData(override var translations: Map<Language, String>): OptionData {
 
-    constructor(value: Any): this(mutableMapOf(DEFAULT_LANGUAGE to value.toString()))
+    constructor(value: Any): this(mutableMapOf(Language.DEFAULT to value.toString()))
 
-    constructor(vararg translations: Pair<String, String>) : this(translations.toMap())
+    constructor(vararg translations: Pair<Language, String>) : this(translations.toMap())
 
     override fun toString() = getText()
 
@@ -40,7 +38,7 @@ data class SimpleTextOptionData(override var translations: Map<String, String>):
 data class QuestionData (
     val statement: QuestionType,
     private val options: Map<OptionData, Boolean>,
-    val language: String = DEFAULT_LANGUAGE,
+    val language: Language = Language.DEFAULT,
 ) {
     private val shuffledOptions: Map<OptionData, Boolean>
         get() {
@@ -77,13 +75,13 @@ sealed interface Question {
      * Builds the question from the source code.
      * @param source Source code of a Java class.
      */
-    fun build(source: String, language: String = DEFAULT_LANGUAGE): QuestionData
+    fun build(source: String, language: Language = Language.DEFAULT): QuestionData
 
     /**
      * Builds the question from a Java source code file.
      * @param file A Java source code file.
      */
-    fun build(file: File, language: String = DEFAULT_LANGUAGE): QuestionData = build(file.readText(), language)
+    fun build(file: File, language: Language = Language.DEFAULT): QuestionData = build(file.readText(), language)
 
     /**
      * Is the question applicable to the current context?
@@ -93,13 +91,13 @@ sealed interface Question {
 
     fun isApplicable(file: File): Boolean = isApplicable(file.readText())
 
-    fun buildPT(source: String): QuestionData = build(source, PORTUGUESE)
+    fun buildPT(source: String): QuestionData = build(source, Language.PORTUGUESE)
 
-    fun buildEN(source: String): QuestionData = build(source, ENGLISH)
+    fun buildEN(source: String): QuestionData = build(source, Language.ENGLISH)
 
-    fun buildPT(file: File): QuestionData = build(file.readText(), PORTUGUESE)
+    fun buildPT(file: File): QuestionData = build(file.readText(), Language.PORTUGUESE)
 
-    fun buildEN(file: File): QuestionData = build(file.readText(), ENGLISH)
+    fun buildEN(file: File): QuestionData = build(file.readText(), Language.ENGLISH)
 
 }
 

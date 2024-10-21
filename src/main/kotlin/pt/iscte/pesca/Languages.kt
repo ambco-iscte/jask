@@ -1,8 +1,11 @@
 package pt.iscte.pt.iscte.pesca
 
 // Supported Languages
-const val PORTUGUESE = "pt"
+enum class Language(private val code: String) {
+    PORTUGUESE("pt"),
+    ENGLISH("en");
 
-const val ENGLISH = "en"
-
-const val DEFAULT_LANGUAGE = PORTUGUESE
+    companion object {
+        val DEFAULT = ENGLISH
+    }
+}

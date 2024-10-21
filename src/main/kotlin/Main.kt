@@ -83,10 +83,10 @@ fun TryCallsOtherFunctions() {
 }
 
 fun TryLanguages(){
-    println(CallsOtherFunctions("factorial").build(source, PORTUGUESE))
+    println(CallsOtherFunctions("factorial").build(source, Language.PORTUGUESE))
     println()
 
-    println(CallsOtherFunctions("factorial").build(source, ENGLISH))
+    println(CallsOtherFunctions("factorial").build(source, Language.ENGLISH))
     println()
 
     println(CallsOtherFunctions("factorial").build(source))
@@ -108,10 +108,10 @@ fun TryCanCallAMethodWithGivenArguments(){
     println(CanCallAMethodWithGivenArguments("factorial", listOf(2)).buildPT(source))
     println()
 
-    println(CanCallAMethodWithGivenArguments("printTimesN", listOf("Hello", 3)).build(source,PORTUGUESE))
+    println(CanCallAMethodWithGivenArguments("printTimesN", listOf("Hello", 3)).build(source, Language.PORTUGUESE))
     println()
 
-    println(CanCallAMethodWithGivenArguments("printTimesN", listOf(3, "Hello")).build(source,PORTUGUESE))
+    println(CanCallAMethodWithGivenArguments("printTimesN", listOf(3, "Hello")).build(source, Language.PORTUGUESE))
     println()
 }
 
@@ -122,7 +122,7 @@ fun TryWhatsTheReturnType(){
     println(WhatIsTheReturnType("printTimesN").buildPT(source))
     println()
 
-    println(WhatIsTheReturnType("printHelloNTimes").build(source, ENGLISH))
+    println(WhatIsTheReturnType("printHelloNTimes").build(source, Language.ENGLISH))
     println()
 }
 
