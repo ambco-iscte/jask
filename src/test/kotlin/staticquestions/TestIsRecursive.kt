@@ -2,9 +2,8 @@ package staticquestions
 
 import BaseTest
 import org.junit.jupiter.api.Test
-import pt.iscte.pt.iscte.pesca.questions.IsRecursive
-import pt.iscte.pt.iscte.pesca.questions.NO
-import pt.iscte.pt.iscte.pesca.questions.YES
+import pt.iscte.pesca.questions.IsRecursive
+import pt.iscte.pesca.questions.SimpleTextOption
 import kotlin.test.assertEquals
 
 class TestIsRecursive : BaseTest("Example.java") {
@@ -18,22 +17,22 @@ class TestIsRecursive : BaseTest("Example.java") {
 
         assertIsApplicable(IsRecursive("factorial")).let {
             assertEquals(1, it.solution.size)
-            assertEquals(YES, it.solution.first())
+            assertEquals(SimpleTextOption.yes(), it.solution.first())
         }
 
         assertIsApplicable(IsRecursive("hello")).let {
             assertEquals(1, it.solution.size)
-            assertEquals(NO, it.solution.first())
+            assertEquals(SimpleTextOption.no(), it.solution.first())
         }
 
         assertIsApplicable(IsRecursive("printHelloNTimes")).let {
             assertEquals(1, it.solution.size)
-            assertEquals(NO, it.solution.first())
+            assertEquals(SimpleTextOption.no(), it.solution.first())
         }
 
         assertIsApplicable(IsRecursive("printTimesN")).let {
             assertEquals(1, it.solution.size)
-            assertEquals(NO, it.solution.first())
+            assertEquals(SimpleTextOption.no(), it.solution.first())
         }
     }
 }

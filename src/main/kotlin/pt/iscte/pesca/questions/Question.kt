@@ -1,54 +1,67 @@
-package pt.iscte.pt.iscte.pesca.questions
+package pt.iscte.pesca.questions
 
-import pt.iscte.pt.iscte.pesca.Language
-import java.io.File
+import com.github.javaparser.ast.Node
+import com.github.javaparser.ast.body.MethodDeclaration
+import pt.iscte.pesca.Language
 
-interface LocalisedObject {
-    val translations : Map<Language, String>
+interface QuestionStatement
 
-    fun getText(): String = translations[Language.DEFAULT].toString()
+data class SimpleTextStatement(val statement: String): QuestionStatement {
 
-    fun getText(language: Language): String =
-        (translations[language] ?: translations[Language.DEFAULT]).toString()
+    override fun toString() = statement
 }
 
-interface QuestionType : LocalisedObject
+data class TextWithCodeStatement(val statement: String, val code: String): QuestionStatement {
 
-data class SimpleTextStatement(override var translations: Map<Language, String>): QuestionType {
-
-    constructor(value: Any): this(mutableMapOf(Language.DEFAULT to value.toString()) )
-
-    constructor(vararg translations: Pair<Language, String>) : this(translations.toMap())
-
-    override fun toString() = getText()
+    override fun toString() = "$statement${System.lineSeparator()}$code"
 }
 
-interface OptionData : LocalisedObject
 
-data class SimpleTextOptionData(override var translations: Map<Language, String>): OptionData {
+interface Option
 
-    constructor(value: Any): this(mutableMapOf(Language.DEFAULT to value.toString()))
+data class SimpleTextOption(val text: String): Option {
 
-    constructor(vararg translations: Pair<Language, String>) : this(translations.toMap())
+    companion object {
+        fun none(language: Language = Language.DEFAULT): SimpleTextOption =
+            SimpleTextOption(language["NoneOfTheAbove"])
 
-    override fun toString() = getText()
+        fun all(language: Language = Language.DEFAULT): SimpleTextOption =
+            SimpleTextOption(language["AllOfTheAbove"])
 
+        fun yes(language: Language = Language.DEFAULT): SimpleTextOption =
+            SimpleTextOption(language["Yes"])
+
+        fun no(language: Language = Language.DEFAULT): SimpleTextOption =
+            SimpleTextOption(language["No"])
+    }
+
+    constructor(value: Any): this(value.toString())
+
+    override fun toString() = text
 }
+
 
 data class QuestionData (
-    val statement: QuestionType,
-    private val options: Map<OptionData, Boolean>,
+    val statement: QuestionStatement,
+    private val options: Map<Option, Boolean>,
     val language: Language = Language.DEFAULT,
 ) {
-    private val shuffledOptions: Map<OptionData, Boolean>
+    private val shuffledOptions: Map<Option, Boolean>
         get() {
+            val lastUnshuffled = listOf(
+                SimpleTextOption.none(language),
+                SimpleTextOption.all(language),
+                SimpleTextOption.yes(language),
+                SimpleTextOption.no(language)
+            )
+
             val shuffled = options.keys.filter {
-                option -> !(LAST_UNSHUFFLED_OPTIONS.contains(option))
+                option -> !(lastUnshuffled.contains(option))
             }.shuffled().associateWith {
                 option -> options[option]!!
             }.toMutableMap()
 
-            LAST_UNSHUFFLED_OPTIONS.forEach { lastOption ->
+            lastUnshuffled.forEach { lastOption ->
                 if (options.containsKey(lastOption))
                     shuffled[lastOption] = options[lastOption]!!
             }
@@ -56,7 +69,7 @@ data class QuestionData (
             return shuffled
         }
 
-    val solution: List<OptionData>
+    val solution: List<Option>
         get() = options.filter { it.value }.map { it.key }
 
     init {
@@ -64,44 +77,44 @@ data class QuestionData (
         require(options.any { option -> option.value }) { "Question must have at least one correct option!" }
     }
 
-    override fun toString(): String = "${statement.getText(language)}\n${shuffledOptions.toList().joinToString(System.lineSeparator()) { 
-        option -> "[${if (option.second) "x" else " "}] ${option.first.getText(language)}"
+    override fun toString(): String = "$statement\n${shuffledOptions.toList().joinToString(System.lineSeparator()) { 
+        option -> "[${if (option.second) "x" else " "}] ${option.first}"
     }}"
 }
 
-sealed interface Question {
 
-    /**
-     * Builds the question from the source code.
-     * @param source Source code of a Java class.
-     */
-    fun build(source: String, language: Language = Language.DEFAULT): QuestionData
+sealed class Question(val range: IntRange = 1 .. Int.MAX_VALUE) {
 
-    /**
-     * Builds the question from a Java source code file.
-     * @param file A Java source code file.
-     */
-    fun build(file: File, language: Language = Language.DEFAULT): QuestionData = build(file.readText(), language)
+    constructor(min: Int) : this(min .. Int.MAX_VALUE)
 
-    /**
-     * Is the question applicable to the current context?
-     */
-    // Each question should implement its precondition(s) in this function.
-    fun isApplicable(source: String): Boolean = true
+    fun generate(sources: List<String>, language: Language = Language.DEFAULT): QuestionData {
+        require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
+        return build(sources, language)
+    }
 
-    fun isApplicable(file: File): Boolean = isApplicable(file.readText())
+    protected fun List<String>.getRandomSource(): String =
+        filter { isApplicable(it) }.randomOrNull() ?: throw NoSuchElementException("Could not find an applicable source!")
 
-    fun buildPT(source: String): QuestionData = build(source, Language.PORTUGUESE)
+    protected abstract fun build(sources: List<String>, language: Language = Language.DEFAULT): QuestionData
 
-    fun buildEN(source: String): QuestionData = build(source, Language.ENGLISH)
+    protected inline fun <reified T : Node> String.getApplicable(condition: (T) -> Boolean = { true }): List<T> =
+        flatMap { pt.iscte.pesca.extensions.find<T>(this, condition) }
 
-    fun buildPT(file: File): QuestionData = build(file.readText(), Language.PORTUGUESE)
+    protected fun String.findMethod(name: String?): List<MethodDeclaration> =
+        flatMap { source ->
+            pt.iscte.pesca.extensions.find<MethodDeclaration>(this) { it.nameAsString == name }
+        }
 
-    fun buildEN(file: File): QuestionData = build(file.readText(), Language.ENGLISH)
+    protected inline fun <reified T : Node> List<String>.getApplicable(condition: (T) -> Boolean = { true }): List<T> =
+        flatMap { it.getApplicable(condition) }
 
+    protected fun List<String>.findMethod(name: String?): List<MethodDeclaration> =
+        flatMap { it.findMethod(name) }
+
+    open fun isApplicable(source: String): Boolean = true
 }
 
-interface StaticQuestion : Question
+abstract class StaticQuestion : Question()
 
-interface DynamicQuestion : Question
+abstract class DynamicQuestion : Question()
 

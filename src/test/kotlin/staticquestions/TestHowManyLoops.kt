@@ -2,11 +2,10 @@ package staticquestions
 
 import BaseTest
 import org.junit.jupiter.api.Test
-import pt.iscte.pt.iscte.pesca.questions.HowManyLoops
-import pt.iscte.pt.iscte.pesca.questions.SimpleTextOptionData
+import pt.iscte.pesca.questions.HowManyLoops
+import pt.iscte.pesca.questions.QuestionData
+import pt.iscte.pesca.questions.SimpleTextOption
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class TestHowManyLoops : BaseTest("Example.java") {
 
@@ -20,17 +19,17 @@ class TestHowManyLoops : BaseTest("Example.java") {
 
         assertIsApplicable(HowManyLoops("howManyPositiveEvensNumbersBeforeN")).let {
             assertEquals(1, it.solution.size)
-            assertEquals(SimpleTextOptionData("1"), it.solution.first())
+            assertEquals(SimpleTextOption("1"), it.solution.first())
         }
 
         assertIsApplicable(HowManyLoops("printHelloNTimes")).let {
             assertEquals(1, it.solution.size)
-            assertEquals(SimpleTextOptionData("1"), it.solution.first())
+            assertEquals(SimpleTextOption("1"), it.solution.first())
         }
 
         assertIsApplicable(HowManyLoops("whileAndForMethod")).let {
             assertEquals(1, it.solution.size)
-            assertEquals(SimpleTextOptionData("2"), it.solution.first())
+            assertEquals(SimpleTextOption("2"), it.solution.first())
         }
     }
 }
