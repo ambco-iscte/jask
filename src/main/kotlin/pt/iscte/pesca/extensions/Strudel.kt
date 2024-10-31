@@ -9,6 +9,18 @@ import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.random.Random
 import kotlin.random.nextInt
 
+val VARIABLE_ROLES = listOf(
+    "FixedValue",
+    "Gatherer",
+    "ArrayIndexIterator",
+    "Stepper",
+    "MostWantedHolder",
+    "OneWayFlag"
+)
+
+fun IProcedureDeclaration.generateRandomArguments(vm: IVirtualMachine): List<IValue> =
+    parameters.map { it.type }.map { it.generateRandomValue(vm) }
+
 fun IType.generateRandomValue(vm: IVirtualMachine, numRange: IntRange = 0.. 10): IValue = when (this) {
     INT -> vm.getValue(Random.nextInt(numRange))
     DOUBLE -> vm.getValue(Random.nextDouble(numRange.first.toDouble(), numRange.last.toDouble()))

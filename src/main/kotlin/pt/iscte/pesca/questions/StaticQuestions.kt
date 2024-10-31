@@ -4,11 +4,10 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.accepts
+import pt.iscte.pesca.extensions.accepts
 import pt.iscte.pesca.extensions.*
-import pt.iscte.pesca.sample
+import pt.iscte.pesca.extensions.sample
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
-import kotlin.collections.ifEmpty
 import kotlin.text.format
 
 data class HowManyParams(val methodName: String? = null): StaticQuestion<MethodDeclaration>() {

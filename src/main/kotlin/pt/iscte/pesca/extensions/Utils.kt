@@ -1,4 +1,4 @@
-package pt.iscte.pesca
+package pt.iscte.pesca.extensions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import java.lang.reflect.Method
@@ -33,3 +33,11 @@ fun Any.call(methodName: String, arguments: List<Any>): Any? {
 }
 
 fun <T> Collection<T>.sample(amount: Int): List<T> = shuffled().take(amount)
+
+fun String.pascalCaseToSpaces(): String {
+    var spaces = ""
+    this.forEach { char ->
+        spaces += if (char.isUpperCase()) " $char" else char
+    }
+    return spaces.trim()
+}
