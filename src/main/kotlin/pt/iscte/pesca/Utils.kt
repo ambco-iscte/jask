@@ -31,3 +31,5 @@ fun Any.call(methodName: String, arguments: List<Any>): Any? {
         ?: throw NoSuchMethodException("Method not found: $methodName(${argumentTypes.joinToString { it.simpleName }})")
     return method.invoke(this, *arguments.toTypedArray())
 }
+
+fun <T> Collection<T>.sample(amount: Int): List<T> = shuffled().take(amount)

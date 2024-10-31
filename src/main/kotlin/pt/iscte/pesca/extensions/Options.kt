@@ -11,7 +11,22 @@ fun Int.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
     SimpleTextOption.none(language) to false
 )
 
-fun Boolean.trueOrFalse(language: Language): Map<Option, Boolean> = mapOf(
-    SimpleTextOption.yes(language) to this,
-    SimpleTextOption.no(language) to !this
-)
+fun Double.multipleChoice(language: Language): Map<Option, Boolean> {
+    TODO()
+}
+
+fun Char.multipleChoice(language: Language): Map<Option, Boolean> {
+    TODO()
+}
+
+fun Boolean.trueOrFalse(language: Language, literal: Boolean = false): Map<Option, Boolean> =
+    if (!literal)
+        mapOf(
+            SimpleTextOption.yes(language) to this,
+            SimpleTextOption.no(language) to !this
+        )
+    else
+        mapOf(
+            SimpleTextOption(this.toString()) to this,
+            SimpleTextOption((!this).toString()) to !this
+        )

@@ -2,8 +2,7 @@ package staticquestions
 
 import BaseTest
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.questions.HowManyParameters
-import pt.iscte.pesca.questions.QuestionData
+import pt.iscte.pesca.questions.HowManyParams
 import pt.iscte.pesca.questions.SimpleTextOption
 import kotlin.test.assertEquals
 
@@ -11,42 +10,42 @@ class TestHowManyParameters : BaseTest("Example.java") {
 
     @Test
     fun test() {
-        assertIsApplicable(HowManyParameters("factorial")).let {
+        assertIsApplicable(HowManyParams("factorial")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(1), it.solution.first())
         }
 
-        assertIsApplicable(HowManyParameters("square")).let {
+        assertIsApplicable(HowManyParams("square")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(1), it.solution.first())
         }
 
-        assertIsApplicable(HowManyParameters("sum")).let {
+        assertIsApplicable(HowManyParams("sum")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(2), it.solution.first())
         }
 
-        assertIsApplicable(HowManyParameters("hello")).let {
+        assertIsApplicable(HowManyParams("hello")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(0), it.solution.first())
         }
 
-        assertIsApplicable(HowManyParameters("howManyPositiveEvensNumbersBeforeN")).let {
+        assertIsApplicable(HowManyParams("howManyPositiveEvensNumbersBeforeN")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(1), it.solution.first())
         }
 
-        assertIsApplicable(HowManyParameters("printHelloNTimes")).let {
+        assertIsApplicable(HowManyParams("printHelloNTimes")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(1), it.solution.first())
         }
 
-        assertIsApplicable(HowManyParameters("whileAndForMethod")).let {
+        assertIsApplicable(HowManyParams("whileAndForMethod")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(0), it.solution.first())
         }
 
-        assertIsApplicable(HowManyParameters("printTimesN")).let {
+        assertIsApplicable(HowManyParams("printTimesN")).let {
             assertEquals(1, it.solution.size)
             assertEquals(SimpleTextOption(2), it.solution.first())
         }
