@@ -12,6 +12,7 @@ import com.github.javaparser.ast.stmt.ForStmt
 import com.github.javaparser.ast.stmt.WhileStmt
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
+import pt.iscte.pesca.questions.SourceCode
 import java.util.Locale
 
 inline fun <reified T : Node> find(source: String, condition: (T) -> Boolean = { true }): List<T> =

@@ -6,6 +6,7 @@ import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.strudel.model.IProcedureDeclaration
+import pt.iscte.strudel.model.IProgramElement
 import pt.iscte.strudel.parsing.java.JP
 
 interface QuestionStatement
@@ -89,41 +90,3 @@ data class QuestionData (
         option -> "[${if (option.second) "x" else " "}] ${option.first}"
     }}"
 }
-
-
-sealed class Question<T : Node>(val range: IntRange = 1 .. Int.MAX_VALUE) {
-
-    companion object {
-        init {
-            StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
-        }
-    }
-
-    fun generate(sources: List<String>, language: Language = Language.DEFAULT): QuestionData {
-        require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
-        return build(sources, language)
-    }
-
-    protected abstract fun build(sources: List<String>, language: Language = Language.DEFAULT): QuestionData
-
-    inline fun <reified R : T> getApplicableElements(source: String): List<R> =
-        pt.iscte.pesca.extensions.find<R>(source) { isApplicable(it) }
-
-    protected inline fun <reified R : T> getApplicableElements(sources: List<String>): List<R> =
-        sources.filter { isApplicable<R>(it) }.flatMap {
-            source -> pt.iscte.pesca.extensions.find<R>(source) { isApplicable(it) }
-        }
-
-    protected inline fun <reified R : T> getApplicableSources(sources: List<String>): List<String> =
-        sources.filter { isApplicable<R>(it) }
-
-    inline fun <reified R : T> isApplicable(source: String): Boolean =
-        getApplicableElements<R>(source).isNotEmpty()
-
-    open fun isApplicable(element: T): Boolean = true
-}
-
-abstract class StaticQuestion<T : Node> : Question<T>()
-
-abstract class DynamicQuestion<T : Node> : Question<T>()
-

@@ -15,7 +15,7 @@ data class HowManyParams(val methodName: String? = null): StaticQuestion<MethodD
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.nameMatches(methodName)
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val signature = method.prettySignature
@@ -34,7 +34,7 @@ data class IsRecursive(val methodName: String? = null) : StaticQuestion<MethodDe
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.nameMatches(methodName) && element.body.getOrNull?.hasMethodCalls() == true
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val signature = method.prettySignature
@@ -56,7 +56,7 @@ data class HowManyVariables(val methodName: String? = null): StaticQuestion<Meth
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.nameMatches(methodName)
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val signature = method.prettySignature
@@ -76,7 +76,7 @@ data class HowManyLoops(val methodName: String? = null): StaticQuestion<MethodDe
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.nameMatches(methodName) && element.body.getOrNull?.hasLoopControlStructures() == true
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val howManyLoops = method.body.get().getLoopControlStructures().size
@@ -94,7 +94,7 @@ data class CallsOtherFunctions(val methodName: String? = null) : StaticQuestion<
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.nameMatches(methodName)
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val callsOtherFunctions = method.findAll<MethodCallExpr>().any { call ->
@@ -114,7 +114,7 @@ data class HowManyFunctions(val methodName: String? = null): StaticQuestion<Meth
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.nameMatches(methodName)
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val otherFunctions = method.findAll<MethodCallExpr>().map { it.nameAsString }.toSet().size
@@ -134,7 +134,7 @@ data class CanCallAMethodWithGivenArguments(val methodName: String? = null, val 
 
     constructor(methodName: String?, vararg arguments: Any) : this(methodName, arguments.toList())
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val canCallAMethodWithGivenArguments = method.accepts(arguments)
@@ -154,7 +154,7 @@ data class WhichReturnType(val methodName: String? = null) : StaticQuestion<Meth
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.nameMatches(methodName) && element.getUsedTypes().size >= 2
 
-    override fun build(sources: List<String>, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
 
         val methodReturnType = method.type
