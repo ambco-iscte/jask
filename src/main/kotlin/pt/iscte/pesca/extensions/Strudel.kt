@@ -1,25 +1,46 @@
 package pt.iscte.pesca.extensions
 
-import com.github.javaparser.ast.Node
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.questions.Option
 import pt.iscte.strudel.model.*
-import pt.iscte.strudel.model.IBlock.IVisitor
 import pt.iscte.strudel.model.IType
-import pt.iscte.strudel.parsing.java.JP
+import pt.iscte.strudel.model.roles.*
+import pt.iscte.strudel.parsing.java.allocateStringArray
+import pt.iscte.strudel.parsing.java.extensions.getString
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
+import pt.iscte.strudel.vm.NULL
 import kotlin.random.Random
 import kotlin.random.nextInt
 import kotlin.reflect.KClass
 
-val VARIABLE_ROLES = listOf(
-    "FixedValue",
-    "Gatherer",
-    "ArrayIndexIterator",
-    "Stepper",
-    "MostWantedHolder",
-    "OneWayFlag"
+@Suppress("UNCHECKED_CAST")
+fun Any?.toIValue(vm: IVirtualMachine): IValue = when (this) {
+    is Collection<*> -> {
+        if (isEmpty()) vm.allocateArrayOf(NULL.type)
+        else if (runCatching { vm.getValue(first()) }.isSuccess) {
+            val type = vm.getValue(first()).type
+            vm.allocateArrayOf(type, *this.map { it ?: NULL }.toTypedArray())
+        } else if (first() is String) {
+            vm.allocateStringArray(*(this as Collection<String>).toTypedArray())
+        } else {
+            val type = HostRecordType(first()!!::class.java.canonicalName)
+            vm.allocateArrayOf(type, *this.map { it ?: NULL }.toTypedArray())
+        }
+    }
+    null -> NULL
+    is IValue -> this
+    is String -> getString(this)
+    else -> vm.getValue(this)
+}
+
+val VARIABLE_ROLES: Map<KClass<out IVariableRole>, String> = mapOf(
+    IFixedValue::class to "Fixed Value",
+    IGatherer::class to "Gatherer",
+    IArrayIndexIterator::class to "Array Index Iterator",
+    IStepper::class to "Stepper",
+    IMostWantedHolder::class to "Most-Wanted Holder",
+    IOneWayFlag::class to "One-Way Flag"
 )
 
 fun IProcedureDeclaration.generateRandomArguments(vm: IVirtualMachine): List<IValue> =

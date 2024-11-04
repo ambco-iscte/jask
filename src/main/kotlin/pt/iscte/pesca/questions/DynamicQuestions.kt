@@ -10,6 +10,7 @@ import pt.iscte.pesca.extensions.multipleChoice
 import pt.iscte.pesca.extensions.nameMatches
 import pt.iscte.pesca.extensions.pascalCaseToSpaces
 import pt.iscte.pesca.extensions.sample
+import pt.iscte.pesca.extensions.toIValue
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.roles.IVariableRole
@@ -44,7 +45,7 @@ data class WhatIsResult(val methodName: String? = null): DynamicQuestion<IProced
         val callsForProcedure = source.calls.filter { it.id == procedure.id }
         if (callsForProcedure.isEmpty())
             throw RuntimeException("Could not find procedure call specification for procedure ${procedure.id}.")
-        val arguments = callsForProcedure.random().arguments.random().toTypedArray()
+        val arguments = callsForProcedure.random().arguments.random().map { it.toIValue(vm) }.toTypedArray()
 
         val call = "${procedure.id}(${arguments.joinToString()})"
 
@@ -88,11 +89,11 @@ data class WhichVariableRole(val methodName: String? = null): DynamicQuestion<IP
 
         // Determine that variable's role.
         val role = IVariableRole.match(variable)
-        val roleName = role::class.simpleName!!
+        val roleName = VARIABLE_ROLES[role::class]!!
 
         // Generate fancy options. :)
-        val options: MutableMap<Option, Boolean> = VARIABLE_ROLES.minus(roleName).sample(3).associate {
-            SimpleTextOption(it.pascalCaseToSpaces()) to false
+        val options: MutableMap<Option, Boolean> = VARIABLE_ROLES.keys.minus(role::class).sample(3).associate {
+            SimpleTextOption(VARIABLE_ROLES[it]!!) to false
         }.toMutableMap()
         options[SimpleTextOption(roleName)] = true
 

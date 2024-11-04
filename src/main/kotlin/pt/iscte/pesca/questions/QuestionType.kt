@@ -37,14 +37,9 @@ data class SourceCode(val code: String): ISource {
     override fun toString(): String = code
 }
 
-data class ProcedureCall(val id: String, val arguments: List<List<IValue>>) {
-    constructor(id: String, vararg arguments: IValue): this(id, listOf(arguments.toList()))
+data class ProcedureCall(val id: String, val arguments: List<List<Any?>>) {
 
-    init {
-        assert(arguments.isNotEmpty()) {
-            "Procedure call must specify at least one list of input arguments!"
-        }
-    }
+    constructor(id: String, vararg arguments: Any?): this(id, listOf(arguments.toList()))
 }
 
 data class SourceCodeWithInput(val source: SourceCode, val calls: List<ProcedureCall>): ISource
