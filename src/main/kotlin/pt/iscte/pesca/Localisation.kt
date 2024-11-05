@@ -4,8 +4,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
 
-fun lang(code: String): Language = Localisation.getLanguage(code)
-
 object Localisation {
     internal val languages = mutableSetOf<Language>()
 

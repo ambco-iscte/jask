@@ -2,20 +2,20 @@ package pt.iscte.pesca.extensions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.questions.Option
+import pt.iscte.pesca.questions.RecordTypeData
 import pt.iscte.strudel.model.*
 import pt.iscte.strudel.model.IType
 import pt.iscte.strudel.model.roles.*
+import pt.iscte.strudel.model.roles.impl.*
 import pt.iscte.strudel.parsing.java.allocateStringArray
 import pt.iscte.strudel.parsing.java.extensions.getString
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import pt.iscte.strudel.vm.NULL
-import kotlin.random.Random
-import kotlin.random.nextInt
 import kotlin.reflect.KClass
 
 @Suppress("UNCHECKED_CAST")
-fun Any?.toIValue(vm: IVirtualMachine): IValue = when (this) {
+fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue = when (this) {
     is Collection<*> -> {
         if (isEmpty()) vm.allocateArrayOf(NULL.type)
         else if (runCatching { vm.getValue(first()) }.isSuccess) {
@@ -31,28 +31,26 @@ fun Any?.toIValue(vm: IVirtualMachine): IValue = when (this) {
     null -> NULL
     is IValue -> this
     is String -> getString(this)
+    is RecordTypeData -> {
+        val recordType = module.getRecordType(this.name)
+        val ref = vm.allocateRecord(recordType)
+        val record = ref.target
+        recordType.fields.forEachIndexed { i, field ->
+            record.setField(field, this.fields[i].toIValue(vm, module))
+        }
+        ref
+    }
     else -> vm.getValue(this)
 }
 
 val VARIABLE_ROLES: Map<KClass<out IVariableRole>, String> = mapOf(
-    IFixedValue::class to "Fixed Value",
-    IGatherer::class to "Gatherer",
-    IArrayIndexIterator::class to "Array Index Iterator",
-    IStepper::class to "Stepper",
-    IMostWantedHolder::class to "Most-Wanted Holder",
-    IOneWayFlag::class to "One-Way Flag"
+    FixedValue::class to "Fixed Value",
+    Gatherer::class to "Gatherer",
+    ArrayIndexIterator::class to "Array Index Iterator",
+    Stepper::class to "Stepper",
+    MostWantedHolder::class to "Most-Wanted Holder",
+    OneWayFlag::class to "One-Way Flag"
 )
-
-fun IProcedureDeclaration.generateRandomArguments(vm: IVirtualMachine): List<IValue> =
-    parameters.map { it.type }.map { it.generateRandomValue(vm) }
-
-fun IType.generateRandomValue(vm: IVirtualMachine, numRange: IntRange = 0.. 10): IValue = when (this) {
-    INT -> vm.getValue(Random.nextInt(numRange))
-    DOUBLE -> vm.getValue(Random.nextDouble(numRange.first.toDouble(), numRange.last.toDouble()))
-    CHAR -> vm.getValue(('z' downTo 'a').toList().random())
-    BOOLEAN -> vm.getValue(listOf(true, false).random())
-    else -> throw IllegalArgumentException("Cannot generate random value for non-value type: $this")
-}
 
 fun IValue.multipleChoice(language: Language): Map<Option, Boolean> = when (this.type) {
     INT -> toInt().multipleChoice(language)

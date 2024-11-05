@@ -11,15 +11,11 @@ import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IBlockElement
 import pt.iscte.strudel.model.IConstantDeclaration
 import pt.iscte.strudel.model.IExpression
-import pt.iscte.strudel.model.IModule
-import pt.iscte.strudel.model.IPolymorphicProcedure
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IProgramElement
 import pt.iscte.strudel.model.IType
 import pt.iscte.strudel.parsing.java.Java2Strudel
-import pt.iscte.strudel.vm.IValue
-import pt.iscte.strudel.vm.impl.IForeignProcedure
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -37,13 +33,20 @@ data class SourceCode(val code: String): ISource {
     override fun toString(): String = code
 }
 
-data class ProcedureCall(val id: String, val arguments: List<List<Any?>>) {
-
-    constructor(id: String, vararg arguments: Any?): this(id, listOf(arguments.toList()))
+data class RecordTypeData(val name: String, val fields: List<Any?>) {
+    override fun toString(): String = "$name[${fields.joinToString()}]"
 }
+
+data class ProcedureCall(val id: String, val arguments: List<List<Any?>>)
 
 data class SourceCodeWithInput(val source: SourceCode, val calls: List<ProcedureCall>): ISource
 
+/**
+ * This class provides a generic representation of a QLC.
+ * @param T Type of targeted elements within student code.
+ * @param S Type of input source code.
+ * @param range Number of source code(s) which are needed to produce this question.
+ */
 sealed class Question<T : Any, S : ISource>(val range: IntRange = 1 .. Int.MAX_VALUE) {
 
     companion object {
@@ -52,15 +55,24 @@ sealed class Question<T : Any, S : ISource>(val range: IntRange = 1 .. Int.MAX_V
         }
     }
 
+    /**
+     * Given the [type] of targeted elements, is the question applicable to this [source] code?
+     * @param source Source code.
+     * @param type Type of targeted elements. Must be [T] or a valid subclass.
+     */
     fun <R : T> isApplicable(source: S, type: KClass<R>): Boolean =
         getApplicableElements(source, type).isNotEmpty()
+
+    /**
+     * Is the question applicable to this [element]?
+     * @param element An element of the question's target type.
+     */
+    protected open fun isApplicable(element: T): Boolean = true
 
     protected abstract fun <R : T> getApplicableElements(source: S, type: KClass<R>): List<R>
 
     protected inline fun <reified R : T> getApplicableElements(source: S): List<R> =
         getApplicableElements(source, R::class)
-
-    protected open fun isApplicable(element: T): Boolean = true
 
     protected inline fun <reified R : T> getApplicableElements(sources: List<S>): List<R> =
         sources.filter { isApplicable(it, R::class) }.flatMap {
@@ -71,8 +83,20 @@ sealed class Question<T : Any, S : ISource>(val range: IntRange = 1 .. Int.MAX_V
         sources.filter { isApplicable(it, R::class) }
 }
 
+/**
+ * This class provides a representation of a QLC targeting *static* code elements, i.e. static syntactic elements
+ * which do not change during execution. This question type takes pure [SourceCode] as input.
+ *
+ * @param T The type of JavaParser - [com.github.javaparser] - node the question targets, e.g.
+ * [com.github.javaparser.ast.body.MethodDeclaration] if the question targets methods.
+ */
 abstract class StaticQuestion<T : Node> : Question<T, SourceCode>() {
 
+    /**
+     * Generates the [QuestionData] for this question using a list of [sources].
+     * @param sources A list of sources.
+     * @param language The language to use for generating the question's textual elements.
+     */
     fun generate(sources: List<SourceCode>, language: Language = Language.DEFAULT): QuestionData {
         require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
         return build(sources, language)
@@ -84,8 +108,21 @@ abstract class StaticQuestion<T : Node> : Question<T, SourceCode>() {
         source.load().findAll(type.java) { isApplicable(it) }
 }
 
+/**
+ * This class provides a representation of a QLC targeting *dynamic* code elements, i.e. elements which depend
+ * on the code's execution and depend on the methods' provided input. This question type requires [SourceCodeWithInput]
+ * as input, which contains not only the [SourceCode] but also valid calls to the code's methods.
+ *
+ * @param T The type of Strudel - [pt.iscte.strudel] - element that the question target, e.g.
+ * [IProcedure] if the question targets concrete methods.
+ */
 abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWithInput>() {
 
+    /**
+     * Generates the [QuestionData] for this question using a list of [sources].
+     * @param sources A list of sources.
+     * @param language The language to use for generating the question's textual elements.
+     */
     fun generate(sources: List<SourceCodeWithInput>, language: Language = Language.DEFAULT): QuestionData {
         require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
         return build(sources, language)
@@ -99,14 +136,14 @@ abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWith
 
         fun getCollectedElements(): Set<R> = collectedElements
 
-        inner class ExpressionVisitorCollector(val set: MutableSet<R>): IExpression.IVisitor {
+        inner class ExpressionVisitorCollector(): IExpression.IVisitor {
             override fun visitAny(exp: IExpression) {
                 if (type.java.isAssignableFrom(exp::class.java))
                     collectedElements.add(type.cast(exp))
             }
         }
 
-        inner class BlockVisitorCollector(val set: MutableSet<R>): IBlock.IVisitor {
+        inner class BlockVisitorCollector(): IBlock.IVisitor {
             override fun visitAny(element: IBlockElement) {
                 if (type.java.isAssignableFrom(element::class.java))
                     collectedElements.add(type.cast(element))
@@ -116,7 +153,7 @@ abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWith
         override fun visit(constant: IConstantDeclaration): Boolean {
             if (type.java.isAssignableFrom(constant::class.java))
                 collectedElements.add(type.cast(constant))
-            constant.value.accept(ExpressionVisitorCollector(collectedElements))
+            constant.value.accept(ExpressionVisitorCollector())
             return true
         }
 
@@ -130,7 +167,7 @@ abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWith
             if (type.java.isAssignableFrom(procedure::class.java))
                 collectedElements.add(type.cast(procedure))
             when (procedure) {
-                is IProcedure -> procedure.block.accept(BlockVisitorCollector(collectedElements))
+                is IProcedure -> procedure.block.accept(BlockVisitorCollector())
                 else -> return false
             }
             return true

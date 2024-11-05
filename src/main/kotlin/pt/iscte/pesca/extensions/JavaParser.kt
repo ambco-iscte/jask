@@ -13,6 +13,7 @@ import com.github.javaparser.ast.stmt.WhileStmt
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
 import pt.iscte.pesca.questions.SourceCode
+import pt.iscte.strudel.model.IProcedureDeclaration
 import java.util.Locale
 
 inline fun <reified T : Node> find(source: String, condition: (T) -> Boolean = { true }): List<T> =
@@ -24,6 +25,10 @@ inline fun <reified T : Node> Node.findAll(noinline condition: (T) -> Boolean = 
 fun MethodDeclaration.nameMatches(name: String?): Boolean =
     if (name == null) true
     else nameAsString == name
+
+fun IProcedureDeclaration.nameMatches(name: String?): Boolean =
+    if (name == null) id == null
+    else id == name
 
 val MethodDeclaration.prettySignature: String
     get() = "$typeAsString $nameAsString(${parameters.joinToString()})"

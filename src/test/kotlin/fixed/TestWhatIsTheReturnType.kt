@@ -1,9 +1,9 @@
-package staticquestions
+package fixed
 
 import BaseTest
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.WhichReturnType
+import pt.iscte.pesca.questions.fixed.*
 import kotlin.test.assertEquals
 
 class TestWhatIsTheReturnType : BaseTest("Example.java") {

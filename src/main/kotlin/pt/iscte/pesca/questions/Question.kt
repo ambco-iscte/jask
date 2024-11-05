@@ -9,14 +9,16 @@ import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IProgramElement
 import pt.iscte.strudel.parsing.java.JP
 
-interface QuestionStatement
+sealed interface QuestionStatement {
+    val statement: String
+}
 
-data class SimpleTextStatement(val statement: String): QuestionStatement {
+data class SimpleTextStatement(override val statement: String): QuestionStatement {
 
     override fun toString() = statement
 }
 
-data class TextWithCodeStatement(val statement: String, val code: String): QuestionStatement {
+data class TextWithCodeStatement(override val statement: String, val code: String): QuestionStatement {
 
     constructor(statement: String, code: MethodDeclaration): this(statement, code.toString())
 
@@ -26,7 +28,7 @@ data class TextWithCodeStatement(val statement: String, val code: String): Quest
 }
 
 
-interface Option
+sealed interface Option
 
 data class SimpleTextOption(val text: String): Option {
 
@@ -52,7 +54,7 @@ data class SimpleTextOption(val text: String): Option {
 
 data class QuestionData (
     val statement: QuestionStatement,
-    private val options: Map<Option, Boolean>,
+    val options: Map<Option, Boolean>,
     val language: Language = Language.DEFAULT,
 ) {
     private val shuffledOptions: Map<Option, Boolean>

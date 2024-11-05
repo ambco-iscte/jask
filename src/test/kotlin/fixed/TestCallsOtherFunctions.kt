@@ -1,8 +1,8 @@
-package staticquestions
+package fixed
 
 import BaseTest
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.questions.CallsOtherFunctions
+import pt.iscte.pesca.questions.fixed.*
 import pt.iscte.pesca.questions.SimpleTextOption
 import kotlin.test.assertEquals
 
