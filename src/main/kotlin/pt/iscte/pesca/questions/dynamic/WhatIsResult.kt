@@ -41,7 +41,7 @@ data class WhatIsResult(val methodName: String? = null): DynamicQuestion<IProced
         val callsForProcedure = source.calls.filter { it.id == procedure.id }
         if (callsForProcedure.isEmpty())
             throw RuntimeException("Could not find procedure call specification for procedure ${procedure.id}.")
-        val arguments = callsForProcedure.random().arguments.random().map { it.toIValue(vm, module) }.toTypedArray()
+        val arguments = callsForProcedure.random().alternatives.random().map { it.toIValue(vm, module) }.toTypedArray()
 
         val call = "${procedure.id}(${arguments.joinToString()})"
 

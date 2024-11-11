@@ -37,7 +37,9 @@ data class RecordTypeData(val name: String, val fields: List<Any?>) {
     override fun toString(): String = "$name[${fields.joinToString()}]"
 }
 
-data class ProcedureCall(val id: String, val arguments: List<List<Any?>>)
+typealias Arguments = List<Any?>
+
+data class ProcedureCall(val id: String, val alternatives: List<Arguments>)
 
 data class SourceCodeWithInput(val source: SourceCode, val calls: List<ProcedureCall>): ISource
 
@@ -90,7 +92,9 @@ sealed class Question<T : Any, S : ISource>(val range: IntRange = 1 .. Int.MAX_V
  * @param T The type of JavaParser - [com.github.javaparser] - node the question targets, e.g.
  * [com.github.javaparser.ast.body.MethodDeclaration] if the question targets methods.
  */
-abstract class StaticQuestion<T : Node> : Question<T, SourceCode>() {
+abstract class StaticQuestion<T : Node>(range: IntRange) : Question<T, SourceCode>(range) {
+
+    constructor() : this(1..Int.MAX_VALUE)
 
     /**
      * Generates the [QuestionData] for this question using a list of [sources].
@@ -127,6 +131,10 @@ abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWith
         require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
         return build(sources, language)
     }
+
+    fun generate(src: String, call: ProcedureCall) = generate(
+        listOf(SourceCodeWithInput(SourceCode(src), listOf(call)))
+    )
 
     protected abstract fun build(sources: List<SourceCodeWithInput>, language: Language = Language.DEFAULT): QuestionData
 

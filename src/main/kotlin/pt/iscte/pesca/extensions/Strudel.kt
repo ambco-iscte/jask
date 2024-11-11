@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
 @Suppress("UNCHECKED_CAST")
 fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue = when (this) {
     is Collection<*> -> {
-        if (isEmpty()) vm.allocateArrayOf(NULL.type)
+        if (isEmpty()) vm.allocateArrayOf(ANY)
         else if (runCatching { vm.getValue(first()) }.isSuccess) {
             val type = vm.getValue(first()).type
             vm.allocateArrayOf(type, *this.map { it ?: NULL }.toTypedArray())

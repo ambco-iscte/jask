@@ -1,6 +1,7 @@
 package pt.iscte.pesca.extensions
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import pt.iscte.pesca.questions.ProcedureCall
 import java.lang.reflect.Method
 
 val Class<*>.wrapper: Class<*>
@@ -41,3 +42,6 @@ fun String.pascalCaseToSpaces(): String {
     }
     return spaces.trim()
 }
+
+fun String.pcall(vararg arguments: Any?): ProcedureCall =
+    ProcedureCall(this, listOf(arguments.toList()))
