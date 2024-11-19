@@ -22,7 +22,12 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
 
     constructor(statement: String, code: MethodDeclaration): this(statement, code.toString())
 
-    constructor(statement: String, code: IProcedureDeclaration): this(statement, (code.getProperty(JP) ?: code).toString())
+    constructor(statement: String, code: IProgramElement): this(statement, (code.getProperty(JP) ?: code).toString())
+
+    constructor(statement: String, code: Collection<IProgramElement>): this(
+        statement,
+        code.joinToString(System.lineSeparator().repeat(2)) { (it.getProperty(JP) ?: it).toString() }
+    )
 
     override fun toString() = "$statement${System.lineSeparator()}$code"
 }
@@ -46,7 +51,10 @@ data class SimpleTextOption(val text: String): Option {
             SimpleTextOption(language["No"])
     }
 
-    constructor(value: Any): this(value.toString())
+    constructor(value: Any?): this(when (value) {
+        is Collection<*> -> value.joinToString()
+        else -> value.toString()
+    })
 
     override fun toString() = text
 }

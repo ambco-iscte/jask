@@ -117,7 +117,7 @@ abstract class StaticQuestion<T : Node>(range: IntRange) : Question<T, SourceCod
  * on the code's execution and depend on the methods' provided input. This question type requires [SourceCodeWithInput]
  * as input, which contains not only the [SourceCode] but also valid calls to the code's methods.
  *
- * @param T The type of Strudel - [pt.iscte.strudel] - element that the question target, e.g.
+ * @param T The type of Strudel - [pt.iscte.strudel] - element that the question targets, e.g.
  * [IProcedure] if the question targets concrete methods.
  */
 abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWithInput>() {

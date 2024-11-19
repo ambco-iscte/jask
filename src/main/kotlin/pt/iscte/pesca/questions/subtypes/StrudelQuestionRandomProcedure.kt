@@ -1,13 +1,17 @@
-package pt.iscte.pesca.questions
+package pt.iscte.pesca.questions.subtypes
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.toIValue
+import pt.iscte.pesca.questions.DynamicQuestion
+import pt.iscte.pesca.questions.QuestionData
+import pt.iscte.pesca.questions.SourceCodeWithInput
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
-abstract class DynamicQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
+abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
+
     override fun build(
         sources: List<SourceCodeWithInput>,
         language: Language
@@ -16,13 +20,16 @@ abstract class DynamicQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
             ?: throw RuntimeException("Could not find an applicable source!")
 
         val module = Java2Strudel().load(source.source.code)
-        val procedure = module.procedures.filterIsInstance<IProcedure>().filter { isApplicable(it) }.randomOrNull() ?:
+        val procedure = module.procedures.filterIsInstance<IProcedure>().filter {
+            p -> isApplicable(p) && source.calls.any { it.id == p.id }
+        }.randomOrNull() ?:
         throw RuntimeException(
-            "Could not find procedure with value type and value type parameters in module ${module.id}!"
+            "Could not find applicable procedure in module ${module.id}!"
         )
 
         val vm = IVirtualMachine.create()
         setup(vm)
+
         val callsForProcedure = source.calls.filter { it.id == procedure.id }
         if (callsForProcedure.isEmpty())
             throw RuntimeException("Could not find procedure call specification for procedure ${procedure.id}.")
@@ -33,7 +40,7 @@ abstract class DynamicQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
         return build(vm, procedure, arguments.toList(), call, language)
     }
 
-    abstract fun setup(vm: IVirtualMachine)
+    open fun setup(vm: IVirtualMachine) { }
 
-    abstract fun build(vm: IVirtualMachine, procedure: IProcedure, arguments: List<IValue>, call: String, language: Language): QuestionData
+    protected abstract fun build(vm: IVirtualMachine, procedure: IProcedure, arguments: List<IValue>, call: String, language: Language): QuestionData
 }

@@ -84,3 +84,37 @@ fun IModule.accept(visitor: IModuleVisitor) {
         visitor.endVisit(it)
     }
 }
+
+fun IProcedure.getProcedureCalls(): List<IProcedureCall> {
+    val lst = mutableListOf<IProcedureCall>()
+    val v = object : IBlock.IVisitor {
+        override fun visit(call: IProcedureCall): Boolean {
+            lst.add(call)
+            return true
+        }
+        override fun visit(exp: IProcedureCallExpression): Boolean {
+            lst.add(exp)
+            return true
+        }
+    }
+    block.accept(v)
+    return lst
+}
+
+fun IProcedure.isSelfContained(): Boolean =
+    getProcedureCalls().none { it.procedure != this && it.procedure.module == this.module }
+
+fun IProcedure.getUsedProceduresWithinModule(): List<IProcedureDeclaration> =
+    getProcedureCalls().filter { it.procedure.module == this.module }.map { it.procedure }
+
+fun IProcedure.getVariableAssignments(): Map<IVariableDeclaration<*>, List<IVariableAssignment>> {
+    val map = mutableMapOf<IVariableDeclaration<*>, List<IVariableAssignment>>()
+    val v = object : IBlock.IVisitor {
+        override fun visit(assignment: IVariableAssignment): Boolean {
+            map[assignment.target] = (map[assignment.target] ?: emptyList()) + listOf(assignment)
+            return true
+        }
+    }
+    block.accept(v)
+    return map
+}

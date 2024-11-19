@@ -33,15 +33,5 @@ fun Any.call(methodName: String, arguments: List<Any>): Any? {
     return method.invoke(this, *arguments.toTypedArray())
 }
 
-fun <T> Collection<T>.sample(amount: Int): List<T> = shuffled().take(amount)
-
-fun String.pascalCaseToSpaces(): String {
-    var spaces = ""
-    this.forEach { char ->
-        spaces += if (char.isUpperCase()) " $char" else char
-    }
-    return spaces.trim()
-}
-
-fun String.pcall(vararg arguments: Any?): ProcedureCall =
-    ProcedureCall(this, listOf(arguments.toList()))
+fun <T> Collection<T>.sample(amount: Int?): List<T> =
+    shuffled().take(amount ?: (1 .. size).random())

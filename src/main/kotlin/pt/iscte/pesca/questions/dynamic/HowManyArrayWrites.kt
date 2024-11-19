@@ -14,8 +14,10 @@ import pt.iscte.strudel.vm.IArray
 import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
+import kotlin.text.format
 
-class HowManyArrayReads : StrudelQuestionRandomProcedure() {
+class HowManyArrayWrites : StrudelQuestionRandomProcedure() {
+
     var count = 0
     var len = 0
 
@@ -39,7 +41,7 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
             override fun arrayAllocated(ref: IReference<IArray>) {
                 len += ref.target.length
                 ref.target.addListener(object : IArray.IListener {
-                    override fun elementRead(index: Int, value: IValue) {
+                    override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
                         count++
                     }
                 })
@@ -57,7 +59,7 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
         vm.execute(procedure, *arguments.toTypedArray())
         return QuestionData(
             TextWithCodeStatement(
-                language["HowManyArrayReads"].format(call),
+                language["HowManyArrayWrites"].format(call),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             mapOf(

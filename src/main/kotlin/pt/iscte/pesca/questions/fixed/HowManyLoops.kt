@@ -5,22 +5,18 @@ import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getLoopControlStructures
 import pt.iscte.pesca.extensions.hasLoopControlStructures
 import pt.iscte.pesca.extensions.multipleChoice
-import pt.iscte.pesca.extensions.nameMatches
 import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SourceCode
-import pt.iscte.pesca.questions.StaticQuestion
 import pt.iscte.pesca.questions.TextWithCodeStatement
+import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import kotlin.text.format
 
-data class HowManyLoops(val methodName: String? = null): StaticQuestion<MethodDeclaration>() {
+class HowManyLoops : JavaParserQuestionRandomMethod() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
-        element.nameMatches(methodName) && element.body.getOrNull?.hasLoopControlStructures() == true
+        element.body.getOrNull?.hasLoopControlStructures() == true
 
-    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
-        val method = getApplicableElements<MethodDeclaration>(sources).random()
-
+    override fun build(method: MethodDeclaration, language: Language): QuestionData {
         val howManyLoops = method.body.get().getLoopControlStructures().size
 
         return QuestionData(

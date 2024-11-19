@@ -1,0 +1,49 @@
+package pt.iscte.pesca.questions.dynamic
+
+import pt.iscte.pesca.Language
+import pt.iscte.pesca.extensions.VARIABLE_ROLES
+import pt.iscte.pesca.extensions.sample
+import pt.iscte.pesca.questions.Option
+import pt.iscte.pesca.questions.QuestionData
+import pt.iscte.pesca.questions.SimpleTextOption
+import pt.iscte.pesca.questions.TextWithCodeStatement
+import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
+import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.roles.IVariableRole
+import pt.iscte.strudel.vm.IValue
+import pt.iscte.strudel.vm.IVirtualMachine
+
+class WhichVariableRole : StrudelQuestionRandomProcedure() {
+
+    // There is at least one variable whose role can be determined.
+    override fun isApplicable(element: IProcedure): Boolean =
+        element.localVariables.any { IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE }
+
+    override fun build(
+        vm: IVirtualMachine,
+        procedure: IProcedure,
+        arguments: List<IValue>,
+        call: String,
+        language: Language
+    ): QuestionData {
+        // Choose a random variable whose role can be determined.
+        // As per the precondition, there is guaranteed to be at least one.
+        val variable = procedure.localVariables.filter { IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE }.random()
+
+        // Determine that variable's role.
+        val role = IVariableRole.Companion.match(variable)
+        val roleName = VARIABLE_ROLES[role::class]!!
+
+        // Generate fancy options. :)
+        val options: MutableMap<Option, Boolean> = VARIABLE_ROLES.keys.minus(role::class).sample(3).associate {
+            SimpleTextOption(VARIABLE_ROLES[it]!!) to false
+        }.toMutableMap()
+        options[SimpleTextOption(roleName)] = true
+
+        return QuestionData(
+            TextWithCodeStatement(language["WhichVariableRole"].format(variable.id, procedure.id), procedure),
+            options,
+            language = language
+        )
+    }
+}
