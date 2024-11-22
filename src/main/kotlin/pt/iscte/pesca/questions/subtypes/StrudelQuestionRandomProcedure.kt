@@ -21,23 +21,23 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
         while (source == null && remaining.isNotEmpty()) {
             val s = sources.random()
             source = s
-            runCatching {
-                val module = Java2Strudel().load(s.source.code)
+            remaining.remove(s)
+            runCatching { val module = Java2Strudel(checkJavaCompilation = false).load(s.source.code)
                 if (module.procedures.filterIsInstance<IProcedure>().none {
                             p -> isApplicable(p) && s.calls.any { it.id == p.id }
                     })
                     source = null
+            }.onFailure {
+                source = null
             }
-            remaining.remove(s)
         }
 
         if (source == null)
             throw RuntimeException("Could not find applicable source for question type ${this::class.simpleName}!")
 
-        val s = source!!
-        val module = Java2Strudel().load(s.source.code)
+        val module = Java2Strudel(checkJavaCompilation = false).load(source!!.source.code)
         val procedure = module.procedures.filterIsInstance<IProcedure>().filter {
-                p -> isApplicable(p) && s.calls.any { it.id == p.id }
+                p -> isApplicable(p) && source!!.calls.any { it.id == p.id }
         }.randomOrNull() ?:
         throw RuntimeException(
             "Could not find applicable procedure for question type ${this::class.simpleName} in module ${module.id}!"
@@ -46,7 +46,7 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
         val vm = IVirtualMachine.create()
         setup(vm)
 
-        val callsForProcedure = s.calls.filter { it.id == procedure.id }
+        val callsForProcedure = source!!.calls.filter { it.id == procedure.id }
         if (callsForProcedure.isEmpty())
             throw RuntimeException("Could not find procedure call specification for procedure ${procedure.id}.")
         val randomCall = callsForProcedure.random()
