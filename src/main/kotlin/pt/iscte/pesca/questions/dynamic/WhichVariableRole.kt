@@ -1,7 +1,6 @@
 package pt.iscte.pesca.questions.dynamic
 
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.extensions.VARIABLE_ROLES
 import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.QuestionData
@@ -10,8 +9,15 @@ import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.roles.IVariableRole
+import pt.iscte.strudel.model.roles.impl.ArrayIndexIterator
+import pt.iscte.strudel.model.roles.impl.FixedValue
+import pt.iscte.strudel.model.roles.impl.Gatherer
+import pt.iscte.strudel.model.roles.impl.MostWantedHolder
+import pt.iscte.strudel.model.roles.impl.OneWayFlag
+import pt.iscte.strudel.model.roles.impl.Stepper
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
+import kotlin.reflect.KClass
 
 class WhichVariableRole : StrudelQuestionRandomProcedure() {
 
@@ -19,10 +25,20 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
     override fun isApplicable(element: IProcedure): Boolean =
         element.localVariables.any { IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE }
 
+    private fun variableRoles(language: Language): Map<KClass<out IVariableRole>, String> = mapOf(
+        FixedValue::class to language["FixedValue"],
+        Gatherer::class to language["Gatherer"],
+        ArrayIndexIterator::class to language["ArrayIndexIterator"],
+        Stepper::class to language["Stepper"],
+        MostWantedHolder::class to language["MostWantedHolder"],
+        OneWayFlag::class to language["OneWayFlag"]
+    )
+
     override fun build(
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
+        alternatives: List<List<IValue>>,
         call: String,
         language: Language
     ): QuestionData {
@@ -31,12 +47,13 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
         val variable = procedure.localVariables.filter { IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE }.random()
 
         // Determine that variable's role.
+        val varRoles = variableRoles(language)
         val role = IVariableRole.Companion.match(variable)
-        val roleName = VARIABLE_ROLES[role::class]!!
+        val roleName = varRoles[role::class]!!
 
         // Generate fancy options. :)
-        val options: MutableMap<Option, Boolean> = VARIABLE_ROLES.keys.minus(role::class).sample(3).associate {
-            SimpleTextOption(VARIABLE_ROLES[it]!!) to false
+        val options: MutableMap<Option, Boolean> = varRoles.keys.minus(role::class).sample(3).associate {
+            SimpleTextOption(varRoles[it]!!) to false
         }.toMutableMap()
         options[SimpleTextOption(roleName)] = true
 

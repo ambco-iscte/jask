@@ -27,7 +27,7 @@ data class SourceCode(val code: String): ISource {
     constructor(file: File) : this(file.readText())
 
     fun load(): CompilationUnit = runCatching { StaticJavaParser.parse(code) }.onFailure {
-        throw IllegalArgumentException("Source code does not compile: ${it.message}", it.cause)
+        throw IllegalArgumentException("Source code does not compile: ${it.message}\n$code", it.cause)
     }.getOrThrow()
 
     override fun toString(): String = code

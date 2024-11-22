@@ -26,10 +26,16 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
 
     constructor(statement: String, code: Collection<IProgramElement>): this(
         statement,
-        code.joinToString(System.lineSeparator().repeat(2)) { (it.getProperty(JP) ?: it).toString() }
+        code.filter{ it.getProperty(JP) != null }.joinToString(System.lineSeparator().repeat(2)) {
+            (it.getProperty(JP) ?: it).toString()
+        }
     )
 
-    override fun toString() = "$statement${System.lineSeparator()}$code"
+    override fun toString(): String {
+        val width = code.split("\n").maxOf { it.length }
+        val sep = "-".repeat(width)
+        return "$statement${System.lineSeparator()}$sep${System.lineSeparator()}$code${System.lineSeparator()}$sep"
+    }
 }
 
 
@@ -62,31 +68,30 @@ data class SimpleTextOption(val text: String): Option {
 
 data class QuestionData (
     val statement: QuestionStatement,
-    val options: Map<Option, Boolean>,
+    private val options: Map<Option, Boolean>,
     val language: Language = Language.DEFAULT,
 ) {
-    private val shuffledOptions: Map<Option, Boolean>
-        get() {
-            val lastUnshuffled = listOf(
-                SimpleTextOption.none(language),
-                SimpleTextOption.all(language),
-                SimpleTextOption.yes(language),
-                SimpleTextOption.no(language)
-            )
+    fun options(shuffled: Boolean = false): Map<Option, Boolean> {
+        val lastUnshuffled = listOf(
+            SimpleTextOption.none(language),
+            SimpleTextOption.all(language),
+            SimpleTextOption.yes(language),
+            SimpleTextOption.no(language)
+        )
 
-            val shuffled = options.keys.filter {
+        val shuffled = options.keys.filter {
                 option -> !(lastUnshuffled.contains(option))
-            }.shuffled().associateWith {
+        }.shuffled().associateWith {
                 option -> options[option]!!
-            }.toMutableMap()
+        }.toMutableMap()
 
-            lastUnshuffled.forEach { lastOption ->
-                if (options.containsKey(lastOption))
-                    shuffled[lastOption] = options[lastOption]!!
-            }
-
-            return shuffled
+        lastUnshuffled.forEach { lastOption ->
+            if (options.containsKey(lastOption))
+                shuffled[lastOption] = options[lastOption]!!
         }
+
+        return shuffled
+    }
 
     val solution: List<Option>
         get() = options.filter { it.value }.map { it.key }
@@ -96,7 +101,7 @@ data class QuestionData (
         require(options.any { option -> option.value }) { "Question must have at least one correct option!" }
     }
 
-    override fun toString(): String = "$statement\n${shuffledOptions.toList().joinToString(System.lineSeparator()) { 
+    override fun toString(): String = "$statement\n${options(true).toList().joinToString(System.lineSeparator()) { 
         option -> "[${if (option.second) "x" else " "}] ${option.first}"
     }}"
 }

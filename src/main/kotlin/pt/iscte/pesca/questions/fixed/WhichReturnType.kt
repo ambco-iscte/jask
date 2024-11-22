@@ -1,6 +1,7 @@
 package pt.iscte.pesca.questions.fixed
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.Expression
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.pesca.extensions.getUsedTypes
@@ -20,14 +21,18 @@ class WhichReturnType : JavaParserQuestionRandomMethod() {
     override fun build(method: MethodDeclaration, language: Language): QuestionData {
         val methodReturnType = method.type
 
-        val otherTypes = method.getUsedTypes().filter { it != methodReturnType }.map { it.asString() }.toSet()
+        val otherTypes = method.getUsedTypes().filter { it != methodReturnType }.map { it.asString() }
 
-        val pool = otherTypes + JAVA_PRIMITIVE_TYPES.filter {
-            it != methodReturnType.asString()
-        }.sample(3 - otherTypes.size)
+        val exprTypes = method.findAll(Expression::class.java).filter { expression ->
+            runCatching { expression.calculateResolvedType() }.isSuccess
+        }.map { it.calculateResolvedType() }.filter { it != methodReturnType }.map { it.describe() }
+
+        val distractors = (otherTypes + exprTypes + JAVA_PRIMITIVE_TYPES).filter {
+            it != methodReturnType .toString()
+        }.toSet().sample(3)
 
         val options: MutableMap<Option, Boolean> =
-            pool.associate { SimpleTextOption(it) to false }.toMutableMap()
+            distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(methodReturnType)] = true
 
         return QuestionData(

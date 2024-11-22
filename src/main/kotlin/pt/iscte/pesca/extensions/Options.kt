@@ -7,17 +7,23 @@ import pt.iscte.pesca.questions.SimpleTextOption
 fun Int.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
     SimpleTextOption(this) to true,
     SimpleTextOption(this + 1) to false,
-    SimpleTextOption(if (this == 0) 2 else this - 1) to false,
+    SimpleTextOption(if (this == 0) 2 else (this - 1)) to false,
     SimpleTextOption.none(language) to false
 )
 
-fun Double.multipleChoice(language: Language): Map<Option, Boolean> {
-    TODO()
-}
+fun Double.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
+    SimpleTextOption(this) to true,
+    SimpleTextOption(this + 1) to false,
+    SimpleTextOption(if (this == 0.0) 2 else (this - 1)) to false,
+    SimpleTextOption.none(language) to false
+)
 
-fun Char.multipleChoice(language: Language): Map<Option, Boolean> {
-    TODO()
-}
+fun Char.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
+    SimpleTextOption(this) to true,
+    SimpleTextOption((this + 1).toChar()) to false,
+    SimpleTextOption((this - 1).toChar()) to false,
+    SimpleTextOption.none(language) to false
+)
 
 fun Boolean.trueOrFalse(language: Language, literal: Boolean = false): Map<Option, Boolean> =
     if (!literal)

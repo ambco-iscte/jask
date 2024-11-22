@@ -1,6 +1,7 @@
 package pt.iscte.pesca.questions.fixed
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.stmt.ReturnStmt
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getReturnVariables
 import pt.iscte.pesca.extensions.getVariablesInScope
@@ -10,13 +11,15 @@ import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.pesca.questions.TextWithCodeStatement
+import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import kotlin.jvm.optionals.toSet
 
 class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
 
-    // Return type is given by a single variable.
+    // Return value is given by a single variable.
     override fun isApplicable(element: MethodDeclaration): Boolean =
-        element.getReturnVariables().any { it.value.toSet().size == 1 }
+        element.findAll(ReturnStmt::class.java).all { it.expression.getOrNull?.isNameExpr == true } &&
+        element.findAll(ReturnStmt::class.java).map { it.expression?.toString() }.toSet().size == 1
 
     override fun build(method : MethodDeclaration, language: Language): QuestionData {
         val returns = method.getReturnVariables()

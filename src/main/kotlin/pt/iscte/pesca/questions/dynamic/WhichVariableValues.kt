@@ -35,6 +35,7 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
+        alternatives: List<List<IValue>>,
         call: String,
         language: Language
     ): QuestionData {
@@ -53,6 +54,7 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
 
         val options: MutableMap<Option, Boolean> =
             others.associate { SimpleTextOption(it) to false }.toMutableMap()
+        options[SimpleTextOption(values.reversed())] = false
         options[SimpleTextOption(values)] = true
         options[SimpleTextOption.none(language)] = false
 

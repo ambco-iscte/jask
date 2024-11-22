@@ -53,6 +53,7 @@ class HowManyArrayWrites : StrudelQuestionRandomProcedure() {
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
+        alternatives: List<List<IValue>>,
         call: String,
         language: Language
     ): QuestionData {
