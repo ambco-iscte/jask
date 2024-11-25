@@ -31,7 +31,7 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
         ArrayIndexIterator::class to language["ArrayIndexIterator"],
         Stepper::class to language["Stepper"],
         MostWantedHolder::class to language["MostWantedHolder"],
-        OneWayFlag::class to language["OneWayFlag"]
+        // OneWayFlag::class to language["OneWayFlag"]
     )
 
     override fun build(
@@ -52,7 +52,7 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
         val roleName = varRoles[role::class]!!
 
         // Generate fancy options. :)
-        val options: MutableMap<Option, Boolean> = varRoles.keys.minus(role::class).sample(3).associate {
+        val options: MutableMap<Option, Boolean> = varRoles.keys.filter { varRoles[it]!! != roleName }.sample(3).associate {
             SimpleTextOption(varRoles[it]!!) to false
         }.toMutableMap()
         options[SimpleTextOption(roleName)] = true
