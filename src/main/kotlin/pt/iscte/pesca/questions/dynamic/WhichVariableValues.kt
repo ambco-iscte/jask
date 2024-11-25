@@ -3,6 +3,7 @@ package pt.iscte.pesca.questions.dynamic
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getVariableAssignments
 import pt.iscte.pesca.extensions.sample
+import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
@@ -44,19 +45,19 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
         val variable = valuesPerVariable.keys.random()
         val values = valuesPerVariable[variable]!!
 
-        val others = mutableListOf<List<IValue>>()
-        while (others.size < 3) {
-            val pool = valuesPerVariable.values.random() + valuesPerVariable.values.random() + arguments
-            val choice = pool.sample(values.size)
-            if (choice != values)
-                others.add(choice)
-        }
+        val distractors = sampleSequentially(2,
+            valuesPerVariable.values.filter { it != values },
+            listOf(arguments)
+        )
 
-        val options: MutableMap<Option, Boolean> =
-            others.associate { SimpleTextOption(it) to false }.toMutableMap()
-        options[SimpleTextOption(values.reversed())] = false
-        options[SimpleTextOption(values)] = true
-        options[SimpleTextOption.none(language)] = false
+        val options: MutableMap<Option, Boolean> = mutableMapOf(
+            SimpleTextOption(values) to true,
+            SimpleTextOption(values.reversed()) to false,
+            SimpleTextOption(distractors.first()) to false,
+            SimpleTextOption(distractors.last()) to false,
+        )
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
             TextWithCodeStatement(language["WhichVariableValues"].format(variable.id, call), procedure),

@@ -16,13 +16,10 @@ class HowManyVariables : StaticQuestion<MethodDeclaration>() {
 
     override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val method = getApplicableElements<MethodDeclaration>(sources).random()
-
-        val signature = method.prettySignature
-
         val howManyVariables = method.body.get().findAll<VariableDeclarationExpr>().size
 
         return QuestionData(
-            TextWithCodeStatement(language["HowManyVariables"].format(signature), method.toString()),
+            TextWithCodeStatement(language["HowManyVariables"].format(method.nameAsString), method.toString()),
             howManyVariables.multipleChoice(language),
             language = language
         )

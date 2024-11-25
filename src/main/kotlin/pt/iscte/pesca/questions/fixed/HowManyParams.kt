@@ -12,11 +12,9 @@ import kotlin.text.format
 class HowManyParams : JavaParserQuestionRandomMethod() {
 
     override fun build(method: MethodDeclaration, language: Language): QuestionData {
-        val signature = method.prettySignature
         val parameters = method.parameters.size
-
         return QuestionData(
-            TextWithCodeStatement(language["HowManyParams"].format(signature), method.toString()),
+            TextWithCodeStatement(language["HowManyParams"].format(method.nameAsString), method.toString()),
             parameters.multipleChoice(language),
             language = language
         )

@@ -3,36 +3,52 @@ package pt.iscte.pesca.questions.fixed
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getLocalVariables
-import pt.iscte.pesca.extensions.getVariablesInScope
-import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
 import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import kotlin.collections.plus
-import kotlin.collections.toSet
 
 class WhichParameters : JavaParserQuestionRandomMethod() {
 
+    // Method has at least one parameter or local variable.
+    override fun isApplicable(element: MethodDeclaration): Boolean =
+        element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()
+
     override fun build(method: MethodDeclaration, language: Language): QuestionData {
-        val parameters = method.parameters.map { it.nameAsString  }.toSet()
+        val parameters = method.parameters.map { it.nameAsString }
+        val paramTypes = method.parameters.map { it.typeAsString }
 
-        val inScope = method.getVariablesInScope().map { it.nameAsString }.toSet()
-        val localVars = method.getLocalVariables().map { it.nameAsString }.toSet()
-        val name = method.nameAsString
+        val localVars = method.getLocalVariables().map { it.nameAsString }
+        val localVarTypes = method.getLocalVariables().map { it.typeAsString }
 
-        val others = mutableListOf<Set<String>>()
-        while (others.size < 3) {
-            val choice = (parameters + inScope + localVars + setOf(name)).toSet().sample(null).toSet()
-            if (choice != parameters)
-                others.add(choice)
-        }
+        val methodName = method.nameAsString
 
-        val options: MutableMap<Option, Boolean> =
-            others.associate { SimpleTextOption(it) to false }.toMutableMap()
-        options[SimpleTextOption(parameters)] = true
-        options[SimpleTextOption.none(language)] = false
+        val options: Map<Option, Boolean> =
+            if (parameters.isNotEmpty() && localVars.isNotEmpty()) // Method has both parameters and local variables.
+                mapOf(
+                    SimpleTextOption(parameters) to true,
+                    SimpleTextOption(paramTypes) to false,
+                    SimpleTextOption(localVars) to false,
+                    SimpleTextOption(parameters + localVars) to false
+                )
+            else if (parameters.isNotEmpty()) // Method only has parameters.
+                mapOf(
+                    SimpleTextOption(parameters) to true,
+                    SimpleTextOption(parameters + listOf(methodName)) to false,
+                    SimpleTextOption(paramTypes) to false,
+                    SimpleTextOption(paramTypes + listOf(methodName)) to false,
+                )
+            else if (localVars.isNotEmpty()) // Method only has local variables.
+                mapOf(
+                    SimpleTextOption(localVars) to false,
+                    SimpleTextOption(localVars + listOf(methodName)) to false,
+                    SimpleTextOption(localVarTypes) to false,
+                    SimpleTextOption(language["FunctionTakesNoParameters"]) to true,
+                )
+            else
+                emptyMap() // This case is never applied, as per the isApplicable method.
 
         return QuestionData(
             TextWithCodeStatement(language["WhichParameters"].format(method.nameAsString), method),

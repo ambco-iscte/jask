@@ -6,6 +6,7 @@ import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getReturnVariables
 import pt.iscte.pesca.extensions.getVariablesInScope
 import pt.iscte.pesca.extensions.sample
+import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
@@ -26,16 +27,17 @@ class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
         val returnStmt = returns.keys.random()
         val returnVariable = returns[returnStmt]!!.random().nameAsString
 
-        val others = (
-            method.getVariablesInScope().map { it.nameAsString } +  // Variables in scope
-            method.parameters.map { it.nameAsString } +             // Function parameters
-            returns.map { it.key.expression.toSet() }               // Return expressions
-        ).filter { it != returnVariable }.toSet().sample(3)
+        val distractors = sampleSequentially(3,
+            method.getVariablesInScope().map { it.nameAsString }.filter { it != returnVariable },
+            method.parameters.map { it.nameAsString }.filter { it != returnVariable },
+            returns.map { it.key.expression.toSet() }.filter { it != returnStmt }.map { it.toString() }
+        )
 
         val options: MutableMap<Option, Boolean> =
-            others.associate { SimpleTextOption(it) to false }.toMutableMap()
+            distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(returnVariable)] = true
-        options[SimpleTextOption.none(language)] = false
+        if (distractors.size < 3)
+            options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
             TextWithCodeStatement(language["WhichVariableHoldsReturn"].format(method.nameAsString), method),

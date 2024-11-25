@@ -6,6 +6,7 @@ import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.pesca.extensions.getUsedTypes
 import pt.iscte.pesca.extensions.sample
+import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
@@ -25,11 +26,15 @@ class WhichReturnType : JavaParserQuestionRandomMethod() {
 
         val exprTypes = method.findAll(Expression::class.java).filter { expression ->
             runCatching { expression.calculateResolvedType() }.isSuccess
-        }.map { it.calculateResolvedType() }.filter { it != methodReturnType }.map { it.describe() }
+        }.map { it.calculateResolvedType() }.filter {
+            it != methodReturnType
+        }.map { it.describe() }
 
-        val distractors = (otherTypes + exprTypes + JAVA_PRIMITIVE_TYPES).filter {
-            it != methodReturnType .toString()
-        }.toSet().sample(3)
+        val primitiveTypes = JAVA_PRIMITIVE_TYPES.filter {
+            it != methodReturnType.asString()
+        }
+
+        val distractors = sampleSequentially(3, otherTypes, exprTypes, primitiveTypes)
 
         val options: MutableMap<Option, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()

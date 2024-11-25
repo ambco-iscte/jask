@@ -2,7 +2,6 @@ package pt.iscte.pesca.extensions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.ProcedureCall
 import pt.iscte.pesca.questions.SimpleTextOption
 import java.lang.reflect.Method
 
@@ -38,7 +37,16 @@ fun Any.call(methodName: String, arguments: List<Any>): Any? {
 fun <T> Collection<T>.sample(amount: Int?): List<T> =
     shuffled().take(amount ?: (1 .. size).random())
 
-
+fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>): Collection<T> {
+    require(collections.isNotEmpty())
+    val result = mutableListOf<T>()
+    collections.forEach {
+        result.addAll(it.sample(targetSize - result.size))
+        if (result.size == targetSize)
+            return@forEach
+    }
+    return result
+}
 
 fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<Option,Boolean> =
     mapOf(SimpleTextOption(correct) to true) +

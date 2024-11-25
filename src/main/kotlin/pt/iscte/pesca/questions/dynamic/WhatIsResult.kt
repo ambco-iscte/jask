@@ -1,26 +1,34 @@
 package pt.iscte.pesca.questions.dynamic
 
-import com.github.javaparser.ast.stmt.ReturnStmt
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.extensions.multipleChoice
-import pt.iscte.pesca.extensions.sample
+import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
 import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.strudel.model.DOUBLE
 import pt.iscte.strudel.model.ILiteral
-import pt.iscte.strudel.model.INT
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IReturn
+import pt.iscte.strudel.model.IVariableAssignment
+import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.util.findAll
-import pt.iscte.strudel.model.util.isIntLiteral
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.text.format
 
 class WhatIsResult: StrudelQuestionRandomProcedure() {
+
+    val valuesPerVariable = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
+
+    override fun setup(vm: IVirtualMachine) {
+        valuesPerVariable.clear()
+        vm.addListener(object : IVirtualMachine.IListener {
+            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+                valuesPerVariable[a.target] = (valuesPerVariable[a.target] ?: emptyList()) + listOf(value)
+            }
+        })
+    }
 
     override fun build(
         vm: IVirtualMachine,
@@ -37,14 +45,14 @@ class WhatIsResult: StrudelQuestionRandomProcedure() {
         }.map {
             vm.getValue((it.expression!!.type as ILiteral).stringValue)
         }
+        val lastVariableValues = valuesPerVariable.values.map { it.last() }.filter { it.value != result.value }
+        val argValues = arguments.filter { it.value != result.value }
 
-        val distractors = returnLiterals.filter {
-            it.value != result.value
-        }.toSet().sample(3 - returnLiterals.size)
+        val distractors = sampleSequentially(3, returnLiterals, lastVariableValues, argValues)
         
-        val options: MutableMap<Option, Boolean> = (result.multipleChoice(language) + distractors.associate {
+        val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it) to false
-        }).toMutableMap()
+        }.toMutableMap()
         options[SimpleTextOption(result)] = true
 
         return QuestionData(

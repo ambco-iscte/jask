@@ -19,14 +19,12 @@ class IsRecursive : JavaParserQuestionRandomMethod() {
         element.body.getOrNull?.hasMethodCalls() == true
 
     override fun build(method: MethodDeclaration, language: Language): QuestionData {
-        val signature = method.prettySignature
-
         val isRecursive = method.findAll<MethodCallExpr>().any { call ->
             call.nameAsString == method.nameAsString
         }
 
         return QuestionData(
-            TextWithCodeStatement(language["IsRecursive"].format(signature), method.toString()),
+            TextWithCodeStatement(language["IsRecursive"].format(method.nameAsString), method.toString()),
             isRecursive.trueOrFalse(language),
             language = language
         )
