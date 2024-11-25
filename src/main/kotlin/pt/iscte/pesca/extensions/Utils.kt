@@ -1,7 +1,9 @@
 package pt.iscte.pesca.extensions
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.ProcedureCall
+import pt.iscte.pesca.questions.SimpleTextOption
 import java.lang.reflect.Method
 
 val Class<*>.wrapper: Class<*>
@@ -35,3 +37,12 @@ fun Any.call(methodName: String, arguments: List<Any>): Any? {
 
 fun <T> Collection<T>.sample(amount: Int?): List<T> =
     shuffled().take(amount ?: (1 .. size).random())
+
+
+
+fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<Option,Boolean> =
+    mapOf(SimpleTextOption(correct) to true) +
+            distractors.filter { it != correct }
+                .sample(maxDistractors).map {
+                    Pair(SimpleTextOption(it), false)
+                }

@@ -1,6 +1,7 @@
 package pt.iscte.pesca.questions.dynamic
 
 import pt.iscte.pesca.Language
+import pt.iscte.pesca.extensions.correctAndRandomDistractors
 import pt.iscte.pesca.extensions.getProcedureCalls
 import pt.iscte.pesca.extensions.getUsedProceduresWithinModule
 import pt.iscte.pesca.extensions.isSelfContained
@@ -12,22 +13,25 @@ import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IProcedureCall
 import pt.iscte.strudel.model.IProcedureDeclaration
+import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
-    var count = 0
+    var count: MutableMap<String, Int> = mutableMapOf()
 
-    // There is at least one call statement.
     override fun isApplicable(element: IProcedure): Boolean =
         element.getProcedureCalls().isNotEmpty()
 
     override fun setup(vm: IVirtualMachine) {
-        count = 0
         vm.addListener(object : IVirtualMachine.IListener {
             override fun procedureCall(procedure: IProcedureDeclaration, args: List<IValue>, caller: IProcedure?) {
-                count++
+                val p = procedure.id!!
+                if(!vm.callStack.isEmpty) {
+                    if(count.putIfAbsent(p, 1) == null)
+                        count[p] = count[p]!! + 1
+                }
             }
         })
     }
@@ -42,20 +46,26 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
     ): QuestionData {
         vm.execute(procedure, *arguments.toTypedArray())
 
-        val num = procedure.getProcedureCalls().size
+        val depProcedures = procedure.getProcedureCalls().map { it.procedure }.toSet()
+
+        val randomProcedure = depProcedures.random()
+
+        val correct = count[randomProcedure.id!!] ?: 0
 
         return QuestionData(
             TextWithCodeStatement(
-                language["HowManyFunctionCalls"].format(call),
+                language["HowManyFunctionCalls"].format(randomProcedure.id, call),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
-            mapOf(
-                SimpleTextOption(count) to true,
-                SimpleTextOption(count+1) to false,
-                SimpleTextOption(if(num != count) num else count-1) to false,
-                (if (count != 0) SimpleTextOption(0) else SimpleTextOption.none(language)) to false,
+            correctAndRandomDistractors(correct,
+                setOf(
+                    procedure.getProcedureCalls().size,
+                    depProcedures.size,
+                    correct + 1,
+                    correct - 1
+                )
             ),
-            language = language
+            language
         )
     }
 }
