@@ -28,7 +28,7 @@ class WhichReturnType : JavaParserQuestionRandomMethod() {
             runCatching { expression.calculateResolvedType() }.isSuccess
         }.map { it.calculateResolvedType().describe() }
 
-        val distractors = sampleSequentially(3, otherTypes, exprTypes, JAVA_PRIMITIVE_TYPES) {
+        val distractors = sampleSequentially(3, otherTypes, exprTypes, listOf(method.nameAsString), JAVA_PRIMITIVE_TYPES) {
             it != methodReturnType.asString()
         }
 

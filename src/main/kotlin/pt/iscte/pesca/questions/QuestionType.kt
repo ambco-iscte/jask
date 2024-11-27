@@ -16,6 +16,7 @@ import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IProgramElement
 import pt.iscte.strudel.model.IType
 import pt.iscte.strudel.parsing.java.Java2Strudel
+import pt.iscte.strudel.vm.IValue
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -25,7 +26,11 @@ data class QuestionGenerationException(
     val source: ISource?,
     override val message: String? = null,
     override val cause: Throwable? = null
-) : Exception(message, cause)
+) : Exception(message, cause) {
+
+    override fun toString(): String =
+        "Error generating question of type ${question::class.simpleName}: $message\n----------$source\n----------\nCause: $cause"
+}
 
 sealed interface ISource
 
@@ -142,6 +147,8 @@ abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWith
     fun generate(src: String, call: ProcedureCall) = generate(
         listOf(SourceCodeWithInput(SourceCode(src), listOf(call)))
     )
+
+    protected open fun isApplicable(element: T, args: List<IValue>): Boolean = isApplicable(element)
 
     protected abstract fun build(sources: List<SourceCodeWithInput>, language: Language = Language.DEFAULT): QuestionData
 

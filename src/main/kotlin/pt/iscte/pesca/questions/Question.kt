@@ -5,6 +5,7 @@ import pt.iscte.pesca.Language
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IProgramElement
 import pt.iscte.strudel.parsing.java.JP
+import kotlin.reflect.KClass
 
 sealed interface QuestionStatement {
     val statement: String

@@ -1,6 +1,8 @@
 package pt.iscte.pesca.questions.dynamic
 
 import pt.iscte.pesca.Language
+import pt.iscte.pesca.extensions.multipleChoice
+import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
@@ -34,24 +36,24 @@ class WhatIsResult: StrudelQuestionRandomProcedure() {
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
-        alternatives: List<List<IValue>>,
         call: String,
         language: Language
     ): QuestionData {
         val result = vm.execute(procedure, *arguments.toTypedArray())!!
 
         val returnLiterals = procedure.findAll(IReturn::class).filter {
-            it.expression != null && it.expression!!.type is ILiteral
+            it.expression != null && it.expression!! is ILiteral
         }.map {
-            vm.getValue((it.expression!!.type as ILiteral).stringValue)
+            vm.getValue((it.expression!! as ILiteral).stringValue)
         }
+
+        val returnExpressions = procedure.findAll(IReturn::class).filter {
+            it.expression != null
+        }.map { it.expression.toString() }
 
         val lastVariableValues = valuesPerVariable.values.map { it.last() }
 
-        val alternativeResults = alternatives.map { vm.execute(procedure, *it.toTypedArray())!! }
-        val alternativeArgValues = alternatives.toTypedArray()
-
-        val distractors = sampleSequentially(3, returnLiterals, lastVariableValues, arguments, alternativeResults, *alternativeArgValues) {
+        val distractors = sampleSequentially(3, returnLiterals, lastVariableValues, arguments) {
             it.value != result.value
         }
         
@@ -59,6 +61,14 @@ class WhatIsResult: StrudelQuestionRandomProcedure() {
             SimpleTextOption(it) to false
         }.toMutableMap()
         options[SimpleTextOption(result)] = true
+        if (options.size < 4) {
+            returnExpressions.sample(4 - options.size).forEach {
+                if (it.toString() != result.toString())
+                    options[SimpleTextOption(it)] = false
+            }
+        }
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
             TextWithCodeStatement(language["WhatIsResult"].format(call), procedure),

@@ -30,7 +30,7 @@ class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
         val distractors = sampleSequentially(3,
             method.getVariablesInScope().map { it.nameAsString },
             method.parameters.map { it.nameAsString },
-            returns.map { it.key.expression.toSet() }.filter { it != returnStmt }.map { it.toString() }
+            returns.map { it.key.expression }.filter { it != returnStmt.expression }.map { it.toString() }
         ) {
             it != returnVariable
         }

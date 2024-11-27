@@ -12,6 +12,7 @@ import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
+import pt.iscte.strudel.model.dsl.False
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.collections.set
@@ -22,6 +23,18 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
 
     override fun isApplicable(element: IProcedure): Boolean =
         element.getVariableAssignments().any { it.value.size > 1 }
+
+    override fun isApplicable(element: IProcedure, args: List<IValue>): Boolean {
+        val vm = IVirtualMachine.create()
+        val assigns = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
+        vm.addListener(object : IVirtualMachine.IListener {
+            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+                assigns[a.target] = (assigns[a.target] ?: emptyList()) + listOf(value)
+            }
+        })
+        vm.execute(element, *args.toTypedArray())
+        return assigns.keys.size > 1 && assigns.values.any { it.size > 1 }
+    }
 
     override fun setup(vm: IVirtualMachine) {
         valuesPerVariable.clear()
@@ -36,7 +49,6 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
-        alternatives: List<List<IValue>>,
         call: String,
         language: Language
     ): QuestionData {

@@ -28,6 +28,7 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         element.getProcedureCalls().isNotEmpty()
 
     override fun setup(vm: IVirtualMachine) {
+        count.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun procedureCall(procedure: IProcedureDeclaration, args: List<IValue>, caller: IProcedure?) {
                 val p = procedure.id!!
@@ -42,7 +43,6 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
-        alternatives: List<List<IValue>>,
         call: String,
         language: Language
     ): QuestionData {
@@ -53,13 +53,23 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         val randomProcedure = depProcedures.random()
         val correct = count[randomProcedure.id!!] ?: 0
 
-        val distractors = sampleSequentially(3, count.values, listOf(count.values.sum(), correct + 1, correct - 1)) {
-            it != correct
-        }
+        val distractors = sampleSequentially(3,
+            count.values,
+            listOf(
+                count.keys.size,
+                count.values.sum(),
+                count.values.sum() + 1,
+                count.values.sum() - 1,
+                correct + 1,
+                correct - 1
+            )
+        ) { it != correct && it >= 0 }
 
         val options: MutableMap<Option, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(correct)] = true
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
             TextWithCodeStatement(
