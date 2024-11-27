@@ -37,20 +37,19 @@ fun Any.call(methodName: String, arguments: List<Any>): Any? {
 fun <T> Collection<T>.sample(amount: Int?): List<T> =
     shuffled().take(amount ?: (1 .. size).random())
 
-fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>): Collection<T> {
+fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, predicate: (T) -> Boolean = { true }): Set<T> {
     require(collections.isNotEmpty())
-    val result = mutableListOf<T>()
+    val result = mutableSetOf<T>()
     collections.forEach {
-        result.addAll(it.sample(targetSize - result.size))
+        result.addAll(it.filter { predicate(it) }.sample(targetSize - result.size))
         if (result.size == targetSize)
-            return@forEach
+            return result
     }
     return result
 }
 
 fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<Option,Boolean> =
     mapOf(SimpleTextOption(correct) to true) +
-            distractors.filter { it != correct }
-                .sample(maxDistractors).map {
-                    Pair(SimpleTextOption(it), false)
-                }
+    distractors
+        .filter { it != correct }
+        .sample(maxDistractors).map { Pair(SimpleTextOption(it), false) }

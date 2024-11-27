@@ -44,7 +44,9 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
     ): QuestionData {
         // Choose a random variable whose role can be determined.
         // As per the precondition, there is guaranteed to be at least one.
-        val variable = procedure.localVariables.filter { IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE }.random()
+        val variable = procedure.localVariables.filter {
+            IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE
+        }.random()
 
         // Determine that variable's role.
         val varRoles = variableRoles(language)
@@ -52,7 +54,7 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
         val roleName = varRoles[role::class]!!
 
         // Generate fancy options. :)
-        val options: MutableMap<Option, Boolean> = varRoles.keys.filter { varRoles[it]!! != roleName }.sample(3).associate {
+        val options: MutableMap<Option, Boolean> = varRoles.keys.filter { varRoles[it]!! != roleName }.sample(4).associate {
             SimpleTextOption(varRoles[it]!!) to false
         }.toMutableMap()
         options[SimpleTextOption(roleName)] = true

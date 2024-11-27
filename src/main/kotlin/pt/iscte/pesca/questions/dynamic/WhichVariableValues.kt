@@ -46,14 +46,17 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
         val values = valuesPerVariable[variable]!!
 
         val distractors = sampleSequentially(3,
-            valuesPerVariable.values.filter { it != values },
+            valuesPerVariable.values,
+            valuesPerVariable.values.map { it.reversed() },
             listOf(arguments)
-        )
+        ) {
+            it != values && it.isNotEmpty()
+        }
 
         val options: MutableMap<Option, Boolean> = mutableMapOf(SimpleTextOption(values) to true)
         if (values.size > 1)
             options[SimpleTextOption(values.reversed())] = false
-        distractors.sample(3 - options.size).forEach { options[SimpleTextOption(it)] = false }
+        distractors.forEach { options[SimpleTextOption(it)] = false }
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 

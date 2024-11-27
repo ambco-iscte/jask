@@ -45,10 +45,15 @@ class WhatIsResult: StrudelQuestionRandomProcedure() {
         }.map {
             vm.getValue((it.expression!!.type as ILiteral).stringValue)
         }
-        val lastVariableValues = valuesPerVariable.values.map { it.last() }.filter { it.value != result.value }
-        val argValues = arguments.filter { it.value != result.value }
 
-        val distractors = sampleSequentially(3, returnLiterals, lastVariableValues, argValues)
+        val lastVariableValues = valuesPerVariable.values.map { it.last() }
+
+        val alternativeResults = alternatives.map { vm.execute(procedure, *it.toTypedArray())!! }
+        val alternativeArgValues = alternatives.toTypedArray()
+
+        val distractors = sampleSequentially(3, returnLiterals, lastVariableValues, arguments, alternativeResults, *alternativeArgValues) {
+            it.value != result.value
+        }
         
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it) to false

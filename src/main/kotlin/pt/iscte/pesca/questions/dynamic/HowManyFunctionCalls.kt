@@ -1,10 +1,13 @@
 package pt.iscte.pesca.questions.dynamic
 
 import pt.iscte.pesca.Language
+import pt.iscte.pesca.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.pesca.extensions.correctAndRandomDistractors
 import pt.iscte.pesca.extensions.getProcedureCalls
 import pt.iscte.pesca.extensions.getUsedProceduresWithinModule
 import pt.iscte.pesca.extensions.isSelfContained
+import pt.iscte.pesca.extensions.sampleSequentially
+import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
 import pt.iscte.pesca.questions.TextWithCodeStatement
@@ -28,9 +31,8 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         vm.addListener(object : IVirtualMachine.IListener {
             override fun procedureCall(procedure: IProcedureDeclaration, args: List<IValue>, caller: IProcedure?) {
                 val p = procedure.id!!
-                if(!vm.callStack.isEmpty) {
-                    if(count.putIfAbsent(p, 1) == null)
-                        count[p] = count[p]!! + 1
+                if (!vm.callStack.isEmpty) {
+                    count[p] = (count[p] ?: 0) + 1
                 }
             }
         })
@@ -49,22 +51,22 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         val depProcedures = procedure.getProcedureCalls().map { it.procedure }.toSet()
 
         val randomProcedure = depProcedures.random()
-
         val correct = count[randomProcedure.id!!] ?: 0
+
+        val distractors = sampleSequentially(3, count.values, listOf(count.values.sum(), correct + 1, correct - 1)) {
+            it != correct
+        }
+
+        val options: MutableMap<Option, Boolean> =
+            distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
+        options[SimpleTextOption(correct)] = true
 
         return QuestionData(
             TextWithCodeStatement(
                 language["HowManyFunctionCalls"].format(randomProcedure.id, call),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
-            correctAndRandomDistractors(correct,
-                setOf(
-                    procedure.getProcedureCalls().size,
-                    depProcedures.size,
-                    correct + 1,
-                    correct - 1
-                )
-            ),
+            options,
             language
         )
     }

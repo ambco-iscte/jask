@@ -28,10 +28,12 @@ class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
         val returnVariable = returns[returnStmt]!!.random().nameAsString
 
         val distractors = sampleSequentially(3,
-            method.getVariablesInScope().map { it.nameAsString }.filter { it != returnVariable },
-            method.parameters.map { it.nameAsString }.filter { it != returnVariable },
+            method.getVariablesInScope().map { it.nameAsString },
+            method.parameters.map { it.nameAsString },
             returns.map { it.key.expression.toSet() }.filter { it != returnStmt }.map { it.toString() }
-        )
+        ) {
+            it != returnVariable
+        }
 
         val options: MutableMap<Option, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()

@@ -20,6 +20,13 @@ import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
+data class QuestionGenerationException(
+    val question: Question<*, *>,
+    val source: ISource?,
+    override val message: String? = null,
+    override val cause: Throwable? = null
+) : Exception(message, cause)
+
 sealed interface ISource
 
 data class SourceCode(val code: String): ISource {
