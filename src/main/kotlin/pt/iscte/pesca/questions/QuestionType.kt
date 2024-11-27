@@ -34,6 +34,11 @@ data class QuestionGenerationException(
 
 sealed interface ISource
 
+fun ISource?.hasSameSourceCode(other: ISource?): Boolean =
+    this == other
+    || (this is SourceCodeWithInput && this.source == other)
+    || (other is SourceCodeWithInput && this == other.source)
+
 data class SourceCode(val code: String): ISource {
 
     constructor(file: File) : this(file.readText())

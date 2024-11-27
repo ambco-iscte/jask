@@ -37,6 +37,9 @@ fun Any.call(methodName: String, arguments: List<Any>): Any? {
 fun <T> Collection<T>.sample(amount: Int?): List<T> =
     shuffled().take(amount ?: (1 .. size).random())
 
+fun <K, V> Map<K, V>.sample(amount: Int): Map<K, V> =
+    toList().shuffled().take(amount).toMap()
+
 fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, predicate: (T) -> Boolean = { true }): Set<T> {
     require(collections.isNotEmpty())
     val result = mutableSetOf<T>()

@@ -2,7 +2,6 @@ package pt.iscte.pesca.questions.dynamic
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getUsedProceduresWithinModule
-import pt.iscte.pesca.extensions.isSelfContained
 import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.Option
 import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
@@ -18,7 +17,8 @@ import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 class HowManyArrayReads : StrudelQuestionRandomProcedure() {
-    var count = 0
+    var countReads = 0
+    var countWrites = 0
     var len = 0
     var allocated = 0
 
@@ -36,7 +36,8 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
     }
 
     override fun setup(vm: IVirtualMachine) {
-        count = 0
+        countReads = 0
+        countWrites = 0
         len = 0
         allocated = 0
         vm.addListener(object : IVirtualMachine.IListener {
@@ -45,7 +46,11 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
                 len += ref.target.length
                 ref.target.addListener(object : IArray.IListener {
                     override fun elementRead(index: Int, value: IValue) {
-                        count++
+                        countReads++
+                    }
+
+                    override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
+                        countWrites++
                     }
                 })
             }
@@ -62,16 +67,16 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
         vm.execute(procedure, *arguments.toTypedArray())
 
         val distractors = sampleSequentially(3,
-            listOf(allocated, count + 1, count - 1, allocated + 1, allocated - 1),
+            listOf(allocated, countReads + 1, countReads - 1, countWrites, countWrites + 1, countWrites - 1, allocated + 1, allocated - 1),
             listOf(len, len + 1, len - 1)
         ) {
-            it != count && it >= 0
+            it != countReads && it >= 0
         }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it) to false
         }.toMutableMap()
-        options[SimpleTextOption(count)] = true
+        options[SimpleTextOption(countReads)] = true
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 

@@ -59,7 +59,9 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
 
         val distractors = sampleSequentially(3,
             valuesPerVariable.values,
+            valuesPerVariable.values.map { it.subList(1, it.size) },
             valuesPerVariable.values.map { it.reversed() },
+            valuesPerVariable.values.map { it.reversed().subList(1, it.size) },
             listOf(arguments)
         ) {
             it != values && it.isNotEmpty()

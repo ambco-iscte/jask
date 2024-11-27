@@ -56,7 +56,6 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         val distractors = sampleSequentially(3,
             count.values,
             listOf(
-                count.keys.size,
                 count.values.sum(),
                 count.values.sum() + 1,
                 count.values.sum() - 1,

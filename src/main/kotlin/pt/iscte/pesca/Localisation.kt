@@ -8,7 +8,7 @@ object Localisation {
     internal val languages = mutableSetOf<Language>()
 
     init {
-        val root = File(this::class.java.getResource("/localisation")!!.path)
+        val root = File(Localisation::class.java.getResource("/localisation")!!.path)
         root.listFiles()?.forEach { register(it) }
     }
 

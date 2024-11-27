@@ -24,15 +24,15 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
         vm: IVirtualMachine,
         module: IModule,
         calls: List<ProcedureCall>
-    ): Pair<IProcedure, List<IValue>>? {
-        val pairs = mutableListOf<Pair<IProcedure, List<IValue>>>()
+    ): Pair<IProcedure, List<Any?>>? {
+        val pairs = mutableListOf<Pair<IProcedure, List<Any?>>>()
         module.procedures.filterIsInstance<IProcedure>().forEach { p ->
             calls.forEach { call ->
                 if (call.id == p.id) {
                     call.alternatives.forEach {
                         val args = it.map { it.toIValue(vm, module) }
                         if (isApplicable(p) && isApplicable(p, args))
-                            pairs.add(p to args)
+                            pairs.add(p to it)
                     }
                 }
             }
@@ -40,22 +40,26 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
         return pairs.randomOrNull()
     }
 
+    // Pretty print :)
+    private fun IValue.asString(): String = when (this@asString) {
+        is IReference<*> -> target.asString()
+        is IRecord -> "new $this"
+        is IArray -> "[${elements.joinToString { it.asString() }}]"
+        else -> toString()
+    }
+
+    private fun Collection<IValue>.joinAsString(): String = joinToString { it.asString() }
+
     override fun build(
         sources: List<SourceCodeWithInput>,
         language: Language
     ): QuestionData {
         val vm = IVirtualMachine.create()
-        setup(vm)
 
         val source: SourceCodeWithInput? = sources.filter { s ->
             runCatching {
                 val module = Java2Strudel(checkJavaCompilation = false).load(s.source.code)
                 getRandomApplicableProcedureAndArguments(vm, module, s.calls) != null
-                /*
-                module.procedures.filterIsInstance<IProcedure>().any { procedure ->
-                    isApplicable(procedure) && s.calls.any { it.id == procedure.id  }
-                }
-                 */
             }.getOrDefault(false)
         }.randomOrNull()
 
@@ -64,39 +68,11 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
 
         val module = Java2Strudel(checkJavaCompilation = false).load(source.source.code)
 
-        val (procedure, arguments) = getRandomApplicableProcedureAndArguments(vm, module, source.calls) ?:
+        val (procedure, args) = getRandomApplicableProcedureAndArguments(vm, module, source.calls) ?:
         throw QuestionGenerationException(this, source, "Could not find applicable procedure within source.")
 
-        /*
-        val procedure = module.procedures.filterIsInstance<IProcedure>().filter { p ->
-            val hasApplicableCalls = source.calls.any { call ->
-                call.id == p.id && call.alternatives.any {
-                    val args = it.map { it.toIValue(vm, module) }
-                    isApplicable(p, args)
-                }
-            }
-            isApplicable(p) && hasApplicableCalls
-        }.randomOrNull() ?:
-        throw QuestionGenerationException(this, source, "Could not find applicable procedure within source.")
-         */
-
-        /*
-        val callsForProcedure = source.calls.filter { it.id == procedure.id }
-        if (callsForProcedure.isEmpty())
-            throw QuestionGenerationException(this, source, "Could not find procedure call for chosen procedure.")
-
-        val randomCall = callsForProcedure.random()
-        val arguments = randomCall.alternatives.random().map { it.toIValue(vm, module) }
-         */
-
-        // Pretty print :)
-        fun IValue.asString(): String = when (this@asString) {
-            is IReference<*> -> target.asString()
-            is IRecord -> "new $this"
-            is IArray -> "[${elements.joinToString { it.asString() }}]"
-            else -> toString()
-        }
-        fun Collection<IValue>.joinAsString(): String = joinToString { it.asString() }
+        setup(vm)
+        val arguments = args.map { it.toIValue(vm, module) }
 
         val call =
             if (procedure.hasThisParameter)
@@ -105,8 +81,11 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
                 "${procedure.id}(${arguments.joinAsString()})"
 
         return try {
-            build(vm, procedure, arguments.toList(), call, language)
-        }catch (e: Exception) {
+            build(vm, procedure, arguments.toList(), call, language).apply {
+                this.type = this@StrudelQuestionRandomProcedure::class.simpleName
+                this.source = source
+            }
+        } catch (e: Exception) {
             throw RuntimeException("${this::class.simpleName}\n${e.stackTraceToString()}\n$procedure\nargs: ${arguments.toList()}")
         }
     }

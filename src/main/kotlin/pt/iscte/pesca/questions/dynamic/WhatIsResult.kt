@@ -1,6 +1,7 @@
 package pt.iscte.pesca.questions.dynamic
 
 import pt.iscte.pesca.Language
+import pt.iscte.pesca.extensions.getLiteralExpressions
 import pt.iscte.pesca.extensions.multipleChoice
 import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.extensions.sampleSequentially
@@ -51,10 +52,12 @@ class WhatIsResult: StrudelQuestionRandomProcedure() {
             it.expression != null
         }.map { it.expression.toString() }
 
+        val literalExpressions = procedure.getLiteralExpressions().map { vm.getValue(it.stringValue) }
+
         val lastVariableValues = valuesPerVariable.values.map { it.last() }
 
-        val distractors = sampleSequentially(3, returnLiterals, lastVariableValues, arguments) {
-            it.value != result.value
+        val distractors = sampleSequentially(3, returnLiterals, literalExpressions, lastVariableValues, arguments) {
+            it.value != result.value && it.type == procedure.returnType
         }
         
         val options: MutableMap<Option, Boolean> = distractors.associate {

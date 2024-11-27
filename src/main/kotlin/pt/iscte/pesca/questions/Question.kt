@@ -83,6 +83,12 @@ data class QuestionData (
     private val options: Map<Option, Boolean>,
     val language: Language = Language.DEFAULT,
 ) {
+    var type: String? = null
+        internal set
+
+    var source: ISource? = null
+        internal set
+
     fun options(shuffled: Boolean = false): Map<Option, Boolean> {
         val lastUnshuffled = listOf(
             SimpleTextOption.none(language),
@@ -92,7 +98,7 @@ data class QuestionData (
         )
 
         val shuffled = options.keys.filter {
-                option -> !(lastUnshuffled.contains(option))
+                option -> !lastUnshuffled.contains(option)
         }.shuffled().associateWith {
                 option -> options[option]!!
         }.toMutableMap()

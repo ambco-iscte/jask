@@ -119,3 +119,14 @@ fun IProcedure.getVariableAssignments(): Map<IVariableDeclaration<*>, List<IVari
     block.accept(v)
     return map
 }
+
+fun IProcedure.getLiteralExpressions(): List<ILiteral> {
+    val literals = mutableListOf<ILiteral>()
+    block.accept(object : IBlock.IVisitor {
+        override fun visitAny(exp: IExpression) {
+            if (exp is ILiteral)
+                literals.add(exp)
+        }
+    })
+    return literals
+}
