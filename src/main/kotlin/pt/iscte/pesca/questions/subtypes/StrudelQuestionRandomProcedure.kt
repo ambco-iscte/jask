@@ -66,7 +66,11 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
             else
                 "${procedure.id}(${arguments.joinAsString()})"
 
-        return build(vm, procedure, arguments.toList(), x, call, language)
+        return try {
+            build(vm, procedure, arguments.toList(), x, call, language)
+        }catch (e: Exception) {
+            throw RuntimeException("${this::class.simpleName}\n${e.stackTraceToString()}\n$procedure\nargs: ${arguments.toList()}")
+        }
     }
 
     open fun setup(vm: IVirtualMachine) { }

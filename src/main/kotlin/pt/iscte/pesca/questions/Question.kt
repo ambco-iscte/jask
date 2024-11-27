@@ -1,8 +1,5 @@
 package pt.iscte.pesca.questions
 
-import com.github.javaparser.ParserConfiguration
-import com.github.javaparser.StaticJavaParser
-import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.strudel.model.IProcedureDeclaration
@@ -35,6 +32,20 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
         val width = code.split("\n").maxOf { it.length }
         val sep = "-".repeat(width)
         return "$statement${System.lineSeparator()}$sep${System.lineSeparator()}$code${System.lineSeparator()}$sep"
+    }
+}
+
+data class TextWithMultipleCodeStatements(override val statement: String, val codeStatements: List<String>): QuestionStatement {
+
+    //constructor(statement: String, codeStatements: List<MethodDeclaration>): this(statement, codeStatements.map { it.toString() })
+
+    //constructor(statement: String, codeStatements: List<IProcedureDeclaration>): this(statement, codeStatements.map { (it.getProperty(JP) ?: it).toString() })
+
+    override fun toString() = "$statement${System.lineSeparator()}${codeStatements.map { "$it${System.lineSeparator()}" }}"
+
+    companion object {
+        fun from(statement: String, codeStatements: List<IProcedureDeclaration>) =
+            TextWithMultipleCodeStatements(statement, codeStatements.map { (it.getProperty(JP) ?: it).toString() })
     }
 }
 
@@ -97,8 +108,8 @@ data class QuestionData (
         get() = options.filter { it.value }.map { it.key }
 
     init {
-        require(options.size >= 2) { "Question must have at least two options!" }
-        require(options.any { option -> option.value }) { "Question must have at least one correct option!" }
+        require(options.size >= 2) { "Question must have at least two options!\n$this" }
+        require(options.any { option -> option.value }) { "Question must have at least one correct option!\n$this" }
     }
 
     override fun toString(): String = "$statement\n${options(true).toList().joinToString(System.lineSeparator()) { 
