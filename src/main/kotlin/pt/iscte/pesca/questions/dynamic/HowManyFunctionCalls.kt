@@ -22,17 +22,19 @@ import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
-    var count: MutableMap<String, Int> = mutableMapOf()
+    val proceduresToConsider: MutableList<IProcedureDeclaration> = mutableListOf()
+    val count: MutableMap<String, Int> = mutableMapOf()
 
     override fun isApplicable(element: IProcedure): Boolean =
         element.getProcedureCalls().isNotEmpty()
 
     override fun setup(vm: IVirtualMachine) {
+        proceduresToConsider.clear()
         count.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun procedureCall(procedure: IProcedureDeclaration, args: List<IValue>, caller: IProcedure?) {
                 val p = procedure.id!!
-                if (!vm.callStack.isEmpty) {
+                if (!vm.callStack.isEmpty && procedure in proceduresToConsider) {
                     count[p] = (count[p] ?: 0) + 1
                 }
             }
@@ -46,6 +48,9 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         call: String,
         language: Language
     ): QuestionData {
+        proceduresToConsider.add(procedure)
+        proceduresToConsider.addAll(procedure.getUsedProceduresWithinModule())
+
         vm.execute(procedure, *arguments.toTypedArray())
 
         val depProcedures = procedure.getProcedureCalls().map { it.procedure }.toSet()

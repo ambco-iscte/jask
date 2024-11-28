@@ -29,12 +29,15 @@ class WhichReturnType : JavaParserQuestionRandomMethod() {
         }.map { it.calculateResolvedType().describe() }
 
         val distractors = sampleSequentially(3, otherTypes, exprTypes, listOf(method.nameAsString), JAVA_PRIMITIVE_TYPES) {
-            it != methodReturnType.asString()
+            it != methodReturnType.asString() && it != methodReturnType.toString()
         }
 
         val options: MutableMap<Option, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(methodReturnType)] = true
+
+        if (options.size < 4)
+            TODO()
 
         return QuestionData(
             TextWithCodeStatement(language["WhichReturnType"].format(method.nameAsString), method),

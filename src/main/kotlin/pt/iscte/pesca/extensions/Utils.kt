@@ -44,11 +44,11 @@ fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, p
     require(collections.isNotEmpty())
     val result = mutableSetOf<T>()
     collections.forEach {
-        result.addAll(it.filter { predicate(it) }.sample(targetSize - result.size))
-        if (result.size == targetSize)
-            return result
+        result.addAll(it.filter { predicate(it) }.sample(targetSize))
+        if (result.size >= targetSize)
+            return@forEach
     }
-    return result
+    return result.take(targetSize).toSet()
 }
 
 fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<Option,Boolean> =

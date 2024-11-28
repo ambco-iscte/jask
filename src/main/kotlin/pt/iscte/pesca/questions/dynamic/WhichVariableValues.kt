@@ -68,9 +68,9 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
         }
 
         val options: MutableMap<Option, Boolean> = mutableMapOf(SimpleTextOption(values) to true)
-        if (values.size > 1)
-            options[SimpleTextOption(values.reversed())] = false
         distractors.forEach { options[SimpleTextOption(it)] = false }
+        if (values.size > 1 && options.size < 4)
+            options[SimpleTextOption(values.reversed())] = false
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 
