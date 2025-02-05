@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.fixed
+package pt.iscte.pesca.questions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.Expression
@@ -12,6 +12,7 @@ import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
 import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
+import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.text.format
 
 class WhichReturnType : JavaParserQuestionRandomMethod() {
@@ -36,13 +37,11 @@ class WhichReturnType : JavaParserQuestionRandomMethod() {
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(methodReturnType)] = true
 
-        if (options.size < 4)
-            TODO()
-
         return QuestionData(
             TextWithCodeStatement(language["WhichReturnType"].format(method.nameAsString), method),
             options,
-            language = language
+            language = language,
+            relevantSourceCode = listOf(SourceLocation(method.type)) // TODO?
         )
     }
 }

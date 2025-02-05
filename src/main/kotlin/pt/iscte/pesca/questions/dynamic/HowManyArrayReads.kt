@@ -1,6 +1,7 @@
-package pt.iscte.pesca.questions.dynamic
+package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
+import pt.iscte.pesca.extensions.countArrayAccesses
 import pt.iscte.pesca.extensions.getUsedProceduresWithinModule
 import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.Option
@@ -9,8 +10,11 @@ import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SimpleTextOption
 import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.strudel.model.IArrayAccess
+import pt.iscte.strudel.model.IArrayLength
 import pt.iscte.strudel.model.IBlock
+import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.vm.IArray
 import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
@@ -23,17 +27,8 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
     var allocated = 0
 
     // There is at least one array access.
-    override fun isApplicable(element: IProcedure): Boolean {
-        var count = 0
-        val v = object : IBlock.IVisitor {
-            override fun visit(exp: IArrayAccess): Boolean {
-                count++
-                return true
-            }
-        }
-        element.block.accept(v)
-        return count != 0
-    }
+    override fun isApplicable(element: IProcedure): Boolean =
+        element.countArrayAccesses() != 0
 
     override fun setup(vm: IVirtualMachine) {
         countReads = 0
@@ -66,8 +61,27 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
     ): QuestionData {
         vm.execute(procedure, *arguments.toTypedArray())
 
+        var arrayLengthAccess = 0
+        procedure.accept(object : IBlock.IVisitor {
+            override fun visitAny(exp: IExpression) {
+                if (exp is IArrayLength)
+                    arrayLengthAccess++
+            }
+        })
+
         val distractors = sampleSequentially(3,
-            listOf(allocated, countReads + 1, countReads - 1, countWrites, countWrites + 1, countWrites - 1, allocated + 1, allocated - 1),
+            listOf(
+                allocated,
+                countReads + 1,
+                countReads - 1,
+                countWrites,
+                countWrites + 1,
+                countWrites - 1,
+                // countWrites + countReads
+                allocated + 1,
+                allocated - 1,
+                arrayLengthAccess
+            ),
             listOf(len, len + 1, len - 1)
         ) {
             it != countReads && it >= 0

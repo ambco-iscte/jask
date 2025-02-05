@@ -54,9 +54,7 @@ data class RecordTypeData(val name: String, val fields: List<Any?>) {
     override fun toString(): String = "$name[${fields.joinToString()}]"
 }
 
-typealias Arguments = List<Any?>
-
-data class ProcedureCall(val id: String, val alternatives: List<Arguments>)
+data class ProcedureCall(val id: String?, val arguments: List<Any?>)
 
 data class SourceCodeWithInput(val source: SourceCode, val calls: List<ProcedureCall>): ISource
 
