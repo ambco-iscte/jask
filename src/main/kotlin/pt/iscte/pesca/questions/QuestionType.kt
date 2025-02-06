@@ -7,14 +7,7 @@ import com.github.javaparser.ast.Node
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.IModuleVisitor
 import pt.iscte.pesca.extensions.accept
-import pt.iscte.strudel.model.IBlock
-import pt.iscte.strudel.model.IBlockElement
-import pt.iscte.strudel.model.IConstantDeclaration
-import pt.iscte.strudel.model.IExpression
-import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.IProcedureDeclaration
-import pt.iscte.strudel.model.IProgramElement
-import pt.iscte.strudel.model.IType
+import pt.iscte.strudel.model.*
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.vm.IValue
 import java.io.File
@@ -149,8 +142,8 @@ abstract class DynamicQuestion<T : IProgramElement> : Question<T, SourceCodeWith
         return build(sources, language)
     }
 
-    fun generate(src: String, call: ProcedureCall) = generate(
-        listOf(SourceCodeWithInput(SourceCode(src), listOf(call)))
+    fun generate(src: String, call: ProcedureCall, language: Language = Language.DEFAULT) = generate(
+        listOf(SourceCodeWithInput(SourceCode(src), listOf(call))), language
     )
 
     protected open fun isApplicable(element: T, args: List<IValue>): Boolean = isApplicable(element)
