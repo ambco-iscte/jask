@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.dynamic
+package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getProcedureCalls

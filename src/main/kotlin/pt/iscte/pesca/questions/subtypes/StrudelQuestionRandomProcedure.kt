@@ -2,7 +2,6 @@ package pt.iscte.pesca.questions.subtypes
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.toIValue
-import pt.iscte.pesca.questions.Arguments
 import pt.iscte.pesca.questions.DynamicQuestion
 import pt.iscte.pesca.questions.ProcedureCall
 import pt.iscte.pesca.questions.QuestionData
@@ -10,6 +9,8 @@ import pt.iscte.pesca.questions.QuestionGenerationException
 import pt.iscte.pesca.questions.SourceCodeWithInput
 import pt.iscte.strudel.model.IModule
 import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.parsing.java.CONSTRUCTOR_FLAG
+import pt.iscte.strudel.parsing.java.JP
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.parsing.java.extensions.hasThisParameter
 import pt.iscte.strudel.vm.IArray
@@ -21,18 +22,23 @@ import pt.iscte.strudel.vm.IVirtualMachine
 abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
 
     private fun getRandomApplicableProcedureAndArguments(
-        vm: IVirtualMachine,
         module: IModule,
         calls: List<ProcedureCall>
     ): Pair<IProcedure, List<Any?>>? {
+        val vm = IVirtualMachine.create()
         val pairs = mutableListOf<Pair<IProcedure, List<Any?>>>()
-        module.procedures.filterIsInstance<IProcedure>().forEach { p ->
+        module.procedures.filterIsInstance<IProcedure>().filter { !it.hasFlag(CONSTRUCTOR_FLAG) }.forEach { p ->
             calls.forEach { call ->
-                if (call.id == p.id) {
-                    call.alternatives.forEach {
-                        val args = it.map { it.toIValue(vm, module) }
+                val args = call.arguments.map { it.toIValue(vm, module) }
+                if (call.id == p.id && p.id != null) { // Specific test cases
+                    call.arguments.forEach {
                         if (isApplicable(p) && isApplicable(p, args))
-                            pairs.add(p to it)
+                            pairs.add(p to call.arguments)
+                    }
+                }
+                else if (call.id == null) { // Wildcard test cases
+                    runCatching { vm.execute(p, *args.toTypedArray()) }.onSuccess {
+                        pairs.add(p to call.arguments)
                     }
                 }
             }
@@ -54,12 +60,10 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
         sources: List<SourceCodeWithInput>,
         language: Language
     ): QuestionData {
-        val vm = IVirtualMachine.create()
-
         val source: SourceCodeWithInput? = sources.filter { s ->
             runCatching {
                 val module = Java2Strudel(checkJavaCompilation = false).load(s.source.code)
-                getRandomApplicableProcedureAndArguments(vm, module, s.calls) != null
+                getRandomApplicableProcedureAndArguments(module, s.calls) != null
             }.getOrDefault(false)
         }.randomOrNull()
 
@@ -68,9 +72,10 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
 
         val module = Java2Strudel(checkJavaCompilation = false).load(source.source.code)
 
-        val (procedure, args) = getRandomApplicableProcedureAndArguments(vm, module, source.calls) ?:
+        val (procedure, args) = getRandomApplicableProcedureAndArguments(module, source.calls) ?:
         throw QuestionGenerationException(this, source, "Could not find applicable procedure within source.")
 
+        val vm = IVirtualMachine.create()
         setup(vm)
         val arguments = args.map { it.toIValue(vm, module) }
 

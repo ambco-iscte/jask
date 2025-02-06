@@ -130,3 +130,20 @@ fun IProcedure.getLiteralExpressions(): List<ILiteral> {
     })
     return literals
 }
+
+fun IProcedure.countArrayAccesses(): Int {
+    var count = 0
+    block.accept(object : IBlock.IVisitor {
+        override fun visit(exp: IArrayAccess): Boolean {
+            count++
+            return true
+        }
+
+        override fun visit(call: IProcedureCall): Boolean {
+            if (call.procedure is IProcedure)
+                count += (call.procedure as IProcedure).countArrayAccesses()
+            return true
+        }
+    })
+    return count
+}

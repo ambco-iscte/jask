@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.dynamic
+package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.correctAndRandomDistractors
@@ -10,6 +10,7 @@ import pt.iscte.strudel.model.ILoop
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
+import pt.iscte.strudel.parsing.java.JP
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
@@ -17,6 +18,7 @@ class HowManyVariableAssignments : StrudelQuestionRandomProcedure() {
 
     val countPerVariable = mutableMapOf<IVariableDeclaration<*>, Int>()
     var iterations = 0
+
     // There is at least one variable that is assigned multiple times.
     override fun isApplicable(element: IProcedure): Boolean =
         element.getVariableAssignments().any { it.value.size > 1 }

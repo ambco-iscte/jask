@@ -5,6 +5,7 @@ import pt.iscte.pesca.Language
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IProgramElement
 import pt.iscte.strudel.parsing.java.JP
+import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.reflect.KClass
 
 sealed interface QuestionStatement {
@@ -77,11 +78,17 @@ data class SimpleTextOption(val text: String): Option {
     override fun toString() = text
 }
 
+enum class QuestionChoiceType {
+    SINGLE,
+    MULTIPLE
+}
 
 data class QuestionData (
     val statement: QuestionStatement,
     private val options: Map<Option, Boolean>,
     val language: Language = Language.DEFAULT,
+    val choice: QuestionChoiceType = QuestionChoiceType.SINGLE,
+    val relevantSourceCode: List<SourceLocation> = emptyList()
 ) {
     var type: String? = null
         internal set

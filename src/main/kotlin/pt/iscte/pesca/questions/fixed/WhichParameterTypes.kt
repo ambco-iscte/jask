@@ -51,7 +51,7 @@ class WhichParameterTypes : JavaParserQuestionRandomMethod() {
                 emptyMap() // This case is never applied, as per the isApplicable method.
 
         return QuestionData(
-            TextWithCodeStatement(language[this::class.simpleName!!].format(method.nameAsString), method),
+            TextWithCodeStatement(language["WhichParameterTypes"].format(method.nameAsString), method),
             options,
             language = language
         )

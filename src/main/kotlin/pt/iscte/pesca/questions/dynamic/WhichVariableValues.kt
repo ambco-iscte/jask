@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.dynamic
+package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getVariableAssignments
@@ -54,23 +54,32 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
     ): QuestionData {
         vm.execute(procedure, *arguments.toTypedArray())
 
+        valuesPerVariable.keys.forEach {
+            if (it in procedure.parameters)
+                valuesPerVariable[it] =
+                    listOf(arguments[procedure.parameters.indexOf(it)]) + (valuesPerVariable[it] ?: emptyList())
+        }
         val variable = valuesPerVariable.keys.random()
         val values = valuesPerVariable[variable]!!
 
         val distractors = sampleSequentially(3,
+            if (values.size > 1) listOf(
+                values.subList(1, values.size),
+                values.subList(0, values.size - 1)
+            ) else emptyList(),
+            valuesPerVariable.values.filter { it.size > 1 }.map { it.subList(1, it.size) },
+            valuesPerVariable.values.filter { it.size > 1 }.map { it.subList(0, it.size - 1) },
             valuesPerVariable.values,
-            valuesPerVariable.values.map { it.subList(1, it.size) },
-            valuesPerVariable.values.map { it.reversed() },
-            valuesPerVariable.values.map { it.reversed().subList(1, it.size) },
-            listOf(arguments)
+            valuesPerVariable.values.filter { it.size > 1 }.map { it.reversed() },
+            valuesPerVariable.values.filter { it.size > 1 }.map { it.reversed().subList(1, it.size) },
+            valuesPerVariable.values.filter { it.size > 1 }.map { it.reversed().subList(0, it.size - 1) },
+            listOf(listOf(valuesPerVariable.keys.size), arguments)
         ) {
             it != values && it.isNotEmpty()
         }
 
         val options: MutableMap<Option, Boolean> = mutableMapOf(SimpleTextOption(values) to true)
         distractors.forEach { options[SimpleTextOption(it)] = false }
-        if (values.size > 1 && options.size < 4)
-            options[SimpleTextOption(values.reversed())] = false
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 

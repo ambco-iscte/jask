@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.fixed
+package pt.iscte.pesca.questions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
@@ -6,16 +6,11 @@ import pt.iscte.pesca.Language
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.LiteralExpr
 import com.github.javaparser.ast.expr.UnaryExpr
-import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.extensions.getLocalVariables
 import pt.iscte.pesca.extensions.getVariablesInScope
 import pt.iscte.pesca.extensions.sample
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.SourceCode
-import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
+import pt.iscte.strudel.parsing.java.SourceLocation
 
 class WhichFixedVariables : JavaParserQuestionRandomMethod() {
 
@@ -40,7 +35,8 @@ class WhichFixedVariables : JavaParserQuestionRandomMethod() {
         element.getFixedVariables().isNotEmpty()
 
     override fun build(method: MethodDeclaration, language: Language): QuestionData {
-        val fixedVariables = method.getFixedVariables().map { it.nameAsString }
+        val fixedVariables = method.getFixedVariables()
+        val fixedVariablesNames = fixedVariables.map { it.nameAsString }
 
         val inScope = method.getVariablesInScope().map { it.nameAsString }.toSet()
         val params = method.parameters.map { it.nameAsString }.toSet()
@@ -48,20 +44,21 @@ class WhichFixedVariables : JavaParserQuestionRandomMethod() {
 
         val others = mutableListOf<Set<String>>()
         while (others.size < 3) {
-            val choice = (fixedVariables + inScope + params + literals).toSet().sample(null).toSet()
-            if (choice != fixedVariables)
+            val choice = (fixedVariablesNames + inScope + params + literals).toSet().sample(null).toSet()
+            if (choice != fixedVariablesNames)
                 others.add(choice)
         }
 
         val options: MutableMap<Option, Boolean> =
             others.associate { SimpleTextOption(it) to false }.toMutableMap()
-        options[SimpleTextOption(fixedVariables)] = true
+        options[SimpleTextOption(fixedVariablesNames)] = true
         options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
             TextWithCodeStatement(language["WhichFixedVariables"].format(method.nameAsString), method),
             options,
-            language = language
+            language = language,
+            relevantSourceCode = fixedVariables.map { SourceLocation(it) }
         )
     }
 }

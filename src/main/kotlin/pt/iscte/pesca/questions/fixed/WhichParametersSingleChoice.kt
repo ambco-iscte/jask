@@ -1,16 +1,13 @@
-package pt.iscte.pesca.questions.fixed
+package pt.iscte.pesca.questions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getLocalVariables
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
+import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 
-class WhichParameters : JavaParserQuestionRandomMethod() {
+class WhichParametersSingleChoice : JavaParserQuestionRandomMethod() {
 
     // Method has at least one parameter or local variable.
     override fun isApplicable(element: MethodDeclaration): Boolean =
@@ -53,7 +50,8 @@ class WhichParameters : JavaParserQuestionRandomMethod() {
         return QuestionData(
             TextWithCodeStatement(language["WhichParameters"].format(method.nameAsString), method),
             options,
-            language = language
+            language = language,
+            relevantSourceCode = method.parameters.map { SourceLocation(it) }
         )
     }
 }
