@@ -22,10 +22,10 @@ class TestWhichReturnExecuted {
             }
         """.trimIndent()
 
-        val qlc1 = WhichReturnExecuted().generate(src, ProcedureCall("abs", listOf(listOf(-2.0))), Localisation.getLanguage("pt"))
+        val qlc1 = WhichReturnExecuted().generate(src, ProcedureCall("abs", listOf(-2.0)), Localisation.getLanguage("pt"))
         assertEquals("Linha 4", qlc1.solution.first().toString())
 
-        val qlc2 = WhichReturnExecuted().generate(src, ProcedureCall("abs", listOf(listOf(2.0))), Localisation.getLanguage("pt"))
+        val qlc2 = WhichReturnExecuted().generate(src, ProcedureCall("abs", listOf(2.0)), Localisation.getLanguage("pt"))
         assertEquals("Linha 7", qlc2.solution.first().toString())
     }
 }
