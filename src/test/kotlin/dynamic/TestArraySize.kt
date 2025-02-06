@@ -1,8 +1,8 @@
 package dynamic
 
-import pt.iscte.pesca.questions.dynamic.*
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.questions.ProcedureCall
+import pt.iscte.pesca.questions.WhatArraySize
 import kotlin.test.assertEquals
 
 class TestArraySize {
@@ -20,7 +20,6 @@ class TestArraySize {
             }
         """.trimIndent()
         val qlc = WhatArraySize()
-
         val subArray = qlc.generate(src, ProcedureCall("subArray", listOf(listOf(1, 2, 3, 4, 5, 6), 2, 4)))
         println(subArray)
         assertEquals("3", subArray.solution.first().toString())
