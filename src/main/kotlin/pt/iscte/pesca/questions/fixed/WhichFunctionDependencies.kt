@@ -12,7 +12,7 @@ import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class WhichFunctions : JavaParserQuestionRandomMethod() {
+class WhichFunctionDependencies : JavaParserQuestionRandomMethod() {
 
     // Has at least one call statement to another function.
     override fun isApplicable(element: MethodDeclaration): Boolean =
@@ -47,7 +47,7 @@ class WhichFunctions : JavaParserQuestionRandomMethod() {
         options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
-            TextWithCodeStatement(language["WhichFunctions"].format(method.nameAsString), method),
+            TextWithCodeStatement(language[this::class.simpleName!!].format(method.nameAsString), method),
             options,
             language = language,
             relevantSourceCode = calls.map { SourceLocation(it) }
