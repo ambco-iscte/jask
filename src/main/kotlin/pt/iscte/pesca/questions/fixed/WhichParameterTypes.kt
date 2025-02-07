@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.fixed
+package pt.iscte.pesca.questions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
