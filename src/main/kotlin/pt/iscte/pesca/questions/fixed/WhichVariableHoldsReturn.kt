@@ -4,7 +4,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.ReturnStmt
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getReturnVariables
-import pt.iscte.pesca.extensions.getVariablesInScope
+import pt.iscte.pesca.extensions.getUsableVariables
 import pt.iscte.pesca.extensions.sampleSequentially
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
@@ -24,7 +24,7 @@ class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
         val returnVariableName = returnVariable.nameAsString
 
         val distractors = sampleSequentially(3,
-            method.getVariablesInScope().map { it.nameAsString },
+            method.getUsableVariables().map { it.nameAsString },
             method.parameters.map { it.nameAsString },
             returns.map { it.key.expression }.filter { it != returnStmt.expression }.map { it.toString() },
             listOf(method.nameAsString)

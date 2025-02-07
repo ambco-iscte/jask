@@ -6,9 +6,8 @@ import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
-import com.github.javaparser.ast.expr.Expression
+import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
-import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithBody
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
@@ -19,15 +18,14 @@ import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.WhileStmt
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
-import pt.iscte.pesca.questions.SourceCode
-import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import java.util.Locale
+import java.util.Optional
 
 inline fun <reified T : Node> find(source: String, condition: (T) -> Boolean = { true }): List<T> =
     StaticJavaParser.parse(source).findAll(T::class.java).filter { condition(it) }
 
-inline fun <reified T : Node> Node.findAll(noinline condition: (T) -> Boolean = { true }) =
+inline fun <reified T : Node> Node.findAll(noinline condition: (T) -> Boolean = { true }): List<T> =
     findAll(T::class.java, condition)
 
 val MethodDeclaration.prettySignature: String
@@ -65,10 +63,34 @@ fun MethodDeclaration.getReturnVariables(): Map<ReturnStmt, List<NodeWithSimpleN
 fun MethodDeclaration.getLocalVariables(): List<VariableDeclarator> =
     findAll(VariableDeclarationExpr::class.java).flatMap { it.variables }
 
-fun MethodDeclaration.getVariablesInScope(): List<VariableDeclarator> =
+fun MethodDeclaration.getUsableVariables(): List<VariableDeclarator> =
     getLocalVariables() + (findAncestor(TypeDeclaration::class.java).getOrNull?.findAll(FieldDeclaration::class.java)?.flatMap {
         it.variables
     } ?: listOf())
 
 fun MethodCallExpr.asString(): String =
     (if (scope.isPresent) "${scope.get()}." else "") + nameAsString
+
+fun Node.getVariablesInScope(): Set<String> {
+    val variables = mutableSetOf<String>()
+
+    val start: Node = this
+    val line = start.range.get().begin.line
+
+    var current: Optional<Node> = Optional.of(this)
+    while (current.isPresent) {
+        val node = current.get()
+
+        if (node.range.isPresent) {
+            variables.addAll(node.findAll<VariableDeclarator>().filter {
+                it.range.isPresent && it.range.get().end.line < line
+            }.map { it.nameAsString })
+        }
+        if (node is MethodDeclaration)
+            variables.addAll(node.asMethodDeclaration().parameters.map { it.nameAsString })
+
+        current = node.parentNode
+    }
+
+    return variables
+}

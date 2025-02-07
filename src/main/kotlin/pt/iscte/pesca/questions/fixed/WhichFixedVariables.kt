@@ -7,7 +7,7 @@ import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.LiteralExpr
 import com.github.javaparser.ast.expr.UnaryExpr
 import pt.iscte.pesca.extensions.getLocalVariables
-import pt.iscte.pesca.extensions.getVariablesInScope
+import pt.iscte.pesca.extensions.getUsableVariables
 import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
@@ -38,7 +38,7 @@ class WhichFixedVariables : JavaParserQuestionRandomMethod() {
         val fixedVariables = method.getFixedVariables()
         val fixedVariablesNames = fixedVariables.map { it.nameAsString }
 
-        val inScope = method.getVariablesInScope().map { it.nameAsString }.toSet()
+        val inScope = method.getUsableVariables().map { it.nameAsString }.toSet()
         val params = method.parameters.map { it.nameAsString }.toSet()
         val literals = method.findAll(LiteralExpr::class.java).map { it.toString() }
 
