@@ -6,7 +6,7 @@ import pt.iscte.pesca.questions.DynamicQuestion
 import pt.iscte.pesca.questions.ProcedureCall
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.QuestionGenerationException
-import pt.iscte.pesca.questions.SourceCodeWithInput
+import pt.iscte.pesca.questions.SourceCode
 import pt.iscte.strudel.model.IModule
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.parsing.java.CONSTRUCTOR_FLAG
@@ -57,12 +57,12 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
     private fun Collection<IValue>.joinAsString(): String = joinToString { it.asString() }
 
     override fun build(
-        sources: List<SourceCodeWithInput>,
+        sources: List<SourceCode>,
         language: Language
     ): QuestionData {
-        val source: SourceCodeWithInput? = sources.filter { s ->
+        val source: SourceCode? = sources.filter { s ->
             runCatching {
-                val module = Java2Strudel(checkJavaCompilation = false).load(s.source.code)
+                val module = Java2Strudel(checkJavaCompilation = false).load(s.code)
                 getRandomApplicableProcedureAndArguments(module, s.calls) != null
             }.getOrDefault(false)
         }.randomOrNull()
@@ -70,7 +70,7 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
         if (source == null)
             throw QuestionGenerationException(this, null, "Could not find source with at least one applicable procedure.")
 
-        val module = Java2Strudel(checkJavaCompilation = false).load(source.source.code)
+        val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
 
         val (procedure, args) = getRandomApplicableProcedureAndArguments(module, source.calls) ?:
         throw QuestionGenerationException(this, source, "Could not find applicable procedure within source.")
@@ -86,10 +86,7 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
                 "${procedure.id}(${arguments.joinAsString()})"
 
         return try {
-            build(vm, procedure, arguments.toList(), call, language).apply {
-                this.type = this@StrudelQuestionRandomProcedure::class.simpleName
-                this.source = source
-            }
+            build(source, vm, procedure, arguments.toList(), call, language)
         } catch (e: Exception) {
             throw RuntimeException("${this::class.simpleName}\n${e.stackTraceToString()}\n$procedure\nargs: ${arguments.toList()}")
         }
@@ -98,6 +95,7 @@ abstract class StrudelQuestionRandomProcedure : DynamicQuestion<IProcedure>() {
     open fun setup(vm: IVirtualMachine) { }
 
     protected abstract fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,

@@ -13,7 +13,7 @@ class WhichParametersSingleChoice : JavaParserQuestionRandomMethod() {
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val parameters = method.parameters.map { it.nameAsString }
         val paramTypes = method.parameters.map { it.typeAsString }
 
@@ -48,6 +48,7 @@ class WhichParametersSingleChoice : JavaParserQuestionRandomMethod() {
                 emptyMap() // This case is never applied, as per the isApplicable method.
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["WhichParameters"].format(method.nameAsString), method),
             options,
             language = language,

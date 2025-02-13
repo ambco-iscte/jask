@@ -14,28 +14,25 @@ import pt.iscte.strudel.model.IArrayLength
 import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.IProcedureCall
-import pt.iscte.strudel.model.IProcedureDeclaration
+import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.vm.IArray
 import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
-import kotlin.text.format
 
-class HowManyArrayWrites : StrudelQuestionRandomProcedure() {
-
-    var countWrites = 0
+class HowManyArrayReads : StrudelQuestionRandomProcedure() {
     var countReads = 0
+    var countWrites = 0
     var len = 0
-    var allocated  = 0
+    var allocated = 0
 
     // There is at least one array access.
     override fun isApplicable(element: IProcedure): Boolean =
         element.countArrayAccesses() != 0
 
     override fun setup(vm: IVirtualMachine) {
-        countWrites = 0
         countReads = 0
+        countWrites = 0
         len = 0
         allocated = 0
         vm.addListener(object : IVirtualMachine.IListener {
@@ -43,12 +40,12 @@ class HowManyArrayWrites : StrudelQuestionRandomProcedure() {
                 allocated++
                 len += ref.target.length
                 ref.target.addListener(object : IArray.IListener {
-                    override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
-                        countWrites++
-                    }
-
                     override fun elementRead(index: Int, value: IValue) {
                         countReads++
+                    }
+
+                    override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
+                        countWrites++
                     }
                 })
             }
@@ -56,6 +53,7 @@ class HowManyArrayWrites : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -75,31 +73,32 @@ class HowManyArrayWrites : StrudelQuestionRandomProcedure() {
         val distractors = sampleSequentially(3,
             listOf(
                 allocated,
-                countReads,
                 countReads + 1,
                 countReads - 1,
+                countWrites,
                 countWrites + 1,
                 countWrites - 1,
-                // countReads + countWrites
+                // countWrites + countReads
                 allocated + 1,
                 allocated - 1,
                 arrayLengthAccess
             ),
             listOf(len, len + 1, len - 1)
         ) {
-            it != countWrites && it >= 0
+            it != countReads && it >= 0
         }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it) to false
         }.toMutableMap()
-        options[SimpleTextOption(countWrites)] = true
+        options[SimpleTextOption(countReads)] = true
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(
-                language["HowManyArrayWrites"].format(call),
+                language["HowManyArrayReads"].format(call),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             options,

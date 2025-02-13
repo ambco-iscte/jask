@@ -46,6 +46,7 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -84,6 +85,7 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
             options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["WhichVariableValues"].format(variable.id, call), procedure),
             options,
             language = language

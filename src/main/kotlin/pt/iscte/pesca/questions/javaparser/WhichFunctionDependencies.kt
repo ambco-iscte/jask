@@ -20,7 +20,7 @@ class WhichFunctionDependencies : JavaParserQuestionRandomMethod() {
             it.nameAsString != element.nameAsString
         }
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val calls = method.findAll(MethodCallExpr::class.java)
         val callsNames = calls.map { it.asString()  }
 
@@ -47,6 +47,7 @@ class WhichFunctionDependencies : JavaParserQuestionRandomMethod() {
         options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language[this::class.simpleName!!].format(method.nameAsString), method),
             options,
             language = language,

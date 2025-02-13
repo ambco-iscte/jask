@@ -15,7 +15,7 @@ class WhatVariables: JavaParserQuestionRandomMethod() {
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getLocalVariables().isNotEmpty()
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val variables = method.getLocalVariables()
         val variableNames = variables.map { it.nameAsString  }.toSet()
 
@@ -36,6 +36,7 @@ class WhatVariables: JavaParserQuestionRandomMethod() {
         options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["WhatVariables"].format(method.nameAsString), method),
             options,
             language = language,

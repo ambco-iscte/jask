@@ -5,23 +5,95 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Main.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/Strudel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/Strudel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Localisation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/Localisation.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/Question.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/Question.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/QuestionType.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/QuestionType.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowDeepCallStack.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowDeepCallStack.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyArrayAllocations.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyArrayAllocations.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyArrayReads.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyArrayReads.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyArrayWrites.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyArrayWrites.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyFunctionCalls.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyFunctionCalls.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyLoopIterations.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyLoopIterations.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyVariableAssignments.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/HowManyVariableAssignments.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhatArraySize.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhatArraySize.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhatIsResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhatIsResult.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichResultMakesSense.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichResultMakesSense.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichReturnExecuted.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichReturnExecuted.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichVariableRole.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichVariableRole.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichVariableValues.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/dynamic/WhichVariableValues.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/CallsOtherFunctions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/CallsOtherFunctions.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/CanCallAMethodWithGivenArguments.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyFunctionDependencies.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyFunctionDependencies.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyLoops.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyLoops.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyLoopsMakeSense.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyLoopsMakeSense.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyParams.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyParams.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyVariables.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/HowManyVariables.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/IsRecursive.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/IsRecursive.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhatVariables.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhatVariables.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichFixedVariables.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichFixedVariables.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichFunctionDependencies.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichFunctionDependencies.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichParameterTypes.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichParameterTypes.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichParametersMultipleChoice.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichParametersMultipleChoice.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichParametersSingleChoice.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichParametersSingleChoice.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichReturnType.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichReturnType.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichVariableHoldsReturn.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/fixed/WhichVariableHoldsReturn.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/subtypes/JavaParserQuestionRandomMethod.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/subtypes/JavaParserQuestionRandomMethod.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/subtypes/StrudelQuestionRandomProcedure.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/subtypes/StrudelQuestionRandomProcedure.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/JavaStatement2Strudel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/JavaStatement2Strudel.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestExplicitConstructor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestExplicitConstructor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestStringEscapes.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestStringEscapes.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/TestMemoryLeak.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/TestMemoryLeak.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/MainJar.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/MainJar.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/IBlock.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/IBlock.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/ICompositeExpression.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/ICompositeExpression.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/IPolymorphicProcedure.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/IPolymorphicProcedure.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/roles/impl/MostWantedHolder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/roles/impl/MostWantedHolder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/roles/impl/OneWayFlag.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/roles/impl/OneWayFlag.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/util/Observer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/util/Observer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/util/Validation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/model/util/Validation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/Java2Strudel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/Java2Strudel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/ClassLoader.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/ClassLoader.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/ControlStructureEncapsulateVisitor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/ControlStructureEncapsulateVisitor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/Extensions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/Extensions.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/Namespace.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/parsing/java/extensions/Namespace.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/vm/impl/StackFrame.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/main/kotlin/pt/iscte/strudel/vm/impl/StackFrame.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/java/MergeSort.java" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/java/MergeSort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/java/Sorting.java" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/java/Sorting.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestAbsDouble.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestAbsDouble.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestAbsInt.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestAbsInt.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestArrayExists.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestArrayExists.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestArrayIndexOutOfBounds.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestArrayIndexOutOfBounds.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestArrayList.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestArrayList.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestAvgInvoke.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestAvgInvoke.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestBinarySearch.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestBinarySearch.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestBuiltinRound.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestBuiltinRound.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestBuiltinString.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestBuiltinString.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestCharArrayCount.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestCharArrayCount.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestEmpty.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestEmpty.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestFactorial.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestFactorial.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestGCD.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestGCD.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestHeavyProcessing.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestHeavyProcessing.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestIsEven.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestIsEven.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestJDKLinkedList.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestJDKLinkedList.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestLinkedList.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestLinkedList.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixIdentity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixIdentity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixIndexOutOfBounds.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixIndexOutOfBounds.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixScalar.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixScalar.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixSum.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMatrixSum.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMaxArray.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestMaxArray.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestNot.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestNot.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestReplaceFirstBreak.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestReplaceFirstBreak.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestReplaceFirstReturn.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestReplaceFirstReturn.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestRound.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestRound.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestSumPositivesArrayContinue.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestSumPositivesArrayContinue.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestSwap.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestSwap.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestUnaryPlus.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestUnaryPlus.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/TestUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestCharArray.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestCharArray.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestIntDoubleEquality.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestIntDoubleEquality.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestJPForVarResolveBug.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestJPForVarResolveBug.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestWeirdStudentBugs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/javaparser/TestWeirdStudentBugs.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/temp/TestStackRecord.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/temp/TestStackRecord.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/temp/TestsPaper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/src/test/kotlin/pt/iscte/strudel/tests/temp/TestsPaper.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,8 +125,8 @@
       <list>
         <option value="Kotlin Object" />
         <option value="Kotlin Interface" />
-        <option value="Kotlin File" />
         <option value="Kotlin Class" />
+        <option value="Kotlin File" />
       </list>
     </option>
   </component>
@@ -86,33 +158,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.AllTests.executor": "Run",
-    "Gradle.Build pesca.executor": "Run",
-    "Gradle.TestIsRecursive.test.executor": "Run",
-    "Kotlin.MainKt.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "jdk.selected.JAVA_MODULE": "17",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/ASUS/IdeaProjects/pesca/src/test/resources",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.AllTests.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build pesca.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestIsRecursive.test.executor&quot;: &quot;Run&quot;,
+    &quot;Kotlin.MainKt.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;17&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/ASUS/IdeaProjects/pesca/src/test/resources&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\ASUS\IdeaProjects\pesca\src\test\resources" />
@@ -191,8 +263,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.21565.193" />
-        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-IU-243.21565.193" />
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.23654.189" />
+        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-IU-243.23654.189" />
       </set>
     </attachedChunks>
   </component>
@@ -214,6 +286,7 @@
       <workItem from="1730395802145" duration="3420000" />
       <workItem from="1730403980056" duration="93000" />
       <workItem from="1732135102752" duration="164000" />
+      <workItem from="1739459715464" duration="4724000" />
     </task>
     <servers />
   </component>

@@ -23,8 +23,6 @@ object Localisation {
         return javaClass.classLoader.getResourceAsStream(path)?.bufferedReader(Charsets.ISO_8859_1)?.use { it.readText() }
     }
 
-
-
     val DefaultLanguage: Language = languages.first { it.code ==  "en" }
 
     fun register(file: File): Language {
@@ -35,8 +33,6 @@ object Localisation {
         languages.add(lang)
         return lang
     }
-
-
 
     fun getLanguage(code: String): Language =
         languages.firstOrNull { it.code == code } ?: DefaultLanguage

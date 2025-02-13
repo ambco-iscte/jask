@@ -84,17 +84,20 @@ enum class QuestionChoiceType {
 }
 
 data class QuestionData (
+    val source: SourceCode,
     val statement: QuestionStatement,
     private val options: Map<Option, Boolean>,
     val language: Language = Language.DEFAULT,
     val choice: QuestionChoiceType = QuestionChoiceType.SINGLE,
     val relevantSourceCode: List<SourceLocation> = emptyList()
 ) {
-    var type: String? = null
+    lateinit var type: String
         internal set
 
-    var source: ISource? = null
-        internal set
+    init {
+        require(options.size >= 2) { "Question must have at least two options!\n$this" }
+        require(options.any { option -> option.value }) { "Question must have at least one correct option!\n$this" }
+    }
 
     fun options(shuffled: Boolean = false): Map<Option, Boolean> {
         val lastUnshuffled = listOf(
@@ -120,11 +123,6 @@ data class QuestionData (
 
     val solution: List<Option>
         get() = options.filter { it.value }.map { it.key }
-
-    init {
-        require(options.size >= 2) { "Question must have at least two options!\n$this" }
-        require(options.any { option -> option.value }) { "Question must have at least one correct option!\n$this" }
-    }
 
     override fun toString(): String = "$statement\n${options(true).toList().joinToString(System.lineSeparator()) { 
         option -> "[${if (option.second) "x" else " "}] ${option.first}"

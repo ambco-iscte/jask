@@ -13,13 +13,14 @@ import kotlin.text.format
 
 class CallsOtherFunctions : JavaParserQuestionRandomMethod() {
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val otherFunctions = method.findAll<MethodCallExpr>().filter {call ->
             call.nameAsString != method.nameAsString
         }
         val callsOtherFunctions = otherFunctions.isNotEmpty()
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["CallsOtherFunctions"].format(method.nameAsString), method),
             callsOtherFunctions.trueOrFalse(language),
             language = language,

@@ -42,6 +42,7 @@ class HowManyLoopIterations : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -78,6 +79,7 @@ class HowManyLoopIterations : StrudelQuestionRandomProcedure() {
             options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(
                 language["HowManyLoopIterations"].format(call),
                 procedure

@@ -35,6 +35,7 @@ class HowDeepCallStack : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -54,6 +55,7 @@ class HowDeepCallStack : StrudelQuestionRandomProcedure() {
             options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(
                 language["HowDeepCallStack"].format(call),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()

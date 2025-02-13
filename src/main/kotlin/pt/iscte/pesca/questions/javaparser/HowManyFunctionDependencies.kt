@@ -10,13 +10,14 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 
 class HowManyFunctionDependencies : JavaParserQuestionRandomMethod() {
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val otherFunctions =  method.findAll<MethodCallExpr>()
         val otherFunctionsNames = otherFunctions
             .filter { it.nameAsString != method.nameAsString }
             .map { it.nameAsString }.toSet().size
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language[this::class.simpleName!!].format(method.nameAsString), method),
             otherFunctionsNames.multipleChoice(language),
             language = language,

@@ -19,13 +19,14 @@ class IsRecursive : JavaParserQuestionRandomMethod() {
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasMethodCalls() == true
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val recursiveCalls = method.findAll<MethodCallExpr>().filter { call ->
             call.nameAsString == method.nameAsString
         }
         val isRecursive = recursiveCalls.isNotEmpty()
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["IsRecursive"].format(method.nameAsString), method.toString()),
             isRecursive.trueOrFalse(language),
             language = language,

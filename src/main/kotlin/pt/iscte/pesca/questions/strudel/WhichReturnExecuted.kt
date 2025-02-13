@@ -19,6 +19,7 @@ class WhichReturnExecuted : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -47,6 +48,7 @@ class WhichReturnExecuted : StrudelQuestionRandomProcedure() {
         }
 
         return QuestionData(
+            source,
             TextWithCodeStatement(
                 language[this::class.simpleName!!].format(
                     call

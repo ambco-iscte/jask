@@ -58,3 +58,9 @@ fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistract
         .filter { it != correct }
         .sample(maxDistractors).map { Pair(SimpleTextOption(it), false) }
 
+fun <T> Collection<T>.randomBy(predicate: (T) -> Boolean): T =
+    filter { predicate(it) }.random()
+
+fun <T> Collection<T>.randomByOrNull(predicate: (T) -> Boolean): T? =
+    filter { predicate(it) }.randomOrNull()
+

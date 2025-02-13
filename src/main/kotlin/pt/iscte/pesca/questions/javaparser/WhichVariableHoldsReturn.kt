@@ -17,7 +17,7 @@ class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
         element.findAll(ReturnStmt::class.java).all { it.expression.getOrNull?.isNameExpr == true } &&
         element.findAll(ReturnStmt::class.java).map { it.expression?.toString() }.toSet().size == 1
 
-    override fun build(method : MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method : MethodDeclaration, language: Language): QuestionData {
         val returns = method.getReturnVariables()
         val returnStmt = returns.keys.random()
         val returnVariable = returns[returnStmt]!!.random()
@@ -39,6 +39,7 @@ class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
             options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["WhichVariableHoldsReturn"].format(method.nameAsString), method),
             options,
             language = language,

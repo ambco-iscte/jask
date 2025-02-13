@@ -35,6 +35,7 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
     )
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -59,6 +60,7 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
         options[SimpleTextOption(roleName)] = true
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["WhichVariableRole"].format(variable.id, procedure.id), procedure),
             options,
             language = language

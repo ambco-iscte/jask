@@ -20,7 +20,7 @@ class WhichReturnType : JavaParserQuestionRandomMethod() {
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getUsedTypes().size >= 2
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val methodReturnType = method.type
 
         val otherTypes = method.getUsedTypes().map { it.asString() }
@@ -38,6 +38,7 @@ class WhichReturnType : JavaParserQuestionRandomMethod() {
         options[SimpleTextOption(methodReturnType)] = true
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["WhichReturnType"].format(method.nameAsString), method),
             options,
             language = language,

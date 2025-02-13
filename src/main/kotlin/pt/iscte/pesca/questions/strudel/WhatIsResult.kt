@@ -20,7 +20,7 @@ import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.text.format
 
-class WhichResultMakesSense: StrudelQuestionRandomProcedure() {
+class WhatIsResult: StrudelQuestionRandomProcedure() {
 
     val valuesPerVariable = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
 
@@ -38,6 +38,7 @@ class WhichResultMakesSense: StrudelQuestionRandomProcedure() {
         element.returnType.isValueType
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -78,7 +79,8 @@ class WhichResultMakesSense: StrudelQuestionRandomProcedure() {
             options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
-            TextWithCodeStatement(language["WhichResultMakesSense"].format(call), procedure.longSignature()),
+            source,
+            TextWithCodeStatement(language["WhatIsResult"].format(call), procedure),
             options,
             language = language
         )

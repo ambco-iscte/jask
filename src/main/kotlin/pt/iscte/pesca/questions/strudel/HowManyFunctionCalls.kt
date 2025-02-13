@@ -42,6 +42,7 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -76,6 +77,7 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
             options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(
                 language["HowManyFunctionCalls"].format(randomProcedure.id, call),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()

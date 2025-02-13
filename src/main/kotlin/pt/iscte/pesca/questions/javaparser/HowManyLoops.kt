@@ -18,11 +18,12 @@ class HowManyLoops : JavaParserQuestionRandomMethod() {
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasLoopControlStructures() == true
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val loops = method.body.get().getLoopControlStructures()
         val howManyLoops = loops.size
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["HowManyLoops"].format(method.nameAsString), method),
             howManyLoops.multipleChoice(language),
             language = language,

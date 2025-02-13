@@ -34,7 +34,7 @@ class WhichFixedVariables : JavaParserQuestionRandomMethod() {
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getFixedVariables().isNotEmpty()
 
-    override fun build(method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
         val fixedVariables = method.getFixedVariables()
         val fixedVariablesNames = fixedVariables.map { it.nameAsString }
 
@@ -55,6 +55,7 @@ class WhichFixedVariables : JavaParserQuestionRandomMethod() {
         options[SimpleTextOption.none(language)] = false
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["WhichFixedVariables"].format(method.nameAsString), method),
             options,
             language = language,

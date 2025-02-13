@@ -38,6 +38,7 @@ class HowManyArrayAllocations : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -68,6 +69,7 @@ class HowManyArrayAllocations : StrudelQuestionRandomProcedure() {
             distractors.add(language["NoneOfTheAbove"])
 
         return QuestionData(
+            source,
             TextWithCodeStatement(
                 language[HowManyArrayAllocations::class.simpleName!!].format(
                     call

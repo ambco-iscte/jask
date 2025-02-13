@@ -37,6 +37,7 @@ class HowManyVariableAssignments : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -49,6 +50,7 @@ class HowManyVariableAssignments : StrudelQuestionRandomProcedure() {
         val count = countPerVariable[variable]!!
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["HowManyVariableAssignments"].format(variable.id, call), procedure),
             correctAndRandomDistractors(count,
                 setOf(

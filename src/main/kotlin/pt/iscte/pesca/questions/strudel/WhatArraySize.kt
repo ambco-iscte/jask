@@ -53,6 +53,7 @@ class WhatArraySize : StrudelQuestionRandomProcedure() {
     }
 
     override fun build(
+        source: SourceCode,
         vm: IVirtualMachine,
         procedure: IProcedure,
         arguments: List<IValue>,
@@ -72,6 +73,7 @@ class WhatArraySize : StrudelQuestionRandomProcedure() {
         ) + arrayArgsLengths
 
         return QuestionData(
+            source,
             TextWithCodeStatement(
                 language[this::class.simpleName!!].format(
                     call
