@@ -2,6 +2,7 @@ package pt.iscte.pesca.extensions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.questions.Option
+import pt.iscte.pesca.questions.Question
 import pt.iscte.pesca.questions.SimpleTextOption
 import java.lang.reflect.Method
 
@@ -56,3 +57,4 @@ fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistract
     distractors
         .filter { it != correct }
         .sample(maxDistractors).map { Pair(SimpleTextOption(it), false) }
+

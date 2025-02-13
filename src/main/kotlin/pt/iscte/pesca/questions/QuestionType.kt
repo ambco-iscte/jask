@@ -114,6 +114,9 @@ abstract class StaticQuestion<T : Node>(range: IntRange) : Question<T, SourceCod
         return build(sources, language)
     }
 
+    fun generate(src: String, language: Language = Language.DEFAULT) =
+        generate(listOf(SourceCode(src)), language)
+
     protected abstract fun build(sources: List<SourceCode>, language: Language = Language.DEFAULT): QuestionData
 
     override fun <R : T> getApplicableElements(source: SourceCode, type: KClass<R>): List<R> =
