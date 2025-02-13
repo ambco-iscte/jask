@@ -10,6 +10,7 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 class HowManyVariables : JavaParserQuestionRandomMethod() {
 
     override fun build(
+        source: SourceCode,
         method: MethodDeclaration,
         language: Language
     ): QuestionData {
@@ -17,6 +18,7 @@ class HowManyVariables : JavaParserQuestionRandomMethod() {
         val howManyVariables = localVariables.size
 
         return QuestionData(
+            source,
             TextWithCodeStatement(language["HowManyVariables"].format(method.nameAsString), method.toString()),
             correctAndRandomDistractors(
                 howManyVariables,
