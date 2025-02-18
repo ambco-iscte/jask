@@ -55,9 +55,9 @@ class WhichReturnExecuted : StrudelQuestionRandomProcedure() {
                 ), procedure
             ),
             correctAndRandomDistractors(
-                language["Line"] + " " + line,
+                "${language["Line"]} $line",
                 distractors.map {
-                    language["Line"] + " " + it
+                    "${language["Line"]} $it"
                 }.toSet()),
             language = language
         )

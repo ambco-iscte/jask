@@ -1,14 +1,14 @@
 package pt.iscte.pesca
 
 import java.io.File
-import java.io.FileInputStream
 import java.io.StringReader
-import java.net.URLDecoder
 import java.util.Properties
-import java.util.jar.JarFile
 
 object Localisation {
     internal val languages = mutableSetOf<Language>()
+
+    internal var argumentFormatter: (String) -> String = { "[$it]" }
+        private set
 
     init {
         languages.add(Language("en", Properties().apply {
@@ -19,9 +19,16 @@ object Localisation {
         }))
     }
 
-    fun loadResource(path: String): String? {
-        return javaClass.classLoader.getResourceAsStream(path)?.bufferedReader(Charsets.ISO_8859_1)?.use { it.readText() }
+    fun setArgumentFormat(format: (String) -> String) {
+        argumentFormatter = format
     }
+
+    fun resetArgumentFormat() {
+        argumentFormatter = { "[$it]" }
+    }
+
+    fun loadResource(path: String): String? =
+        javaClass.classLoader.getResourceAsStream(path)?.bufferedReader(Charsets.ISO_8859_1)?.use { it.readText() }
 
     val DefaultLanguage: Language = languages.first { it.code ==  "en" }
 
@@ -45,12 +52,21 @@ data class Language(val code: String, val properties: Properties) {
         val DEFAULT: Language = Localisation.DefaultLanguage
     }
 
-    fun getLocalisation(key: String): String =
-        if (properties.containsKey(key)) properties.getProperty(key)
+    data class Entry(val template: String) {
+        fun format(vararg args: Any?): String =
+            template.format(*args.map { when (it) {
+                is String -> Localisation.argumentFormatter(it)
+                else -> it
+            } }.toTypedArray())
+
+        override fun toString(): String = template
+    }
+
+    fun getLocalisation(key: String): Entry =
+        if (properties.containsKey(key)) Entry(properties.getProperty(key))
         else throw NoSuchElementException("No $code translation for $key!")
 
-    operator fun get(key: String): String = getLocalisation(key)
-
+    operator fun get(key: String): Entry = getLocalisation(key)
 }
 
 fun main() {

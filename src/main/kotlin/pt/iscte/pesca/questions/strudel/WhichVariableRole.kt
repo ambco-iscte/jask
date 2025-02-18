@@ -26,12 +26,12 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
         element.localVariables.any { IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE }
 
     private fun variableRoles(language: Language): Map<KClass<out IVariableRole>, String> = mapOf(
-        FixedValue::class to language["FixedValue"],
-        Gatherer::class to language["Gatherer"],
-        ArrayIndexIterator::class to language["ArrayIndexIterator"],
-        Stepper::class to language["Stepper"],
-        MostWantedHolder::class to language["MostWantedHolder"],
-        // OneWayFlag::class to language["OneWayFlag"]
+        FixedValue::class to language["FixedValue"].toString(),
+        Gatherer::class to language["Gatherer"].toString(),
+        ArrayIndexIterator::class to language["ArrayIndexIterator"].toString(),
+        Stepper::class to language["Stepper"].toString(),
+        MostWantedHolder::class to language["MostWantedHolder"].toString(),
+        // OneWayFlag::class to language["OneWayFlag"].toString()
     )
 
     override fun build(
