@@ -27,6 +27,13 @@ object Localisation {
         argumentFormatter = { "[$it]" }
     }
 
+    fun <T> withArgumentFormat(format: (String) -> String, block: () -> T): T {
+        setArgumentFormat(format)
+        val result = block()
+        resetArgumentFormat()
+        return result
+    }
+
     fun loadResource(path: String): String? =
         javaClass.classLoader.getResourceAsStream(path)?.bufferedReader(Charsets.ISO_8859_1)?.use { it.readText() }
 

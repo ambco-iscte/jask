@@ -64,3 +64,9 @@ fun <T> Collection<T>.randomBy(predicate: (T) -> Boolean): T =
 fun <T> Collection<T>.randomByOrNull(predicate: (T) -> Boolean): T? =
     filter { predicate(it) }.randomOrNull()
 
+fun <T> success(body: () -> T): Boolean =
+    runCatching(body).isSuccess
+
+fun <T> failure(body: () -> T): Boolean =
+    runCatching(body).isFailure
+

@@ -1,0 +1,12 @@
+package pt.iscte.pesca.compiler.errors
+
+import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.MethodCallExpr
+import pt.iscte.pesca.compiler.ICompilerError
+import pt.iscte.pesca.extensions.asString
+
+data class UnknownMethod(val call: MethodCallExpr, val usable: List<MethodDeclaration>): ICompilerError {
+
+    override fun message(): String =
+        "Unknown method ${call.nameAsString} in: $call\n\tUsable declared methods are: ${usable.joinToString { it.asString() }}"
+}

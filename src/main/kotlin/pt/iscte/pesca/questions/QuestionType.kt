@@ -4,11 +4,9 @@ import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
-import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.IModuleVisitor
 import pt.iscte.pesca.extensions.accept
-import pt.iscte.pesca.extensions.randomBy
 import pt.iscte.pesca.extensions.randomByOrNull
 import pt.iscte.strudel.model.*
 import pt.iscte.strudel.parsing.java.Java2Strudel
@@ -115,7 +113,8 @@ abstract class StaticQuestion<T : Node>(range: IntRange) : Question<T>(range) {
     fun generate(sources: List<SourceCode>, language: Language = Language.DEFAULT): QuestionData {
         require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
         return build(sources, language).apply {
-            type = this@StaticQuestion::class.simpleName ?: this@StaticQuestion::class.java.simpleName
+            if (!this.hasQuestionType)
+                questionType = this@StaticQuestion::class.simpleName ?: this@StaticQuestion::class.java.simpleName
         }
     }
 
@@ -145,7 +144,8 @@ abstract class DynamicQuestion<T : IProgramElement> : Question<T>() {
     fun generate(sources: List<SourceCode>, language: Language = Language.DEFAULT): QuestionData {
         require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
         return build(sources, language).apply {
-            type = this@DynamicQuestion::class.simpleName ?: this@DynamicQuestion::class.java.simpleName
+            if (!this.hasQuestionType)
+                questionType = this@DynamicQuestion::class.simpleName ?: this@DynamicQuestion::class.java.simpleName
         }
     }
 

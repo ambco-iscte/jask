@@ -6,7 +6,6 @@ import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IProgramElement
 import pt.iscte.strudel.parsing.java.JP
 import pt.iscte.strudel.parsing.java.SourceLocation
-import kotlin.reflect.KClass
 
 sealed interface QuestionStatement {
     val statement: String
@@ -91,8 +90,23 @@ data class QuestionData (
     val choice: QuestionChoiceType = QuestionChoiceType.SINGLE,
     val relevantSourceCode: List<SourceLocation> = emptyList()
 ) {
-    lateinit var type: String
+    lateinit var questionType: String
         internal set
+
+    val hasQuestionType: Boolean
+        get() = ::questionType.isInitialized
+
+    constructor(
+        type: String,
+        source: SourceCode,
+        statement: QuestionStatement,
+        options: Map<Option, Boolean>,
+        language: Language = Language.DEFAULT,
+        choice: QuestionChoiceType = QuestionChoiceType.SINGLE,
+        relevantSourceCode: List<SourceLocation> = emptyList()
+    ) : this(source, statement, options, language, choice, relevantSourceCode) {
+        this.questionType = type
+    }
 
     init {
         require(options.size >= 2) { "Question must have at least two options!\n$this" }

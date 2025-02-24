@@ -71,26 +71,10 @@ fun MethodDeclaration.getUsableVariables(): List<VariableDeclarator> =
 fun MethodCallExpr.asString(): String =
     (if (scope.isPresent) "${scope.get()}." else "") + nameAsString
 
-fun Node.getVariablesInScope(): Set<String> {
-    val variables = mutableSetOf<String>()
-
-    val start: Node = this
-    val line = start.range.get().begin.line
-
-    var current: Optional<Node> = Optional.of(this)
-    while (current.isPresent) {
-        val node = current.get()
-
-        if (node.range.isPresent) {
-            variables.addAll(node.findAll<VariableDeclarator>().filter {
-                it.range.isPresent && it.range.get().end.line < line
-            }.map { it.nameAsString })
-        }
-        if (node is MethodDeclaration)
-            variables.addAll(node.asMethodDeclaration().parameters.map { it.nameAsString })
-
-        current = node.parentNode
-    }
-
-    return variables
+fun MethodDeclaration.asString(): String {
+    val type = findAncestor(TypeDeclaration::class.java)
+    return if (type.isPresent)
+        "${type.get().nameAsString}.${nameAsString}"
+    else
+        nameAsString
 }
