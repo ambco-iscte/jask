@@ -36,6 +36,13 @@ object VariableScoping {
                 enclosed.forEach { it.accept(visitor) }
         }
 
+        fun getRootScope(): Scope<*> {
+            var current: Scope<*> = this
+            while (current.parent != null)
+                current = current.parent!!
+            return current
+        }
+
         fun contains(identifier: String): Boolean =
             identifier in variables
 

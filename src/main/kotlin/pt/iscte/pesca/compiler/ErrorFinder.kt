@@ -3,6 +3,7 @@ package pt.iscte.pesca.compiler
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -30,21 +31,14 @@ interface ICompilerError {
     fun message(): String
 }
 
-class ErrorFinder {
+class ErrorFinder<T : Node>(private val target: T) {
 
-    private val unit: CompilationUnit
-
-    constructor(source: String) {
-        StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
-        StaticJavaParser.getParserConfiguration().setSymbolResolver(
-            JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
-        )
-        this.unit = StaticJavaParser.parse(source)
-    }
+    private val unit: CompilationUnit =
+        target.findCompilationUnit().get()
 
     fun findUnknownVariables(): List<UnknownVariable> {
-        val scope = VariableScoping.get(unit)
-        return unit.findAll(NameExpr::class.java).filter {
+        val scope = VariableScoping.get(target)
+        return target.findAll(NameExpr::class.java).filter {
             failure { it.calculateResolvedType() } // Does this just... work?
         }.map { UnknownVariable(it, scope.findDeclaringScopeInHierarchy(it).get()) }
     }
@@ -62,7 +56,7 @@ class ErrorFinder {
             }
         }
 
-        return unit.findAll(MethodCallExpr::class.java).filter {
+        return target.findAll(MethodCallExpr::class.java).filter {
             val scope =
                 if (it.scope.isPresent) failure { it.scope.get().calculateResolvedType() }
                 else true
@@ -77,7 +71,7 @@ class ErrorFinder {
         val unknown = mutableListOf<UnknownType>()
 
         // Variable Declarations
-        unit.findAll(VariableDeclarationExpr::class.java).forEach { declaration ->
+        target.findAll(VariableDeclarationExpr::class.java).forEach { declaration ->
             declaration.variables.forEach { variable ->
                 if (undefined(variable.type))
                     unknown.add(UnknownType(variable.type, declaration, unit.types))
@@ -85,7 +79,7 @@ class ErrorFinder {
         }
 
         // Field Declarations
-        unit.findAll(FieldDeclaration::class.java).forEach { declaration ->
+        target.findAll(FieldDeclaration::class.java).forEach { declaration ->
             declaration.variables.forEach { variable ->
                 if (undefined(variable.type))
                     unknown.add(UnknownType(variable.type, declaration, unit.types))
@@ -93,7 +87,7 @@ class ErrorFinder {
         }
 
         // Method Declarations
-        unit.findAll(MethodDeclaration::class.java).forEach { method ->
+        target.findAll(MethodDeclaration::class.java).forEach { method ->
             if (undefined(method.type))
                 unknown.add(UnknownType(method.type, method, unit.types))
             method.parameters.forEach { parameter ->
@@ -103,7 +97,7 @@ class ErrorFinder {
         }
 
         // Constructor Declarations
-        unit.findAll(ConstructorDeclaration::class.java).forEach { constructor ->
+        target.findAll(ConstructorDeclaration::class.java).forEach { constructor ->
             constructor.parameters.forEach { parameter ->
                 if (undefined(parameter.type))
                     unknown.add(UnknownType(parameter.type, parameter, unit.types))
@@ -111,7 +105,7 @@ class ErrorFinder {
         }
 
         // Record Declarations
-        unit.findAll(RecordDeclaration::class.java).forEach { record ->
+        target.findAll(RecordDeclaration::class.java).forEach { record ->
             record.parameters.forEach { parameter ->
                 if (undefined(parameter.type))
                     unknown.add(UnknownType(parameter.type, parameter, unit.types))
@@ -122,14 +116,14 @@ class ErrorFinder {
     }
 
     fun findIncompatibleVariableTypes(): List<IncompatibleVariableType> =
-        unit.findAll(VariableDeclarator::class.java).filter { variable ->
+        target.findAll(VariableDeclarator::class.java).filter { variable ->
             variable.initializer.isPresent &&
             success { variable.initializer.get().calculateResolvedType() }
             && variable.typeAsString != variable.initializer.get().calculateResolvedType().describe()
         }.map { IncompatibleVariableType(it) }
 
     fun findIncompatibleReturnTypes(): List<IncompatibleReturnType> =
-        unit.findAll(ReturnStmt::class.java).filter {
+        target.findAll(ReturnStmt::class.java).filter {
             val method = it.findAncestor(MethodDeclaration::class.java)
             method.isPresent &&
             it.expression.isPresent &&

@@ -5,8 +5,15 @@ import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
+import pt.iscte.pesca.Localisation
+import pt.iscte.pesca.questions.compiler.WhichVariablesInScopeMultipleChoice
 
 fun main() {
+    StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
+    StaticJavaParser.getParserConfiguration().setSymbolResolver(
+        JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
+    )
+
     val src = """
         class StaticMethods {
             public static int square(int n) {
@@ -50,25 +57,8 @@ fun main() {
         }
     """.trimIndent()
 
-    val errors = ErrorFinder(src)
+    val qlc = WhichVariablesInScopeMultipleChoice()
+    val data = qlc.generate(src, Localisation.getLanguage("pt"))
 
-    println("===== UNKNOWN VARIABLES =====")
-    println(errors.findUnknownVariables().joinToString("\n\n") { it.message() })
-
-    println("\n")
-
-    println("===== UNKNOWN METHODS =====")
-    println(errors.findUnknownMethods().joinToString("\n\n") { it.message() })
-
-    println("\n")
-
-    println("===== UNKNOWN TYPES =====")
-    println(errors.findUnknownClasses().joinToString("\n\n") { it.message() })
-
-    println("\n")
-
-    println("===== INCOMPATIBLE TYPES =====")
-    println((errors.findIncompatibleReturnTypes() + errors.findIncompatibleVariableTypes()).joinToString("\n\n") {
-        it.message()
-    })
+    println(data)
 }

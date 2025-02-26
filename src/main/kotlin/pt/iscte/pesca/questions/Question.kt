@@ -30,9 +30,22 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
     )
 
     override fun toString(): String {
-        val width = code.split("\n").maxOf { it.length }
+        val split = code.split("\n")
+
+        val width = split.maxOf { it.length }
         val sep = "-".repeat(width)
-        return "$statement${System.lineSeparator()}$sep${System.lineSeparator()}$code${System.lineSeparator()}$sep"
+
+        val lines = split.size
+        val lineNumberWidth = "$lines.".length
+
+        var i = 1
+        val sourceCode = split.joinToString(System.lineSeparator()) { line ->
+            val lineNumber = "${i++}."
+            val blank = " ".repeat(lineNumberWidth - lineNumber.length + 1)
+            "$lineNumber$blank$line"
+        }
+
+        return "$statement${System.lineSeparator()}$sep${System.lineSeparator()}$sourceCode${System.lineSeparator()}$sep"
     }
 }
 
