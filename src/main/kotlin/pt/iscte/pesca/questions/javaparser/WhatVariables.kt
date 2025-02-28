@@ -5,17 +5,18 @@ import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getLocalVariables
 import pt.iscte.pesca.extensions.getUsableVariables
 import pt.iscte.pesca.extensions.sample
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 import kotlin.collections.toSet
 
-class WhatVariables: JavaParserQuestionRandomMethod() {
+class WhatVariables: StaticQuestion<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getLocalVariables().isNotEmpty()
 
-    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val variables = method.getLocalVariables()
         val variableNames = variables.map { it.nameAsString  }.toSet()
 

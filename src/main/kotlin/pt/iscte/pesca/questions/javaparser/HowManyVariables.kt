@@ -4,16 +4,16 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.correctAndRandomDistractors
 import pt.iscte.pesca.extensions.getLocalVariables
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class HowManyVariables : JavaParserQuestionRandomMethod() {
+class HowManyVariables : StaticQuestion<MethodDeclaration>() {
 
     override fun build(
-        source: SourceCode,
-        method: MethodDeclaration,
+        sources: List<SourceCode>,
         language: Language
     ): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val localVariables = method.getLocalVariables()
         val howManyVariables = localVariables.size
 

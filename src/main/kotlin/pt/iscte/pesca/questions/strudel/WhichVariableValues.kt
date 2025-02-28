@@ -2,22 +2,17 @@ package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getVariableAssignments
-import pt.iscte.pesca.extensions.sample
+import pt.iscte.pesca.extensions.procedureCallAsString
 import pt.iscte.pesca.extensions.sampleSequentially
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
+import pt.iscte.pesca.extensions.toIValues
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
-import pt.iscte.strudel.model.dsl.False
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.collections.set
 
-class WhichVariableValues : StrudelQuestionRandomProcedure() {
+class WhichVariableValues : DynamicQuestion<IProcedure>() {
 
     val valuesPerVariable = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
 
@@ -36,7 +31,7 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
         return assigns.keys.size > 1 && assigns.values.any { it.size > 1 }
     }
 
-    override fun setup(vm: IVirtualMachine) {
+    fun setup(vm: IVirtualMachine) {
         valuesPerVariable.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
@@ -45,14 +40,13 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
         })
     }
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        setup(vm)
+        val arguments = args.toIValues(vm, module)
+
         vm.execute(procedure, *arguments.toTypedArray())
 
         valuesPerVariable.keys.forEach {
@@ -86,7 +80,7 @@ class WhichVariableValues : StrudelQuestionRandomProcedure() {
 
         return QuestionData(
             source,
-            TextWithCodeStatement(language["WhichVariableValues"].format(variable.id, call), procedure),
+            TextWithCodeStatement(language["WhichVariableValues"].format(variable.id, procedureCallAsString(procedure, arguments)), procedure),
             options,
             language = language
         )

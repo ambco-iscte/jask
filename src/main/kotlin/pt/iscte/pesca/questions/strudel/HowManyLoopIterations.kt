@@ -1,27 +1,18 @@
 package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.extensions.correctAndRandomDistractors
-import pt.iscte.pesca.extensions.getProcedureCalls
-import pt.iscte.pesca.extensions.getUsedProceduresWithinModule
+import pt.iscte.pesca.extensions.procedureCallAsString
 import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.extensions.sampleSequentially
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
+import pt.iscte.pesca.extensions.toIValues
 import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.ILoop
 import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IVariableExpression
 import pt.iscte.strudel.model.util.findAll
-import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
-import kotlin.math.max
 
-class HowManyLoopIterations : StrudelQuestionRandomProcedure() {
+class HowManyLoopIterations : DynamicQuestion<IProcedure>() {
 
     var count: Int = 0
     var guard: IExpression? = null
@@ -29,7 +20,7 @@ class HowManyLoopIterations : StrudelQuestionRandomProcedure() {
     override fun isApplicable(element: IProcedure): Boolean =
         element.findAll(ILoop::class).size == 1
 
-    override fun setup(vm: IVirtualMachine) {
+    fun setup(vm: IVirtualMachine) {
         count = 0
         guard = null
         vm.addListener(object : IVirtualMachine.IListener {
@@ -41,14 +32,13 @@ class HowManyLoopIterations : StrudelQuestionRandomProcedure() {
         })
     }
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        setup(vm)
+        val arguments = args.toIValues(vm, module)
+
         vm.execute(procedure, *arguments.toTypedArray())
 
         val distractors = sampleSequentially(3,
@@ -81,7 +71,7 @@ class HowManyLoopIterations : StrudelQuestionRandomProcedure() {
         return QuestionData(
             source,
             TextWithCodeStatement(
-                language["HowManyLoopIterations"].format(call),
+                language["HowManyLoopIterations"].format(procedureCallAsString(procedure, arguments)),
                 procedure
             ),
             options,

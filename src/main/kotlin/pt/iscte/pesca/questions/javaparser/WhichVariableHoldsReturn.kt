@@ -6,18 +6,19 @@ import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getReturnVariables
 import pt.iscte.pesca.extensions.getUsableVariables
 import pt.iscte.pesca.extensions.sampleSequentially
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
-class WhichVariableHoldsReturn : JavaParserQuestionRandomMethod() {
+class WhichVariableHoldsReturn : StaticQuestion<MethodDeclaration>() {
 
     // Return value is given by a single variable.
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.findAll(ReturnStmt::class.java).all { it.expression.getOrNull?.isNameExpr == true } &&
         element.findAll(ReturnStmt::class.java).map { it.expression?.toString() }.toSet().size == 1
 
-    override fun build(source: SourceCode, method : MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val returns = method.getReturnVariables()
         val returnStmt = returns.keys.random()
         val returnVariable = returns[returnStmt]!!.random()

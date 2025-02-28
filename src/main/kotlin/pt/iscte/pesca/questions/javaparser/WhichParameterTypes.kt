@@ -3,19 +3,16 @@ package pt.iscte.pesca.questions
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getLocalVariables
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import kotlin.collections.plus
 
-class WhichParameterTypes : JavaParserQuestionRandomMethod() {
+class WhichParameterTypes : StaticQuestion<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()
 
-    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val parameters = method.parameters.map { it.nameAsString }
         val paramTypes = method.parameters.map { it.typeAsString }
         val returnType = method.typeAsString

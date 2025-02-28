@@ -23,6 +23,5 @@ class TestArraySize {
         val subArray = qlc.generate(src, ProcedureCall("subArray", listOf(listOf(1, 2, 3, 4, 5, 6), 2, 4)))
         println(subArray)
         assertEquals("3", subArray.solution.first().toString())
-
     }
 }

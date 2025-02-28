@@ -3,18 +3,16 @@ package pt.iscte.pesca.questions
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.correctAndRandomDistractors
 import pt.iscte.pesca.extensions.getVariableAssignments
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
+import pt.iscte.pesca.extensions.procedureCallAsString
+import pt.iscte.pesca.extensions.toIValues
 import pt.iscte.strudel.model.ILoop
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
-import pt.iscte.strudel.parsing.java.JP
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
-class HowManyVariableAssignments : StrudelQuestionRandomProcedure() {
+class HowManyVariableAssignments : DynamicQuestion<IProcedure>() {
 
     val countPerVariable = mutableMapOf<IVariableDeclaration<*>, Int>()
     var iterations = 0
@@ -23,7 +21,7 @@ class HowManyVariableAssignments : StrudelQuestionRandomProcedure() {
     override fun isApplicable(element: IProcedure): Boolean =
         element.getVariableAssignments().any { it.value.size > 1 }
 
-    override fun setup(vm: IVirtualMachine) {
+    fun setup(vm: IVirtualMachine) {
         countPerVariable.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
@@ -36,14 +34,13 @@ class HowManyVariableAssignments : StrudelQuestionRandomProcedure() {
         })
     }
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        setup(vm)
+        val arguments = args.toIValues(vm, module)
+
         vm.execute(procedure, *arguments.toTypedArray())
 
         val variable = countPerVariable.keys.random()
@@ -51,13 +48,13 @@ class HowManyVariableAssignments : StrudelQuestionRandomProcedure() {
 
         return QuestionData(
             source,
-            TextWithCodeStatement(language["HowManyVariableAssignments"].format(variable.id, call), procedure),
+            TextWithCodeStatement(language["HowManyVariableAssignments"].format(variable.id, procedureCallAsString(procedure, arguments)), procedure),
             correctAndRandomDistractors(count,
                 setOf(
                     count+1,
                     count-1,
                     iterations,
-            ) + countPerVariable.map { it.value }),
+                ) + countPerVariable.map { it.value }),
             language
         )
     }

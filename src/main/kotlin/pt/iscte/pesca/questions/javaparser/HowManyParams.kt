@@ -3,16 +3,14 @@ package pt.iscte.pesca.questions
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.multipleChoice
-import pt.iscte.pesca.extensions.prettySignature
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.text.format
 
-class HowManyParams : JavaParserQuestionRandomMethod() {
+class HowManyParams : StaticQuestion<MethodDeclaration>() {
 
-    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val parameters = method.parameters.size
         return QuestionData(
             source,

@@ -5,22 +5,17 @@ import com.github.javaparser.ast.expr.Expression
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.pesca.extensions.getUsedTypes
-import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.extensions.sampleSequentially
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
-import kotlin.text.format
 
-class WhichReturnType : JavaParserQuestionRandomMethod() {
+class WhichReturnType : StaticQuestion<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getUsedTypes().size >= 2
 
-    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val methodReturnType = method.type
 
         val otherTypes = method.getUsedTypes().map { it.asString() }

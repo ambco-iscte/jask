@@ -1,34 +1,24 @@
 package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.extensions.JAVA_PRIMITIVE_TYPES
-import pt.iscte.pesca.extensions.correctAndRandomDistractors
 import pt.iscte.pesca.extensions.getProcedureCalls
 import pt.iscte.pesca.extensions.getUsedProceduresWithinModule
-import pt.iscte.pesca.extensions.isSelfContained
+import pt.iscte.pesca.extensions.procedureCallAsString
 import pt.iscte.pesca.extensions.sampleSequentially
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
-import pt.iscte.strudel.model.IBlock
+import pt.iscte.pesca.extensions.toIValues
 import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.IProcedureCall
 import pt.iscte.strudel.model.IProcedureDeclaration
-import pt.iscte.strudel.model.util.findAll
-import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
-class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
+class HowManyFunctionCalls : DynamicQuestion<IProcedure>() {
     val proceduresToConsider: MutableList<IProcedureDeclaration> = mutableListOf()
     val count: MutableMap<String, Int> = mutableMapOf()
 
     override fun isApplicable(element: IProcedure): Boolean =
         element.getProcedureCalls().isNotEmpty()
 
-    override fun setup(vm: IVirtualMachine) {
+    fun setup(vm: IVirtualMachine) {
         proceduresToConsider.clear()
         count.clear()
         vm.addListener(object : IVirtualMachine.IListener {
@@ -41,14 +31,13 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         })
     }
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        setup(vm)
+        val arguments = args.toIValues(vm, module)
+
         proceduresToConsider.add(procedure)
         proceduresToConsider.addAll(procedure.getUsedProceduresWithinModule())
 
@@ -79,7 +68,7 @@ class HowManyFunctionCalls : StrudelQuestionRandomProcedure() {
         return QuestionData(
             source,
             TextWithCodeStatement(
-                language["HowManyFunctionCalls"].format(randomProcedure.id, call),
+                language["HowManyFunctionCalls"].format(randomProcedure.id, procedureCallAsString(procedure, arguments)),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             options,

@@ -9,10 +9,9 @@ import com.github.javaparser.ast.stmt.WhileStmt
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.asString
 import pt.iscte.pesca.extensions.sample
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class WhichFunctionDependencies : JavaParserQuestionRandomMethod() {
+class WhichFunctionDependencies : StaticQuestion<MethodDeclaration>() {
 
     // Has at least one call statement to another function.
     override fun isApplicable(element: MethodDeclaration): Boolean =
@@ -20,7 +19,9 @@ class WhichFunctionDependencies : JavaParserQuestionRandomMethod() {
             it.nameAsString != element.nameAsString
         }
 
-    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val calls = method.findAll(MethodCallExpr::class.java)
         val callsNames = calls.map { it.asString()  }
 

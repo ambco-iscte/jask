@@ -2,14 +2,10 @@ package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.getLiteralExpressions
-import pt.iscte.pesca.extensions.multipleChoice
+import pt.iscte.pesca.extensions.procedureCallAsString
 import pt.iscte.pesca.extensions.sample
 import pt.iscte.pesca.extensions.sampleSequentially
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
+import pt.iscte.pesca.extensions.toIValues
 import pt.iscte.strudel.model.ILiteral
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IReturn
@@ -18,13 +14,12 @@ import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
-import kotlin.text.format
 
-class WhichResultMakesSense: StrudelQuestionRandomProcedure() {
+class WhichResultMakesSense : DynamicQuestion<IProcedure>() {
 
     val valuesPerVariable = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
 
-    override fun setup(vm: IVirtualMachine) {
+    fun setup(vm: IVirtualMachine) {
         valuesPerVariable.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
@@ -37,14 +32,13 @@ class WhichResultMakesSense: StrudelQuestionRandomProcedure() {
     override fun isApplicable(element: IProcedure): Boolean =
         element.returnType.isValueType
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        setup(vm)
+        val arguments = args.toIValues(vm, module)
+
         val result = vm.execute(procedure, *arguments.toTypedArray())!!
 
         val returnLiterals = procedure.findAll(IReturn::class).filter {
@@ -64,7 +58,7 @@ class WhichResultMakesSense: StrudelQuestionRandomProcedure() {
         val distractors = sampleSequentially(3, returnLiterals, literalExpressions, lastVariableValues, arguments) {
             it.value != result.value && it.type == procedure.returnType
         }
-        
+
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it) to false
         }.toMutableMap()
@@ -80,7 +74,7 @@ class WhichResultMakesSense: StrudelQuestionRandomProcedure() {
 
         return QuestionData(
             source,
-            TextWithCodeStatement(language["WhichResultMakesSense"].format(call), procedure.longSignature()),
+            TextWithCodeStatement(language["WhichResultMakesSense"].format(procedureCallAsString(procedure, arguments)), procedure.longSignature()),
             options,
             language = language
         )

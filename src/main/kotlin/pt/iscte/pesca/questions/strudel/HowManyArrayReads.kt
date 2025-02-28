@@ -3,24 +3,19 @@ package pt.iscte.pesca.questions
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.countArrayAccesses
 import pt.iscte.pesca.extensions.getUsedProceduresWithinModule
+import pt.iscte.pesca.extensions.procedureCallAsString
 import pt.iscte.pesca.extensions.sampleSequentially
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.strudel.model.IArrayAccess
+import pt.iscte.pesca.extensions.toIValues
 import pt.iscte.strudel.model.IArrayLength
 import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.vm.IArray
 import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
-class HowManyArrayReads : StrudelQuestionRandomProcedure() {
+class HowManyArrayReads : DynamicQuestion<IProcedure>() {
     var countReads = 0
     var countWrites = 0
     var len = 0
@@ -30,7 +25,7 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
     override fun isApplicable(element: IProcedure): Boolean =
         element.countArrayAccesses() != 0
 
-    override fun setup(vm: IVirtualMachine) {
+    fun setup(vm: IVirtualMachine) {
         countReads = 0
         countWrites = 0
         len = 0
@@ -52,14 +47,13 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
         })
     }
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        setup(vm)
+        val arguments = args.toIValues(vm, module)
+
         vm.execute(procedure, *arguments.toTypedArray())
 
         var arrayLengthAccess = 0
@@ -98,7 +92,7 @@ class HowManyArrayReads : StrudelQuestionRandomProcedure() {
         return QuestionData(
             source,
             TextWithCodeStatement(
-                language["HowManyArrayReads"].format(call),
+                language["HowManyArrayReads"].format(procedureCallAsString(procedure, arguments)),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             options,

@@ -6,11 +6,15 @@ import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.IModuleVisitor
+import pt.iscte.pesca.extensions.Quadruple
 import pt.iscte.pesca.extensions.accept
 import pt.iscte.pesca.extensions.randomByOrNull
+import pt.iscte.pesca.extensions.toIValue
 import pt.iscte.strudel.model.*
+import pt.iscte.strudel.parsing.java.CONSTRUCTOR_FLAG
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.vm.IValue
+import pt.iscte.strudel.vm.IVirtualMachine
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -135,6 +139,52 @@ abstract class StaticQuestion<T : Node>(range: IntRange) : Question<T>(range) {
  * [IProcedure] if the question targets concrete methods.
  */
 abstract class DynamicQuestion<T : IProgramElement> : Question<T>() {
+
+    private fun DynamicQuestion<IProcedure>.getRandomApplicableProcedureAndArguments(
+        module: IModule,
+        calls: List<ProcedureCall>
+    ): Pair<IProcedure, List<Any?>>? {
+        val vm = IVirtualMachine.create()
+        val pairs = mutableListOf<Pair<IProcedure, List<Any?>>>()
+        module.procedures.filterIsInstance<IProcedure>().filter { !it.hasFlag(CONSTRUCTOR_FLAG) }.forEach { p ->
+            calls.forEach { call ->
+                val args = call.arguments.map { it.toIValue(vm, module) }
+                if (call.id == p.id && p.id != null) { // Specific test cases
+                    call.arguments.forEach {
+                        if (isApplicable(p) && isApplicable(p, args))
+                            pairs.add(p to call.arguments)
+                    }
+                }
+                else if (call.id == null) { // Wildcard test cases
+                    runCatching { vm.execute(p, *args.toTypedArray()) }.onSuccess {
+                        pairs.add(p to call.arguments)
+                    }
+                }
+            }
+        }
+        return pairs.randomOrNull()
+    }
+
+    protected fun DynamicQuestion<IProcedure>.getRandomProcedure(
+        sources: List<SourceCode>
+    ): Quadruple<SourceCode, IModule, IProcedure, List<Any?>> {
+        val source: SourceCode? = sources.filter { s ->
+            runCatching {
+                val module = Java2Strudel(checkJavaCompilation = false).load(s.code)
+                getRandomApplicableProcedureAndArguments(module, s.calls) != null
+            }.getOrDefault(false)
+        }.randomOrNull()
+
+        if (source == null)
+            throw QuestionGenerationException(this, null, "Could not find source with at least one applicable procedure.")
+
+        val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
+
+        val (procedure, args) = getRandomApplicableProcedureAndArguments(module, source.calls) ?:
+        throw QuestionGenerationException(this, source, "Could not find applicable procedure within source.")
+
+        return Quadruple(source, module, procedure, args)
+    }
 
     /**
      * Generates the [QuestionData] for this question using a list of [sources].

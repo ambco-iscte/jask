@@ -5,12 +5,13 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.findAll
 import pt.iscte.pesca.extensions.multipleChoice
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class HowManyFunctionDependencies : JavaParserQuestionRandomMethod() {
+class HowManyFunctionDependencies : StaticQuestion<MethodDeclaration>() {
 
-    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val otherFunctions =  method.findAll<MethodCallExpr>()
         val otherFunctionsNames = otherFunctions
             .filter { it.nameAsString != method.nameAsString }

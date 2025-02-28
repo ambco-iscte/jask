@@ -10,6 +10,10 @@ import pt.iscte.strudel.model.roles.impl.*
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.parsing.java.allocateStringArray
 import pt.iscte.strudel.parsing.java.extensions.getString
+import pt.iscte.strudel.parsing.java.extensions.hasThisParameter
+import pt.iscte.strudel.vm.IArray
+import pt.iscte.strudel.vm.IRecord
+import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import pt.iscte.strudel.vm.NULL
@@ -147,3 +151,22 @@ fun IProcedure.countArrayAccesses(): Int {
     })
     return count
 }
+
+internal fun Collection<Any?>.toIValues(vm: IVirtualMachine, module: IModule): List<IValue> =
+    map { it.toIValue(vm, module) }
+
+// Pretty print :)
+internal fun IValue.asString(): String = when (this@asString) {
+    is IReference<*> -> target.asString()
+    is IRecord -> "new $this"
+    is IArray -> "[${elements.joinToString { it.asString() }}]"
+    else -> toString()
+}
+
+internal fun Collection<IValue>.joinAsString(): String = joinToString { it.asString() }
+
+fun procedureCallAsString(procedure: IProcedureDeclaration, arguments: List<IValue>): String =
+    if (procedure.hasThisParameter)
+        "${arguments.first().asString()}.${procedure.id}(${arguments.subList(1, arguments.size).joinAsString()})"
+    else
+        "${procedure.id}(${arguments.joinAsString()})"

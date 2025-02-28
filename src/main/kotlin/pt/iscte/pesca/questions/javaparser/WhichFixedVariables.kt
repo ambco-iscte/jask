@@ -9,10 +9,9 @@ import com.github.javaparser.ast.expr.UnaryExpr
 import pt.iscte.pesca.extensions.getLocalVariables
 import pt.iscte.pesca.extensions.getUsableVariables
 import pt.iscte.pesca.extensions.sample
-import pt.iscte.pesca.questions.subtypes.JavaParserQuestionRandomMethod
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class WhichFixedVariables : JavaParserQuestionRandomMethod() {
+class WhichFixedVariables : StaticQuestion<MethodDeclaration>() {
 
     private fun MethodDeclaration.getFixedVariables(): List<VariableDeclarator> =
         getLocalVariables().filter { v ->
@@ -34,7 +33,9 @@ class WhichFixedVariables : JavaParserQuestionRandomMethod() {
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getFixedVariables().isNotEmpty()
 
-    override fun build(source: SourceCode, method: MethodDeclaration, language: Language): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
         val fixedVariables = method.getFixedVariables()
         val fixedVariablesNames = fixedVariables.map { it.nameAsString }
 

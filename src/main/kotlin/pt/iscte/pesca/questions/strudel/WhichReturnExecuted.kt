@@ -2,9 +2,8 @@ package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.correctAndRandomDistractors
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
+import pt.iscte.pesca.extensions.procedureCallAsString
+import pt.iscte.pesca.extensions.toIValues
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IReturn
 import pt.iscte.strudel.model.util.findAll
@@ -12,20 +11,18 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
-class WhichReturnExecuted : StrudelQuestionRandomProcedure() {
+class WhichReturnExecuted : DynamicQuestion<IProcedure>() {
 
     override fun isApplicable(element: IProcedure): Boolean {
         return element.findAll(IReturn::class).size >= 2
     }
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        val arguments = args.toIValues(vm, module)
+
         var returnInst: IReturn? = null
         vm.addListener(object : IVirtualMachine.IListener {
             override fun returnCall(s: IReturn, returnValue: IValue?) {
@@ -37,7 +34,7 @@ class WhichReturnExecuted : StrudelQuestionRandomProcedure() {
         vm.execute(procedure, *arguments.toTypedArray())
 
         val line = returnInst?.getProperty(SourceLocation::class.java)?.startLine
-                ?: throw RuntimeException("return line not found")
+            ?: throw RuntimeException("return line not found")
 
         val distractors = procedure.findAll(IReturn::class).mapNotNull {
             val l = it.getProperty(SourceLocation::class.java)?.startLine
@@ -50,9 +47,7 @@ class WhichReturnExecuted : StrudelQuestionRandomProcedure() {
         return QuestionData(
             source,
             TextWithCodeStatement(
-                language[this::class.simpleName!!].format(
-                    call
-                ), procedure
+                language[this::class.simpleName!!].format(procedureCallAsString(procedure, arguments)), procedure
             ),
             correctAndRandomDistractors(
                 "${language["Line"]} $line",

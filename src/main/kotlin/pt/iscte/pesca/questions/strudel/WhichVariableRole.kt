@@ -2,24 +2,16 @@ package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.sample
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.TextWithCodeStatement
-import pt.iscte.pesca.questions.subtypes.StrudelQuestionRandomProcedure
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.roles.IVariableRole
 import pt.iscte.strudel.model.roles.impl.ArrayIndexIterator
 import pt.iscte.strudel.model.roles.impl.FixedValue
 import pt.iscte.strudel.model.roles.impl.Gatherer
 import pt.iscte.strudel.model.roles.impl.MostWantedHolder
-import pt.iscte.strudel.model.roles.impl.OneWayFlag
 import pt.iscte.strudel.model.roles.impl.Stepper
-import pt.iscte.strudel.vm.IValue
-import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.reflect.KClass
 
-class WhichVariableRole : StrudelQuestionRandomProcedure() {
+class WhichVariableRole : DynamicQuestion<IProcedure>() {
 
     // There is at least one variable whose role can be determined.
     override fun isApplicable(element: IProcedure): Boolean =
@@ -34,14 +26,9 @@ class WhichVariableRole : StrudelQuestionRandomProcedure() {
         // OneWayFlag::class to language["OneWayFlag"].toString()
     )
 
-    override fun build(
-        source: SourceCode,
-        vm: IVirtualMachine,
-        procedure: IProcedure,
-        arguments: List<IValue>,
-        call: String,
-        language: Language
-    ): QuestionData {
+    override fun build(sources: List<SourceCode>, language: Language): QuestionData {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
         // Choose a random variable whose role can be determined.
         // As per the precondition, there is guaranteed to be at least one.
         val variable = procedure.localVariables.filter {
