@@ -1,18 +1,9 @@
-package pt.iscte.pesca.questions.compiler
+package pt.iscte.pesca.questions
 
 import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.TypeDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.compiler.ErrorFinder
-import pt.iscte.pesca.extensions.correctAndRandomDistractors
-import pt.iscte.pesca.extensions.sample
-import pt.iscte.pesca.questions.QuestionData
-import pt.iscte.pesca.questions.SimpleTextOption
-import pt.iscte.pesca.questions.SourceCode
-import pt.iscte.pesca.questions.StaticQuestion
-import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
-import kotlin.random.Random
 
 class WhichVariablesInScopeMultipleChoice : StaticQuestion<CompilationUnit>() {
 

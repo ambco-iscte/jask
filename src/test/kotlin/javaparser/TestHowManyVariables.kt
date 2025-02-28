@@ -1,9 +1,9 @@
-package dynamic
+package javaparser
 
-import assertUniqueSolution
+import org.junit.jupiter.api.Test
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.questions.HowManyVariables
-import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class TestHowManyVariables {
     @Test
@@ -18,6 +18,6 @@ class TestHowManyVariables {
         """.trimIndent()
 
         val qlc = HowManyVariables().generate(src, Localisation.getLanguage("pt"))
-        qlc.assertUniqueSolution("1")
+        assertEquals("1", qlc.solution.first().toString())
     }
 }

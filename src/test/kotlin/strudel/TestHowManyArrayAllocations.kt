@@ -1,6 +1,7 @@
-package dynamic
+package strudel
 
 import org.junit.jupiter.api.Test
+import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.questions.HowManyArrayAllocations
 import pt.iscte.pesca.questions.ProcedureCall
 import kotlin.test.assertEquals
@@ -28,10 +29,12 @@ class TestHowManyArrayAllocations {
             }
         """.trimIndent()
         val qlc = HowManyArrayAllocations()
-        val contains = qlc.generate(src, ProcedureCall("drop", listOf(listOf(1, 2, 3, 4, 5), 3)))
+        val contains = qlc.generate(
+            src,
+            ProcedureCall("drop", listOf(listOf(1, 2, 3, 4, 5), 3)),
+            Localisation.getLanguage("en")
+        )
         println(contains)
         assertEquals("1", contains.solution.first().toString())
-
-
     }
 }

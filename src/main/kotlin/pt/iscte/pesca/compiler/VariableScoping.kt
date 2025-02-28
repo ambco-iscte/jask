@@ -43,6 +43,14 @@ object VariableScoping {
             return current
         }
 
+        @Suppress("UNCHECKED_CAST")
+        inline fun <reified R : Node> findAncestor(): Optional<Scope<R>> {
+            var current: Scope<*>? = this
+            while (current != null && current.node !is R)
+                current = current.parent
+            return Optional.ofNullable(current as? Scope<R>)
+        }
+
         fun contains(identifier: String): Boolean =
             identifier in variables
 
@@ -58,14 +66,15 @@ object VariableScoping {
             return usable
         }
 
-        fun findDeclaringScopeInHierarchy(node: Node): Optional<Scope<*>> {
+        @Suppress("UNCHECKED_CAST")
+        fun <R : Node> findDeclaringScopeInHierarchy(node: R): Optional<Scope<R>> {
             val queue = mutableListOf<Scope<*>>(this)
             while (queue.isNotEmpty()) {
                 val current = queue.removeFirst()
                 val contains = current.node.findAll(node::class.java).contains(node)
                 val notInChildren = current.enclosed.none { it.node.findAll(node::class.java).contains(node) }
                 if (current.node == node || (contains && notInChildren))
-                    return Optional.of(current)
+                    return Optional.of(current as Scope<R>)
                 else
                     queue.addAll(current.enclosed)
             }

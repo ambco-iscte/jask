@@ -1,4 +1,4 @@
-package dynamic
+package strudel
 
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.questions.ProcedureCall

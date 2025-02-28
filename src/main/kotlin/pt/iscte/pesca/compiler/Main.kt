@@ -6,7 +6,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.compiler.WhichVariablesInScopeMultipleChoice
+import pt.iscte.pesca.questions.WhichVariablesInScopeMultipleChoice
 
 fun main() {
     StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20

@@ -33,6 +33,13 @@ interface ICompilerError {
 
 class ErrorFinder<T : Node>(private val target: T) {
 
+    init {
+        StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
+        StaticJavaParser.getParserConfiguration().setSymbolResolver(
+            JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
+        )
+    }
+
     private val unit: CompilationUnit =
         target.findCompilationUnit().get()
 
@@ -66,7 +73,7 @@ class ErrorFinder<T : Node>(private val target: T) {
 
     fun findUnknownClasses(): List<UnknownType> {
         fun undefined(type: Type): Boolean =
-            failure { type.resolve() }
+            !type.isPrimitiveType && failure { type.resolve() }
 
         val unknown = mutableListOf<UnknownType>()
 

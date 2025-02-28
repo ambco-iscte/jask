@@ -1,9 +1,8 @@
-package dynamic
+package strudel
 
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.questions.ProcedureCall
 import pt.iscte.pesca.questions.WhatIsResult
-import pt.iscte.pesca.questions.WhichReturnExecuted
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
