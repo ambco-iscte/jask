@@ -7,6 +7,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterNumber
+import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterTypes
 import pt.iscte.pesca.questions.compiler.MethodWithWrongReturnStmt
 
 fun main() {
@@ -58,12 +59,13 @@ fun main() {
             
             public static int squareRoot(int n) {
                 int x = bar(1, 2);
+                int y = bar("hello");
                 return Math.sqrt(n);
             }
         }
     """.trimIndent()
 
-    val qlc = CallMethodWithWrongParameterNumber()
+    val qlc = CallMethodWithWrongParameterTypes()
     val data = qlc.generate(src, Localisation.getLanguage("pt"))
 
     println(data)

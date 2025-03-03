@@ -97,7 +97,8 @@ fun MethodCallExpr.isValidFor(method: MethodDeclaration): Boolean {
         runCatching {
             val argumentType = arg.calculateResolvedType()
             val parameterType = method.parameters[i].type.resolve()
-            parameterType.isAssignableBy(argumentType)
+            if (!parameterType.isAssignableBy(argumentType))
+                return false
         }.getOrElse { return false }
     }
     return true

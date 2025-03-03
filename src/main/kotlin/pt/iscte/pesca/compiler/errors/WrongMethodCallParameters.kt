@@ -14,11 +14,11 @@ import pt.iscte.pesca.extensions.success
 
 data class WrongMethodCallParameters(val method: MethodDeclaration, val call: MethodCallExpr): ICompilerError {
 
-    val expected: List<Type> =
-        method.parameters.map { it.type }
+    val expected: List<Type>
+        get() = method.parameters.map { it.type }
 
-    val actual: List<ResolvedType> =
-        call.arguments.map { it.calculateResolvedType() }
+    val actual: List<ResolvedType>
+        get() = call.arguments.map { it.calculateResolvedType() }
 
     val parameterNumberMismatch: Boolean
         get() = expected.size != actual.size
@@ -29,10 +29,11 @@ data class WrongMethodCallParameters(val method: MethodDeclaration, val call: Me
                 runCatching {
                     val argumentType = arg.calculateResolvedType()
                     val parameterType = method.parameters[i].type.resolve()
-                    parameterType.isAssignableBy(argumentType)
-                }.getOrElse { return false }
+                    if (!parameterType.isAssignableBy(argumentType))
+                        return true
+                }.getOrElse { return true }
             }
-            return true
+            return false
         }
 
     init {

@@ -1,5 +1,6 @@
 package pt.iscte.pesca.questions
 
+import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.IfStmt
@@ -7,7 +8,6 @@ import pt.iscte.pesca.Language
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.extensions.*
 import pt.iscte.strudel.parsing.java.SourceLocation
-
 
 class UselessDuplicationIfElse : StaticQuestion<MethodDeclaration>() {
 
@@ -34,18 +34,18 @@ class UselessDuplicationIfElse : StaticQuestion<MethodDeclaration>() {
         val body = ifStmt.thenStmt
         ifStmt.replace(body)
 
-
         return QuestionData(
             source,
-            TextWithMultipleCodeStatements(
-                language["UselessDuplicationIfElse"].format(method.nameAsString),listOf(method.toString(),methodReplaced.toString())),
+            TextWithCodeStatement(
+                language["UselessDuplicationIfElse"].format(method.nameAsString),
+                NodeList(method, methodReplaced)
+            ),
             true.trueOrFalse(language),
             language = language,
             relevantSourceCode = listOf(SourceLocation(body)),
         )
+    }
 }
-}
-
 
 fun main() {
     val source = """
@@ -63,6 +63,6 @@ fun main() {
     """.trimIndent()
 
     val qlc = UselessDuplicationIfElse()
-    val data = qlc.generate(source,Localisation.getLanguage("pt"))
+    val data = qlc.generate(source, Localisation.getLanguage("pt"))
     println(data)
 }
