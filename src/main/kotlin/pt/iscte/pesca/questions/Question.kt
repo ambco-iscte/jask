@@ -1,5 +1,7 @@
 package pt.iscte.pesca.questions
 
+import com.github.javaparser.ast.Node
+import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.strudel.model.IProcedureDeclaration
@@ -20,6 +22,10 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
 
     constructor(statement: String, code: MethodDeclaration): this(statement, code.toString())
 
+    constructor(statement: String, code: NodeList<Node>): this(statement, code.joinToString(System.lineSeparator().repeat(2)) {
+        it.toString()
+    })
+
     constructor(statement: String, code: IProgramElement): this(statement, (code.getProperty(JP) ?: code).toString())
 
     constructor(statement: String, code: Collection<IProgramElement>): this(
@@ -32,11 +38,11 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
     override fun toString(): String {
         val split = code.split("\n")
 
-        val width = split.maxOf { it.length }
-        val sep = "-".repeat(width)
-
         val lines = split.size
         val lineNumberWidth = "$lines.".length
+
+        val width = split.maxOf { it.length } + lineNumberWidth
+        val sep = "-".repeat(width)
 
         var i = 1
         val sourceCode = split.joinToString(System.lineSeparator()) { line ->

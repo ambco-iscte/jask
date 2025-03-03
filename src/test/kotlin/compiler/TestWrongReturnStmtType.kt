@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import pt.iscte.pesca.compiler.ErrorFinder
 import kotlin.test.assertEquals
 
-class TestIncompatibleReturnType {
+class TestWrongReturnStmtType {
 
     init {
         StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
@@ -32,7 +32,7 @@ class TestIncompatibleReturnType {
             }
         """.trimIndent()
 
-        val errors = ErrorFinder(StaticJavaParser.parse(src)).findIncompatibleReturnTypes()
+        val errors = ErrorFinder(StaticJavaParser.parse(src)).findReturnStmtsWithWrongType()
 
         assertEquals(2, errors.size)
 

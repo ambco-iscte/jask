@@ -5,8 +5,16 @@ import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.types.ResolvedType
 import pt.iscte.pesca.compiler.ICompilerError
+import pt.iscte.pesca.extensions.success
 
-data class IncompatibleReturnType(val method: MethodDeclaration, val returnStmt: ReturnStmt): ICompilerError {
+data class WrongReturnStmtType(val method: MethodDeclaration, val returnStmt: ReturnStmt): ICompilerError {
+
+    init {
+        require(returnStmt.expression.isPresent) { "Return statement must return an expression!" }
+        require(success { returnStmt.expression.get().calculateResolvedType() }) {
+            "Cannot resolve type of return expression: ${returnStmt.expression.get()}"
+        }
+    }
 
     val expected: Type =
         method.type

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import pt.iscte.pesca.compiler.ErrorFinder
 import kotlin.test.assertEquals
 
-class TestIncompatibleVariableType {
+class WrongTypeForVariableDeclaration {
 
     init {
         StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
@@ -34,7 +34,7 @@ class TestIncompatibleVariableType {
             }
         """.trimIndent()
 
-        val errors = ErrorFinder(StaticJavaParser.parse(src)).findIncompatibleVariableTypes()
+        val errors = ErrorFinder(StaticJavaParser.parse(src)).findVariablesAssignedWithWrongType()
 
         assertEquals(4, errors.size)
 

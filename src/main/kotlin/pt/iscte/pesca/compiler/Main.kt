@@ -6,7 +6,8 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.WhichVariablesInScopeMultipleChoice
+import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterNumber
+import pt.iscte.pesca.questions.compiler.MethodWithWrongReturnStmt
 
 fun main() {
     StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
@@ -41,7 +42,7 @@ fun main() {
             private int zz = "Hello World!";
             private int ww = 3.14;
             
-            public int bar(int n) {
+            public static int bar(int n) {
                 unsigned_int m = 400000;
                 return n;
             }
@@ -54,10 +55,15 @@ fun main() {
                 }
                 return i * 2 * n;
             }
+            
+            public static int squareRoot(int n) {
+                int x = bar(1, 2);
+                return Math.sqrt(n);
+            }
         }
     """.trimIndent()
 
-    val qlc = WhichVariablesInScopeMultipleChoice()
+    val qlc = CallMethodWithWrongParameterNumber()
     val data = qlc.generate(src, Localisation.getLanguage("pt"))
 
     println(data)

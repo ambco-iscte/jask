@@ -18,12 +18,15 @@ import com.github.javaparser.ast.type.Type
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
-import pt.iscte.pesca.compiler.errors.IncompatibleReturnType
-import pt.iscte.pesca.compiler.errors.IncompatibleVariableType
+import pt.iscte.pesca.compiler.errors.WrongReturnStmtType
+import pt.iscte.pesca.compiler.errors.WrongTypeForVariableDeclaration
 import pt.iscte.pesca.compiler.errors.UnknownType
 import pt.iscte.pesca.compiler.errors.UnknownMethod
 import pt.iscte.pesca.compiler.errors.UnknownVariable
+import pt.iscte.pesca.compiler.errors.WrongMethodCallParameters
 import pt.iscte.pesca.extensions.failure
+import pt.iscte.pesca.extensions.findMethodDeclaration
+import pt.iscte.pesca.extensions.isValidFor
 import pt.iscte.pesca.extensions.success
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
@@ -122,14 +125,14 @@ class ErrorFinder<T : Node>(private val target: T) {
         return unknown
     }
 
-    fun findIncompatibleVariableTypes(): List<IncompatibleVariableType> =
+    fun findVariablesAssignedWithWrongType(): List<WrongTypeForVariableDeclaration> =
         target.findAll(VariableDeclarator::class.java).filter { variable ->
             variable.initializer.isPresent &&
             success { variable.initializer.get().calculateResolvedType() }
             && variable.typeAsString != variable.initializer.get().calculateResolvedType().describe()
-        }.map { IncompatibleVariableType(it) }
+        }.map { WrongTypeForVariableDeclaration(it) }
 
-    fun findIncompatibleReturnTypes(): List<IncompatibleReturnType> =
+    fun findReturnStmtsWithWrongType(): List<WrongReturnStmtType> =
         target.findAll(ReturnStmt::class.java).filter {
             val method = it.findAncestor(MethodDeclaration::class.java)
             method.isPresent &&
@@ -137,6 +140,12 @@ class ErrorFinder<T : Node>(private val target: T) {
             success { it.expression.get().calculateResolvedType() } &&
             it.expression.get().calculateResolvedType().describe() != method.get().typeAsString
         }.map {
-            IncompatibleReturnType(it.findAncestor(MethodDeclaration::class.java).get(), it)
+            WrongReturnStmtType(it.findAncestor(MethodDeclaration::class.java).get(), it)
         }
+
+    fun findMethodCallsWithWrongArguments(): List<WrongMethodCallParameters> =
+        target.findAll(MethodCallExpr::class.java).filter {
+            val dec = it.findMethodDeclaration()
+            dec.isPresent && !it.isValidFor(dec.get())
+        }.map { WrongMethodCallParameters(it.findMethodDeclaration().get(), it) }
 }

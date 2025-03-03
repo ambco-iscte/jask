@@ -7,7 +7,7 @@ import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.WhileStmt
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.extensions.asString
+import pt.iscte.pesca.extensions.nameWithScope
 import pt.iscte.pesca.extensions.sample
 import pt.iscte.strudel.parsing.java.SourceLocation
 
@@ -23,7 +23,7 @@ class WhichFunctionDependencies : StaticQuestion<MethodDeclaration>() {
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
         val calls = method.findAll(MethodCallExpr::class.java)
-        val callsNames = calls.map { it.asString()  }
+        val callsNames = calls.map { it.nameWithScope()  }
 
         val herrings = mutableListOf<String>(method.nameAsString)
         if (method.findAll(WhileStmt::class.java).isNotEmpty())

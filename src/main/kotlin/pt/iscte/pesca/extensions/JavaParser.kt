@@ -1,12 +1,12 @@
 package pt.iscte.pesca.extensions
 
+import com.github.javaparser.Position
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
-import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithBody
@@ -21,6 +21,7 @@ import com.github.javaparser.ast.type.Type
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import java.util.Locale
 import java.util.Optional
+import kotlin.math.abs
 
 inline fun <reified T : Node> find(source: String, condition: (T) -> Boolean = { true }): List<T> =
     StaticJavaParser.parse(source).findAll(T::class.java).filter { condition(it) }
@@ -68,13 +69,42 @@ fun MethodDeclaration.getUsableVariables(): List<VariableDeclarator> =
         it.variables
     } ?: listOf())
 
-fun MethodCallExpr.asString(): String =
+fun MethodCallExpr.nameWithScope(): String =
     (if (scope.isPresent) "${scope.get()}." else "") + nameAsString
 
-fun MethodDeclaration.asString(): String {
+fun MethodDeclaration.nameWithScope(): String {
     val type = findAncestor(TypeDeclaration::class.java)
     return if (type.isPresent)
         "${type.get().nameAsString}.${nameAsString}"
     else
         nameAsString
 }
+
+fun MethodCallExpr.findMethodDeclaration(): Optional<MethodDeclaration> {
+    val unit = findCompilationUnit()
+    if (unit.isEmpty)
+        return Optional.empty<MethodDeclaration>()
+
+    return Optional.ofNullable(unit.get().findAll(MethodDeclaration::class.java).filter {
+        if (this.scope.isPresent)
+            it.nameWithScope() == this.nameWithScope()
+        else
+            it.nameAsString == this.nameAsString
+    }.minByOrNull { abs(it.parameters.size - this.arguments.size) })
+}
+
+fun MethodCallExpr.isValidFor(method: MethodDeclaration): Boolean {
+    if (arguments.size != method.parameters.size)
+        return false
+    arguments.forEachIndexed { i, arg ->
+        runCatching {
+            val argumentType = arg.calculateResolvedType()
+            val parameterType = method.parameters[i].type.resolve()
+            parameterType.isAssignableBy(argumentType)
+        }.getOrElse { return false }
+    }
+    return true
+}
+
+fun Position.relativeTo(other: Position): Position =
+    Position(line - other.line + 1, column - other.column + 1)
