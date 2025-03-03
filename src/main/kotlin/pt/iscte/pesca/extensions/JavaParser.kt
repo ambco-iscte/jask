@@ -7,15 +7,12 @@ import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithBody
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
-import com.github.javaparser.ast.stmt.DoStmt
-import com.github.javaparser.ast.stmt.ForEachStmt
-import com.github.javaparser.ast.stmt.ForStmt
-import com.github.javaparser.ast.stmt.ReturnStmt
-import com.github.javaparser.ast.stmt.WhileStmt
+import com.github.javaparser.ast.stmt.*
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
@@ -108,3 +105,17 @@ fun MethodCallExpr.isValidFor(method: MethodDeclaration): Boolean {
 
 fun Position.relativeTo(other: Position): Position =
     Position(line - other.line + 1, column - other.column + 1)
+
+fun MethodDeclaration.hasDuplicatedIfElse(): Boolean{
+    this.findAll(IfStmt::class.java).forEach { ifStmt ->
+        val elseStmt: Optional<Statement> = ifStmt.elseStmt
+        if (elseStmt.isPresent && elseStmt.get().isBlockStmt) {
+            val ifBody: BlockStmt = ifStmt.thenStmt.asBlockStmt()
+            val elseBody: BlockStmt = elseStmt.get().asBlockStmt()
+            if (ifBody == elseBody) {
+                return true
+            }
+        }
+    }
+    return false
+}
