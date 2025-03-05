@@ -7,9 +7,9 @@
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/javaparser/DuplicateCodeInLoops.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/Utils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/compiler/CallMethodWithWrongParameterNumber.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/compiler/CallMethodWithWrongParameterNumber.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/javaparser/UselessDuplicationIfElse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/javaparser/UselessDuplicationIfElse.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,8 +41,9 @@
       <list>
         <option value="Kotlin Object" />
         <option value="Kotlin Interface" />
-        <option value="Kotlin Class" />
         <option value="Kotlin File" />
+        <option value="Kotlin Class" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -80,6 +81,7 @@
     "Gradle.Build pesca.executor": "Run",
     "Gradle.TestIsRecursive.test.executor": "Run",
     "Kotlin.MainKt.executor": "Run",
+    "Kotlin.RemoveEmptyIfKt.executor": "Run",
     "Kotlin.UselessDuplicationIfElseKt.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -116,7 +118,7 @@
       <recent name="pt.iscte.pesca.questions.javaparser" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.UselessDuplicationIfElseKt">
+  <component name="RunManager" selected="Kotlin.RemoveEmptyIfKt">
     <configuration name="AllTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -172,6 +174,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="RemoveEmptyIfKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.questions.javaparser.RemoveEmptyIfKt" />
+      <module name="pesca.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="UselessDuplicationIfElseKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.questions.UselessDuplicationIfElseKt" />
       <module name="pesca.main" />
@@ -181,6 +190,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin.RemoveEmptyIfKt" />
         <item itemvalue="Kotlin.UselessDuplicationIfElseKt" />
         <item itemvalue="Gradle.AllTests" />
         <item itemvalue="Gradle.TestIsRecursive.test" />
@@ -215,7 +225,8 @@
       <workItem from="1730403980056" duration="93000" />
       <workItem from="1732135102752" duration="164000" />
       <workItem from="1739459715464" duration="4724000" />
-      <workItem from="1741030093309" duration="4812000" />
+      <workItem from="1741030093309" duration="5661000" />
+      <workItem from="1741200991517" duration="6768000" />
     </task>
     <servers />
   </component>

@@ -107,15 +107,29 @@ fun MethodCallExpr.isValidFor(method: MethodDeclaration): Boolean {
 fun Position.relativeTo(other: Position): Position =
     Position(line - other.line + 1, column - other.column + 1)
 
+fun IfStmt.hasDuplicateCode(): Boolean {
+    if (!elseStmt.isPresent) return false
+
+    val IfStatements = if (thenStmt.isBlockStmt) {
+        thenStmt.asBlockStmt().statements
+    } else {
+        listOf(thenStmt)  // Wrap single statement in a list
+    }
+
+    val ElseStatements = if (elseStmt.get().isBlockStmt) {
+        elseStmt.get().asBlockStmt().statements
+    } else {
+        listOf(elseStmt.get())  // Wrap single statement in a list
+    }
+
+    return ElseStatements == IfStatements
+
+}
+
 fun MethodDeclaration.hasDuplicatedIfElse(): Boolean{
     this.findAll(IfStmt::class.java).forEach { ifStmt ->
-        val elseStmt: Optional<Statement> = ifStmt.elseStmt
-        if (elseStmt.isPresent && elseStmt.get().isBlockStmt) {
-            val ifBody: BlockStmt = ifStmt.thenStmt.asBlockStmt()
-            val elseBody: BlockStmt = elseStmt.get().asBlockStmt()
-            if (ifBody == elseBody) {
+        if (ifStmt.hasDuplicateCode()) {
                 return true
-            }
         }
     }
     return false

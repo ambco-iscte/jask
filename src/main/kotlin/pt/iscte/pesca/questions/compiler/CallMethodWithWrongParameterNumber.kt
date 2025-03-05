@@ -1,10 +1,7 @@
 package pt.iscte.pesca.questions.compiler
 
-import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.expr.MethodCallExpr
-import org.checkerframework.checker.signature.qual.MethodDescriptor
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.compiler.ErrorFinder
 import pt.iscte.pesca.extensions.multipleChoice
