@@ -8,6 +8,8 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.FieldAccessExpr
+import com.github.javaparser.ast.expr.*
+import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithBody
@@ -137,3 +139,51 @@ fun MethodDeclaration.hasDuplicatedIfElse(): Boolean{
 
 fun Node.lineRelativeTo(other: Node): Int =
     range.get().begin.relativeTo(other.range.get().begin).line
+
+
+
+fun negateExpression(expression: Expression): Expression {
+    return when (expression) {
+        is BinaryExpr -> {
+            when (expression.operator) {
+                BinaryExpr.Operator.AND -> BinaryExpr(
+                    negateExpression(expression.left),
+                    negateExpression(expression.right),
+                    BinaryExpr.Operator.OR
+                )
+                BinaryExpr.Operator.OR -> BinaryExpr(
+                    negateExpression(expression.left),
+                    negateExpression(expression.right),
+                    BinaryExpr.Operator.AND
+                )
+                BinaryExpr.Operator.EQUALS -> BinaryExpr(
+                    expression.left, expression.right, BinaryExpr.Operator.NOT_EQUALS
+                )
+                BinaryExpr.Operator.NOT_EQUALS -> BinaryExpr(
+                    expression.left, expression.right, BinaryExpr.Operator.EQUALS
+                )
+                BinaryExpr.Operator.GREATER -> BinaryExpr(
+                    expression.left, expression.right, BinaryExpr.Operator.LESS_EQUALS
+                )
+                BinaryExpr.Operator.GREATER_EQUALS -> BinaryExpr(
+                    expression.left, expression.right, BinaryExpr.Operator.LESS
+                )
+                BinaryExpr.Operator.LESS -> BinaryExpr(
+                    expression.left, expression.right, BinaryExpr.Operator.GREATER_EQUALS
+                )
+                BinaryExpr.Operator.LESS_EQUALS -> BinaryExpr(
+                    expression.left, expression.right, BinaryExpr.Operator.GREATER
+                )
+                else -> UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Default case
+            }
+        }
+        is UnaryExpr -> {
+            if (expression.operator == UnaryExpr.Operator.LOGICAL_COMPLEMENT) {
+                expression.expression // Remove double negation (!!A → A)
+            } else {
+                UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT)
+            }
+        }
+        else -> UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Default case
+    }
+}
