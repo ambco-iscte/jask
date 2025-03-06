@@ -13,7 +13,7 @@ class WhichParameterTypes : StaticQuestion<MethodDeclaration>() {
     companion object {
         fun getDistractors(method: MethodDeclaration, language: Language): Map<Option, Boolean> {
             val parameters = method.parameters.map { it.nameAsString }
-            val paramTypes = method.parameters.map { it.typeAsString }
+            val paramTypes = method.parameters.map { it.typeAsString } // TODO can be equal to one of the others ugghh
             val returnType = method.typeAsString
 
             val localVars = method.getLocalVariables().map { it.nameAsString }

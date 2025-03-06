@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.javaparser
+package pt.iscte.pesca.questions
 
 import pt.iscte.pesca.questions.QuestionData
 import pt.iscte.pesca.questions.SourceCode
@@ -12,7 +12,6 @@ import com.github.javaparser.ast.stmt.IfStmt
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.extensions.*
-import pt.iscte.strudel.parsing.java.SourceLocation
 
 class RemoveEmptyIf : StaticQuestion<MethodDeclaration>() {
 

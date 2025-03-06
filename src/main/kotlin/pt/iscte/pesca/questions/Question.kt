@@ -3,6 +3,7 @@ package pt.iscte.pesca.questions
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.Expression
 import pt.iscte.pesca.Language
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IProgramElement
@@ -23,7 +24,9 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
     constructor(statement: String, code: MethodDeclaration): this(statement, code.toString())
 
     constructor(statement: String, code: NodeList<Node>): this(statement, code.joinToString(System.lineSeparator().repeat(2)) {
-        it.toString()
+        if (it is Expression && !it.toString().endsWith(";"))
+            "$it;"
+        else it.toString()
     })
 
     constructor(statement: String, code: IProgramElement): this(statement, (code.getProperty(JP) ?: code).toString())

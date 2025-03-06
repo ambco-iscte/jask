@@ -3,13 +3,11 @@ package pt.iscte.pesca.questions
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.nodeTypes.NodeWithBody
-import com.github.javaparser.ast.nodeTypes.NodeWithCondition
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.IfStmt
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.extensions.*
-import pt.iscte.strudel.parsing.java.SourceLocation
 
 class UselessDuplicationIfElse : StaticQuestion<MethodDeclaration>() {
 

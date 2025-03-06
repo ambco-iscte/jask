@@ -1,21 +1,22 @@
 package pt.iscte.pesca.questions
 
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.compiler.ErrorFinder
 import pt.iscte.pesca.extensions.randomBy
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class ReferencesUndefinedVariable : StaticQuestion<CompilationUnit>() {
+class ReferencesUndefinedVariable : StaticQuestion<MethodDeclaration>() {
 
-    override fun isApplicable(element: CompilationUnit): Boolean =
+    override fun isApplicable(element: MethodDeclaration): Boolean =
         ErrorFinder(element).findUnknownVariables().any { it.scope.getUsableVariables().size >= 2 }
 
     override fun build(
         sources: List<SourceCode>,
         language: Language
     ): QuestionData {
-        val (source, unit) = sources.getRandom<CompilationUnit>()
+        val (source, unit) = sources.getRandom<MethodDeclaration>()
 
         val errors = ErrorFinder(unit).findUnknownVariables()
 

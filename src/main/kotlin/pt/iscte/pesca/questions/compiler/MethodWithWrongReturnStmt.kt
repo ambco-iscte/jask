@@ -14,6 +14,7 @@ import pt.iscte.pesca.questions.SimpleTextOption
 import pt.iscte.pesca.questions.SourceCode
 import pt.iscte.pesca.questions.StaticQuestion
 import pt.iscte.pesca.questions.TextWithCodeStatement
+import pt.iscte.pesca.questions.WhichReturnType
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class MethodWithWrongReturnStmt: StaticQuestion<MethodDeclaration>() {
@@ -29,26 +30,14 @@ class MethodWithWrongReturnStmt: StaticQuestion<MethodDeclaration>() {
 
         val error = ErrorFinder(method).findReturnStmtsWithWrongType().random()
 
-        val methodReturnType = method.type
-
-        val otherTypes = method.getUsedTypes().map { it.asString() }
-
-        val exprTypes = method.findAll(Expression::class.java).filter { expression ->
-            runCatching { expression.calculateResolvedType() }.isSuccess
-        }.map { it.calculateResolvedType().describe() }
-
-        val distractors = sampleSequentially(3, otherTypes, exprTypes, listOf(method.nameAsString), JAVA_PRIMITIVE_TYPES) {
-            it != methodReturnType.asString() && it != methodReturnType.toString()
-        }
-
-        val options: MutableMap<Option, Boolean> =
-            distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
-        options[SimpleTextOption(methodReturnType)] = true
-
         return QuestionData(
             source,
-            TextWithCodeStatement(language["MethodWithWrongReturnStmt"].format(error.returnStmt.toString(), method.nameWithScope()), method),
-            options,
+            TextWithCodeStatement(language["MethodWithWrongReturnStmt"].format(
+                error.returnStmt.toString(),
+                method.nameWithScope()),
+                method
+            ),
+            WhichReturnType.distractors(method),
             language = language,
             relevantSourceCode = listOf(SourceLocation(method.type), SourceLocation(error.returnStmt))
         )

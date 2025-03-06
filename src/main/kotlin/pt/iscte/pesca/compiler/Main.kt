@@ -6,6 +6,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.pesca.Localisation
+import pt.iscte.pesca.questions.compiler.AssignVarWithMethodWrongType
 import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterNumber
 import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterTypes
 import pt.iscte.pesca.questions.compiler.MethodWithWrongReturnStmt
@@ -37,6 +38,8 @@ fun main() {
             private int m = 2 * l;
             private int a = 2 * a;
             
+            private String abc = bar(4);
+            
             private notfoundclass x = 3;
             private doesnotexist y = 4;
             
@@ -65,7 +68,7 @@ fun main() {
         }
     """.trimIndent()
 
-    val qlc = CallMethodWithWrongParameterTypes()
+    val qlc = AssignVarWithMethodWrongType()
     val data = qlc.generate(src, Localisation.getLanguage("pt"))
 
     println(data)

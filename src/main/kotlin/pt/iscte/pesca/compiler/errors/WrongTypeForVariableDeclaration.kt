@@ -1,6 +1,7 @@
 package pt.iscte.pesca.compiler.errors
 
 import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.types.ResolvedType
 import pt.iscte.pesca.compiler.ICompilerError
@@ -23,6 +24,9 @@ class WrongTypeForVariableDeclaration(val variable: VariableDeclarator): ICompil
     
     val initialiserIsMethodCall: Boolean
         get() = variable.initializer.get().isMethodCallExpr
+
+    val variableInitialiser: Expression
+        get() = variable.initializer.get()
 
     override fun message(): String = "Variable ${variable.nameAsString} is of type ${expected.asString()}, but is " +
             "initialised with expression of type ${actual.describe()}: ${variable.initializer.get()}"

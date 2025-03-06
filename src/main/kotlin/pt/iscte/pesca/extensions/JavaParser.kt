@@ -134,3 +134,6 @@ fun MethodDeclaration.hasDuplicatedIfElse(): Boolean{
     }
     return false
 }
+
+fun Node.lineRelativeTo(other: Node): Int =
+    range.get().begin.relativeTo(other.range.get().begin).line
