@@ -187,3 +187,58 @@ fun negateExpression(expression: Expression): Expression {
         else -> UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Default case
     }
 }
+
+
+fun removeEqualsTrueOrFalse(expression: Expression): Expression {
+    when (expression) {
+        is BinaryExpr -> {
+            when (expression.operator) {
+                BinaryExpr.Operator.AND -> return BinaryExpr(
+                    removeEqualsTrueOrFalse(expression.left),
+                    removeEqualsTrueOrFalse(expression.right),
+                    BinaryExpr.Operator.AND
+                )
+                BinaryExpr.Operator.OR -> return BinaryExpr(
+                    removeEqualsTrueOrFalse(expression.left),
+                    removeEqualsTrueOrFalse(expression.right),
+                    BinaryExpr.Operator.OR
+                )
+                BinaryExpr.Operator.EQUALS -> { // Handle '=='
+                    when {
+                        expression.right is BooleanLiteralExpr && (expression.right as BooleanLiteralExpr).value -> {
+                            return expression.left // Replace (a == true) with a
+                        }
+                        expression.left is BooleanLiteralExpr && (expression.left as BooleanLiteralExpr).value -> {
+                            return expression.right // Replace (true == a) with a
+                        }
+                        expression.right is BooleanLiteralExpr && !(expression.right as BooleanLiteralExpr).value -> {
+                            return UnaryExpr(expression.left, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (a == false) with !a
+                        }
+                        expression.left is BooleanLiteralExpr && !(expression.left as BooleanLiteralExpr).value -> {
+                            return UnaryExpr(expression.right, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (false == a) with !a
+                        }
+                    }
+                }
+                BinaryExpr.Operator.NOT_EQUALS -> { // Handle '!='
+                    when {
+                        expression.right is BooleanLiteralExpr && (expression.right as BooleanLiteralExpr).value -> {
+                            return UnaryExpr(expression.left, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (a != true) with !a
+                        }
+                        expression.left is BooleanLiteralExpr && (expression.left as BooleanLiteralExpr).value -> {
+                            return UnaryExpr(expression.right, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (true != a) with !a
+                        }
+                        expression.right is BooleanLiteralExpr && !(expression.right as BooleanLiteralExpr).value -> {
+                            return expression.left // Replace (a != false) with a
+                        }
+                        expression.left is BooleanLiteralExpr && !(expression.left as BooleanLiteralExpr).value -> {
+                            return expression.right // Replace (false != a) with a
+                        }
+                    }
+                }
+
+                else -> {}
+            }
+        }
+    }
+    return expression
+}

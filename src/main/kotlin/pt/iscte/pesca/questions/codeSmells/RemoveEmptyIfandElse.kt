@@ -79,7 +79,7 @@ class RemoveEmptyIfandElse : StaticQuestion<MethodDeclaration>() {
         return QuestionData(
             source,
             TextWithMultipleCodeStatements(
-                language["UselessDuplicationIfElse"].format(method.nameAsString),listOf(method.toString(),methodReplaced.toString())),
+                language["RemoveEmptyIfandElse"].format(method.nameAsString),listOf(method.toString(),methodReplaced.toString())),
             true.trueOrFalse(language),
             language = language,
 
@@ -112,7 +112,7 @@ fun main() {
         }
     """.trimIndent()
 
-    val qlc = RemoveEmptyIf()
+    val qlc = RemoveEmptyIfandElse()
     val data = qlc.generate(source,Localisation.getLanguage("pt"))
     println(data)
 }
