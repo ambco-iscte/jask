@@ -7,7 +7,6 @@ import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
-import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.expr.MethodCallExpr
@@ -241,4 +240,87 @@ fun removeEqualsTrueOrFalse(expression: Expression): Expression {
         }
     }
     return expression
+}
+
+
+fun findUselessVariableDeclarations(element: MethodDeclaration): List<List<Statement>> {
+    fun checkBlock(statements: List<Statement>): List<List<Statement>> {
+        val declaredVariables = mutableMapOf<String, Int>() // Stores variable names and their declaration index
+        val lastAssignedStatement = mutableMapOf<String, Int>() // Tracks last assigned statement index
+        val unnecessaryDeclarations = mutableListOf<List<Statement>>()
+
+        for (i in statements.indices) {
+            val currentStmt = statements[i]
+
+            // Check if the statement is a variable declaration
+            if (currentStmt is ExpressionStmt && currentStmt.expression is VariableDeclarationExpr) {
+                val varDecl = currentStmt.expression as VariableDeclarationExpr
+
+                if (varDecl.variables.size == 1) {
+                    val variableName = varDecl.variables[0].nameAsString
+                    declaredVariables[variableName] = i
+                }
+            }
+
+            // Check if the statement is an assignment
+            if (currentStmt is ExpressionStmt && currentStmt.expression is AssignExpr) {
+                val assignExpr = currentStmt.expression as AssignExpr
+                val assignedVar = assignExpr.target
+
+                if (assignedVar is NameExpr) {
+                    val variableName = assignedVar.nameAsString
+
+                    // Check if the variable was previously declared but not used before assignment
+                    val declarationIndex = declaredVariables[variableName]
+                    if (declarationIndex != null) {
+                        val isUnusedBeforeAssignment = (declarationIndex + 1 until i).all { stmtIndex ->
+                            val stmt = statements[stmtIndex]
+                            !stmt.findAll(NameExpr::class.java).any { it.nameAsString == variableName }
+                        }
+                        if (isUnusedBeforeAssignment) {
+                            unnecessaryDeclarations.add(listOf(statements[declarationIndex], currentStmt))
+                        }
+                    }
+
+                    // Check if the variable was assigned before but not used in between
+                    val lastAssignmentIndex = lastAssignedStatement[variableName]
+                    if (lastAssignmentIndex != null) {
+                        val isUnusedBetweenAssignments = (lastAssignmentIndex + 1 until i).all { stmtIndex ->
+                            val stmt = statements[stmtIndex]
+                            !stmt.findAll(NameExpr::class.java).any { it.nameAsString == variableName }
+                        }
+                        if (isUnusedBetweenAssignments) {
+                            unnecessaryDeclarations.add(listOf(statements[lastAssignmentIndex], currentStmt))
+                        }
+                    }
+
+                    // Update last assigned statement index
+                    lastAssignedStatement[variableName] = i
+                }
+            }
+
+            // Recursively check nested blocks (if, while, for, etc.)
+            fun extractStatements(stmt: Statement?): List<Statement> {
+                return when (stmt) {
+                    is BlockStmt -> stmt.statements
+                    null -> emptyList()
+                    else -> listOf(stmt) // Treat single-line statements as a "block"
+                }
+            }
+
+            if (currentStmt is IfStmt) {
+                unnecessaryDeclarations.addAll(checkBlock(extractStatements(currentStmt.thenStmt)))
+                unnecessaryDeclarations.addAll(checkBlock(extractStatements(currentStmt.elseStmt.orElse(null))))
+            } else if (currentStmt is WhileStmt) {
+                unnecessaryDeclarations.addAll(checkBlock(extractStatements(currentStmt.body)))
+            } else if (currentStmt is ForStmt) {
+                unnecessaryDeclarations.addAll(checkBlock(extractStatements(currentStmt.body)))
+            } else if (currentStmt is ForEachStmt) {
+                unnecessaryDeclarations.addAll(checkBlock(extractStatements(currentStmt.body)))
+            }
+        }
+        return unnecessaryDeclarations
+    }
+
+    return checkBlock(element.body.orElse(null)?.statements ?: emptyList())
 }
