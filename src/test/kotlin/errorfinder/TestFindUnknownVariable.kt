@@ -1,4 +1,4 @@
-package compiler
+package errorfinder
 
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import pt.iscte.pesca.compiler.ErrorFinder
 import kotlin.test.assertEquals
 
-class TestWrongReturnStmtType {
+class TestFindUnknownVariable {
 
     init {
         StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
@@ -22,26 +22,27 @@ class TestWrongReturnStmtType {
     fun test() {
         val src = """
             class HelloWorld {
+                private int i = 0;
+                private int j = k;
+            
                 public static int foo(int n) {
-                    return n * 2.0;
-                }
-                
-                public static double bar(int n) {
-                    return ":)";
+                    return n * m;
                 }
             }
         """.trimIndent()
 
-        val errors = ErrorFinder(StaticJavaParser.parse(src)).findReturnStmtsWithWrongType()
+        val errors = ErrorFinder(StaticJavaParser.parse(src)).findUnknownVariables()
+
+        errors.forEach { println(it) }
 
         assertEquals(2, errors.size)
 
         val (e1, e2) = errors
 
-        assertEquals("int", e1.expected.asString())
-        assertEquals("double", e1.actual.describe())
+        assertEquals("k", e1.expr.nameAsString)
+        assertEquals("m", e2.expr.nameAsString)
 
-        assertEquals("double", e2.expected.asString())
-        assertEquals("java.lang.String", e2.actual.describe())
+        assertEquals(setOf("i", "j"), e1.scope.getUsableVariables())
+        assertEquals(setOf("i", "j", "n"), e2.scope.getUsableVariables())
     }
 }

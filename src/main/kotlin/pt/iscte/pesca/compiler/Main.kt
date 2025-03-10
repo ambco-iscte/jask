@@ -1,21 +1,12 @@
 package pt.iscte.pesca.compiler
 
-import com.github.javaparser.ParserConfiguration
-import com.github.javaparser.StaticJavaParser
-import com.github.javaparser.symbolsolver.JavaSymbolSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.pesca.Localisation
+import pt.iscte.pesca.extensions.configureStaticJavaParser
 import pt.iscte.pesca.questions.compiler.AssignVarWithMethodWrongType
 import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterNumber
-import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterTypes
-import pt.iscte.pesca.questions.compiler.MethodWithWrongReturnStmt
 
 fun main() {
-    StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
-    StaticJavaParser.getParserConfiguration().setSymbolResolver(
-        JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
-    )
+    configureStaticJavaParser()
 
     val src = """
         class StaticMethods {
@@ -68,7 +59,7 @@ fun main() {
         }
     """.trimIndent()
 
-    val qlc = AssignVarWithMethodWrongType()
+    val qlc = CallMethodWithWrongParameterNumber()
     val data = qlc.generate(src, Localisation.getLanguage("pt"))
 
     println(data)

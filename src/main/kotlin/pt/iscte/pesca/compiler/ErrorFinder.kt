@@ -24,6 +24,7 @@ import pt.iscte.pesca.compiler.errors.UnknownType
 import pt.iscte.pesca.compiler.errors.UnknownMethod
 import pt.iscte.pesca.compiler.errors.UnknownVariable
 import pt.iscte.pesca.compiler.errors.WrongMethodCallParameters
+import pt.iscte.pesca.extensions.configureStaticJavaParser
 import pt.iscte.pesca.extensions.failure
 import pt.iscte.pesca.extensions.findMethodDeclaration
 import pt.iscte.pesca.extensions.isValidFor
@@ -37,10 +38,7 @@ interface ICompilerError {
 class ErrorFinder<T : Node>(private val target: T) {
 
     init {
-        StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
-        StaticJavaParser.getParserConfiguration().setSymbolResolver(
-            JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
-        )
+        configureStaticJavaParser()
     }
 
     private val unit: CompilationUnit =

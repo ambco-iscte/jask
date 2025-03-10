@@ -4,10 +4,14 @@ import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
+import com.github.javaparser.symbolsolver.JavaSymbolSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.extensions.IModuleVisitor
 import pt.iscte.pesca.extensions.Quadruple
 import pt.iscte.pesca.extensions.accept
+import pt.iscte.pesca.extensions.configureStaticJavaParser
 import pt.iscte.pesca.extensions.randomByOrNull
 import pt.iscte.pesca.extensions.toIValue
 import pt.iscte.strudel.model.*
@@ -56,7 +60,7 @@ sealed class Question<T : Any>(val range: IntRange = 1 .. Int.MAX_VALUE) {
 
     companion object {
         init {
-            StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
+            configureStaticJavaParser()
         }
     }
 

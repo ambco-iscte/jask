@@ -1,4 +1,4 @@
-package pt.iscte.pesca.questions.codeSmells
+package pt.iscte.pesca.questions
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.*

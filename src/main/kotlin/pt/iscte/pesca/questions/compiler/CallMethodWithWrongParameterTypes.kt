@@ -2,6 +2,7 @@ package pt.iscte.pesca.questions.compiler
 
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.body.TypeDeclaration
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.compiler.ErrorFinder
 import pt.iscte.pesca.extensions.multipleChoice
@@ -14,9 +15,9 @@ import pt.iscte.pesca.questions.TextWithCodeStatement
 import pt.iscte.pesca.questions.WhichParameterTypes
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class CallMethodWithWrongParameterTypes: StaticQuestion<MethodDeclaration>() {
+class CallMethodWithWrongParameterTypes: StaticQuestion<TypeDeclaration<*>>() {
 
-    override fun isApplicable(element: MethodDeclaration): Boolean =
+    override fun isApplicable(element: TypeDeclaration<*>): Boolean =
         ErrorFinder(element).findMethodCallsWithWrongArguments().any {
             it.parameterTypeMismatch && !it.parameterNumberMismatch
         }
@@ -25,22 +26,22 @@ class CallMethodWithWrongParameterTypes: StaticQuestion<MethodDeclaration>() {
         sources: List<SourceCode>,
         language: Language
     ): QuestionData {
-        val (source, method) = sources.getRandom<MethodDeclaration>()
+        val (source, type) = sources.getRandom<TypeDeclaration<*>>()
 
-        val errors = ErrorFinder(method).findMethodCallsWithWrongArguments()
+        val errors = ErrorFinder(type).findMethodCallsWithWrongArguments()
 
         val (callTarget, call) = errors.randomBy { it.parameterTypeMismatch && !it.parameterNumberMismatch }
 
-        val line = call.range.get().begin.relativeTo(method.range.get().begin).line
+        val line = call.range.get().begin.relativeTo(type.range.get().begin).line
 
         return QuestionData(
             source,
             TextWithCodeStatement(language["CallMethodWithWrongParameterTypes"].format(
                 call.toString(), line, callTarget.nameAsString
-            ), NodeList(method, callTarget)),
+            ), NodeList(type)),
             WhichParameterTypes.getDistractors(callTarget, language),
             language = language,
-            relevantSourceCode = method.parameters.map { SourceLocation(it) }
+            relevantSourceCode = callTarget.parameters.map { SourceLocation(it) } + listOf(SourceLocation(call))
         )
     }
 }

@@ -1,5 +1,6 @@
 package pt.iscte.pesca.extensions
 
+import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.Position
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.Node
@@ -16,10 +17,20 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
 import com.github.javaparser.ast.stmt.*
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
+import com.github.javaparser.symbolsolver.JavaSymbolSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import java.util.Locale
 import java.util.Optional
 import kotlin.math.abs
+
+fun configureStaticJavaParser() {
+    StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
+    StaticJavaParser.getParserConfiguration().setSymbolResolver(
+        JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
+    )
+}
 
 inline fun <reified T : Node> find(source: String, condition: (T) -> Boolean = { true }): List<T> =
     StaticJavaParser.parse(source).findAll(T::class.java).filter { condition(it) }

@@ -1,4 +1,4 @@
-package compiler
+package errorfinder
 
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
