@@ -1,7 +1,5 @@
-package pt.iscte.pesca.compiler
+package pt.iscte.pesca.errors
 
-import com.github.javaparser.ParserConfiguration
-import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.ConstructorDeclaration
@@ -15,15 +13,12 @@ import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.type.Type
-import com.github.javaparser.symbolsolver.JavaSymbolSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
-import pt.iscte.pesca.compiler.errors.WrongReturnStmtType
-import pt.iscte.pesca.compiler.errors.WrongTypeForVariableDeclaration
-import pt.iscte.pesca.compiler.errors.UnknownType
-import pt.iscte.pesca.compiler.errors.UnknownMethod
-import pt.iscte.pesca.compiler.errors.UnknownVariable
-import pt.iscte.pesca.compiler.errors.WrongMethodCallParameters
+import pt.iscte.pesca.errors.compiler.WrongReturnStmtType
+import pt.iscte.pesca.errors.compiler.WrongTypeForVariableDeclaration
+import pt.iscte.pesca.errors.compiler.UnknownType
+import pt.iscte.pesca.errors.compiler.UnknownMethod
+import pt.iscte.pesca.errors.compiler.UnknownVariable
+import pt.iscte.pesca.errors.compiler.WrongMethodCallParameters
 import pt.iscte.pesca.extensions.configureStaticJavaParser
 import pt.iscte.pesca.extensions.failure
 import pt.iscte.pesca.extensions.findMethodDeclaration
@@ -35,7 +30,7 @@ interface ICompilerError {
     fun message(): String
 }
 
-class ErrorFinder<T : Node>(private val target: T) {
+class CompilerErrorFinder<T : Node>(private val target: T) {
 
     init {
         configureStaticJavaParser()

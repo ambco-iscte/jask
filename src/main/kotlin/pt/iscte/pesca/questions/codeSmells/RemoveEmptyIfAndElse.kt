@@ -8,13 +8,14 @@ import pt.iscte.pesca.Language
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.extensions.*
 
-class RemoveEmptyIfandElse : StaticQuestion<MethodDeclaration>() {
+class RemoveEmptyIfAndElse : StaticQuestion<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val ifStmt = element.findAll(IfStmt::class.java).firstOrNull {
             if (it.thenStmt.isBlockStmt) {
                 it.thenStmt.asBlockStmt().isEmpty ||
-                        (it.elseStmt.isPresent && it.elseStmt.get().isBlockStmt  && it.elseStmt.get().asBlockStmt().isEmpty)
+                        (it.elseStmt.isPresent && it.elseStmt.get().isBlockStmt && it.elseStmt.get()
+                            .asBlockStmt().isEmpty)
             } else {
                 false
             }
@@ -30,63 +31,62 @@ class RemoveEmptyIfandElse : StaticQuestion<MethodDeclaration>() {
         var ifStmt = methodReplaced.findAll(IfStmt::class.java).first {
             if (it.thenStmt.isBlockStmt) {
                 it.thenStmt.asBlockStmt().isEmpty ||
-                        (it.elseStmt.isPresent && it.elseStmt.get().isBlockStmt  && it.elseStmt.get().asBlockStmt().isEmpty)
+                        (it.elseStmt.isPresent && it.elseStmt.get().isBlockStmt && it.elseStmt.get()
+                            .asBlockStmt().isEmpty)
             } else {
                 false
             }
         }
-        do {
 
-            if (ifStmt.elseStmt.isPresent){
+        do {
+            if (ifStmt.elseStmt.isPresent) {
                 if (ifStmt.elseStmt.get().isBlockStmt && ifStmt.elseStmt.get().asBlockStmt().isEmpty) {
                     ifStmt.removeElseStmt()
-                }else{
+                } else {
                     ifStmt.setThenStmt(ifStmt.elseStmt.get())
                     ifStmt.removeElseStmt()
                     ifStmt.setCondition(negateExpression(ifStmt.condition))
-
                 }
-            }else{
+            } else {
                 val thenStmt = ifStmt.thenStmt
                 val parent = ifStmt.parentNode.get()
-                if (parent is BlockStmt){
+                if (parent is BlockStmt) {
                     val parentStatements = parent.asBlockStmt().statements
                     parentStatements.remove(ifStmt)
-                }else{
-                    if (parent is NodeWithBody<*>){
-                        (parent as NodeWithBody<*>).setBody(thenStmt)
+                } else {
+                    if (parent is NodeWithBody<*>) {
+                        parent.body = thenStmt
                     }
                     if (parent is IfStmt)
-                        if((parent).thenStmt.equals(ifStmt)){
-                            (parent).thenStmt.replace(thenStmt)
-                        }else{
-                            (parent).elseStmt.get().replace(thenStmt)
+                        if (parent.thenStmt.equals(ifStmt)) {
+                            parent.thenStmt.replace(thenStmt)
+                        } else {
+                            parent.elseStmt.get().replace(thenStmt)
                         }
                 }
             }
             ifStmt = methodReplaced.findAll(IfStmt::class.java).firstOrNull {
                 if (it.thenStmt.isBlockStmt) {
                     it.thenStmt.asBlockStmt().isEmpty ||
-                            (it.elseStmt.isPresent && it.elseStmt.get().isBlockStmt  && it.elseStmt.get().asBlockStmt().isEmpty)
+                            (it.elseStmt.isPresent && it.elseStmt.get().isBlockStmt && it.elseStmt.get()
+                                .asBlockStmt().isEmpty)
                 } else {
                     false
                 }
             }
         } while (ifStmt != null)
 
-
-
         return QuestionData(
             source,
             TextWithMultipleCodeStatements(
-                language["RemoveEmptyIfandElse"].format(method.nameAsString),listOf(method.toString(),methodReplaced.toString())),
+                language["RemoveEmptyIfAndElse"].format(method.nameAsString),
+                listOf(method.toString(), methodReplaced.toString())
+            ),
             true.trueOrFalse(language),
-            language = language,
-
+            language = language
         )
     }
 }
-
 
 
 fun main() {
@@ -112,7 +112,7 @@ fun main() {
         }
     """.trimIndent()
 
-    val qlc = RemoveEmptyIfandElse()
-    val data = qlc.generate(source,Localisation.getLanguage("pt"))
+    val qlc = RemoveEmptyIfAndElse()
+    val data = qlc.generate(source, Localisation.getLanguage("pt"))
     println(data)
 }

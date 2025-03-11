@@ -2,7 +2,7 @@ package errorfinder
 
 import com.github.javaparser.StaticJavaParser
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.compiler.ErrorFinder
+import pt.iscte.pesca.errors.CompilerErrorFinder
 import kotlin.test.assertEquals
 
 class TestFindUnknownMethod {
@@ -17,7 +17,7 @@ class TestFindUnknownMethod {
             }
         """.trimIndent()
 
-        val errors = ErrorFinder(StaticJavaParser.parse(src)).findUnknownMethods()
+        val errors = CompilerErrorFinder(StaticJavaParser.parse(src)).findUnknownMethods()
 
         assertEquals(1, errors.size)
 

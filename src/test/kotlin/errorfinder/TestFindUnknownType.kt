@@ -2,7 +2,7 @@ package errorfinder
 
 import com.github.javaparser.StaticJavaParser
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.compiler.ErrorFinder
+import pt.iscte.pesca.errors.CompilerErrorFinder
 import kotlin.test.assertEquals
 
 class TestFindUnknownType {
@@ -19,7 +19,7 @@ class TestFindUnknownType {
             }
         """.trimIndent()
 
-        val errors = ErrorFinder(StaticJavaParser.parse(src)).findUnknownClasses()
+        val errors = CompilerErrorFinder(StaticJavaParser.parse(src)).findUnknownClasses()
 
         assertEquals(2, errors.size)
 

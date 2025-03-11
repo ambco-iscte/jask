@@ -1,10 +1,10 @@
-package pt.iscte.pesca.compiler.errors
+package pt.iscte.pesca.errors.compiler
 
 import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.types.ResolvedType
-import pt.iscte.pesca.compiler.ICompilerError
+import pt.iscte.pesca.errors.ICompilerError
 import pt.iscte.pesca.extensions.success
 
 class WrongTypeForVariableDeclaration(val variable: VariableDeclarator): ICompilerError {

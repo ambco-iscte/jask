@@ -11,11 +11,7 @@ class UnnecessaryEqualsTrueOrFalse : StaticQuestion<MethodDeclaration>() {
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val ifStmt = element.findAll(IfStmt::class.java).firstOrNull {
             val condition = it.condition
-            if (removeEqualsTrueOrFalse(condition) != condition) {
-                true
-            } else {
-                false
-            }
+            removeEqualsTrueOrFalse(condition) != condition
         }
         return ifStmt != null
     }
@@ -27,22 +23,14 @@ class UnnecessaryEqualsTrueOrFalse : StaticQuestion<MethodDeclaration>() {
 
         var ifStmt = methodReplaced.findAll(IfStmt::class.java).firstOrNull {
             val condition = it.condition
-            if (removeEqualsTrueOrFalse(condition) != condition) {
-                true
-            } else {
-                false
-            }
+            removeEqualsTrueOrFalse(condition) != condition
         }
 
         do {
             ifStmt?.setCondition(removeEqualsTrueOrFalse(ifStmt.condition))
             ifStmt = methodReplaced.findAll(IfStmt::class.java).firstOrNull {
                 val condition = it.condition
-                if (removeEqualsTrueOrFalse(condition) != condition) {
-                    true
-                } else {
-                    false
-                }
+                removeEqualsTrueOrFalse(condition) != condition
             }
         } while (ifStmt != null)
 
@@ -50,14 +38,14 @@ class UnnecessaryEqualsTrueOrFalse : StaticQuestion<MethodDeclaration>() {
         return QuestionData(
             source,
             TextWithMultipleCodeStatements(
-                language["UnnecessaryEqualsTrueOrFalse"].format(method.nameAsString),listOf(method.toString(),methodReplaced.toString())),
+                language["UnnecessaryEqualsTrueOrFalse"].format(method.nameAsString),
+                listOf(method.toString(), methodReplaced.toString())
+            ),
             true.trueOrFalse(language),
-            language = language,
-
-            )
+            language = language
+        )
     }
 }
-
 
 
 fun main() {
@@ -78,6 +66,6 @@ fun main() {
     """.trimIndent()
 
     val qlc = UnnecessaryEqualsTrueOrFalse()
-    val data = qlc.generate(source,Localisation.getLanguage("pt"))
+    val data = qlc.generate(source, Localisation.getLanguage("pt"))
     println(data)
 }

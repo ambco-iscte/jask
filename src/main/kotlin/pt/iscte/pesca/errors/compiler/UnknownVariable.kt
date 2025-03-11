@@ -1,9 +1,8 @@
-package pt.iscte.pesca.compiler.errors
+package pt.iscte.pesca.errors.compiler
 
 import com.github.javaparser.ast.expr.NameExpr
-import com.github.javaparser.ast.stmt.Statement
-import pt.iscte.pesca.compiler.ICompilerError
-import pt.iscte.pesca.compiler.VariableScoping
+import pt.iscte.pesca.errors.ICompilerError
+import pt.iscte.pesca.errors.VariableScoping
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
 data class UnknownVariable(val expr: NameExpr, val scope: VariableScoping.Scope<*>): ICompilerError {

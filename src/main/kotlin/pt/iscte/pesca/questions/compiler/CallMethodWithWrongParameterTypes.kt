@@ -1,11 +1,9 @@
 package pt.iscte.pesca.questions.compiler
 
 import com.github.javaparser.ast.NodeList
-import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.compiler.ErrorFinder
-import pt.iscte.pesca.extensions.multipleChoice
+import pt.iscte.pesca.errors.CompilerErrorFinder
 import pt.iscte.pesca.extensions.randomBy
 import pt.iscte.pesca.extensions.relativeTo
 import pt.iscte.pesca.questions.QuestionData
@@ -18,7 +16,7 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 class CallMethodWithWrongParameterTypes: StaticQuestion<TypeDeclaration<*>>() {
 
     override fun isApplicable(element: TypeDeclaration<*>): Boolean =
-        ErrorFinder(element).findMethodCallsWithWrongArguments().any {
+        CompilerErrorFinder(element).findMethodCallsWithWrongArguments().any {
             it.parameterTypeMismatch && !it.parameterNumberMismatch
         }
 
@@ -28,7 +26,7 @@ class CallMethodWithWrongParameterTypes: StaticQuestion<TypeDeclaration<*>>() {
     ): QuestionData {
         val (source, type) = sources.getRandom<TypeDeclaration<*>>()
 
-        val errors = ErrorFinder(type).findMethodCallsWithWrongArguments()
+        val errors = CompilerErrorFinder(type).findMethodCallsWithWrongArguments()
 
         val (callTarget, call) = errors.randomBy { it.parameterTypeMismatch && !it.parameterNumberMismatch }
 
@@ -38,7 +36,7 @@ class CallMethodWithWrongParameterTypes: StaticQuestion<TypeDeclaration<*>>() {
             source,
             TextWithCodeStatement(language["CallMethodWithWrongParameterTypes"].format(
                 call.toString(), line, callTarget.nameAsString
-            ), NodeList(type)),
+            ), callTarget.toString()),
             WhichParameterTypes.getDistractors(callTarget, language),
             language = language,
             relevantSourceCode = callTarget.parameters.map { SourceLocation(it) } + listOf(SourceLocation(call))

@@ -1,5 +1,6 @@
 package pt.iscte.pesca.questions
 
+import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.*
 import pt.iscte.pesca.Language
@@ -17,35 +18,29 @@ class UselessVariableDeclaration : StaticQuestion<MethodDeclaration>() {
         return list.isNotEmpty()
     }
 
-
     override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
         val methodReplaced = method.clone()
 
+        // FIXME
         var ifStmt = methodReplaced.findAll(IfStmt::class.java).firstOrNull {
             val condition = it.condition
-            if (removeEqualsTrueOrFalse(condition) != condition) {
-                true
-            } else {
-                false
-            }
+            removeEqualsTrueOrFalse(condition) != condition
         }
-
         ifStmt?.setCondition(removeEqualsTrueOrFalse(ifStmt.condition))
 
         return QuestionData(
             source,
             TextWithMultipleCodeStatements(
-                language["UselessVariableDeclaration"].format(method.nameAsString),listOf(method.toString(),methodReplaced.toString())),
+                language["UselessVariableDeclaration"].format(method.nameAsString),
+                listOf(method.toString(), methodReplaced.toString())
+            ),
             true.trueOrFalse(language),
-            language = language,
-
-            )
+            language = language
+        )
     }
 }
-
-
 
 fun main() {
     val source = """

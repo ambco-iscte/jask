@@ -4,7 +4,7 @@ import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.compiler.ErrorFinder
+import pt.iscte.pesca.errors.CompilerErrorFinder
 import pt.iscte.pesca.extensions.findMethodDeclaration
 import pt.iscte.pesca.extensions.nameWithScope
 import pt.iscte.pesca.extensions.randomBy
@@ -19,12 +19,12 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 class AssignVarWithMethodWrongType: StaticQuestion<TypeDeclaration<*>>() {
 
     override fun isApplicable(element: TypeDeclaration<*>): Boolean =
-        ErrorFinder(element).findVariablesAssignedWithWrongType().any { it.initialiserIsMethodCall }
+        CompilerErrorFinder(element).findVariablesAssignedWithWrongType().any { it.initialiserIsMethodCall }
 
     override fun build(sources: List<SourceCode>, language: Language): QuestionData {
         val (source, clazz) = sources.getRandom<TypeDeclaration<*>>()
 
-        val error = ErrorFinder(clazz).findVariablesAssignedWithWrongType().randomBy { it.initialiserIsMethodCall }
+        val error = CompilerErrorFinder(clazz).findVariablesAssignedWithWrongType().randomBy { it.initialiserIsMethodCall }
 
         val initCall = error.variableInitialiser.asMethodCallExpr()
         val methodUsedToInitialise = initCall.findMethodDeclaration().orElseThrow {

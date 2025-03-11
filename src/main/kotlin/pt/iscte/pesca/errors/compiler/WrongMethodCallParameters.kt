@@ -1,13 +1,10 @@
-package pt.iscte.pesca.compiler.errors
+package pt.iscte.pesca.errors.compiler
 
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.body.Parameter
-import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.type.Type
-import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration
 import com.github.javaparser.resolution.types.ResolvedType
-import pt.iscte.pesca.compiler.ICompilerError
+import pt.iscte.pesca.errors.ICompilerError
 import pt.iscte.pesca.extensions.isValidFor
 import pt.iscte.pesca.extensions.nameWithScope
 import pt.iscte.pesca.extensions.success

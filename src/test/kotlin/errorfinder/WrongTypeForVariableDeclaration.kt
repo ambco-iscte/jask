@@ -6,7 +6,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.compiler.ErrorFinder
+import pt.iscte.pesca.errors.CompilerErrorFinder
 import kotlin.test.assertEquals
 
 class WrongTypeForVariableDeclaration {
@@ -34,7 +34,7 @@ class WrongTypeForVariableDeclaration {
             }
         """.trimIndent()
 
-        val errors = ErrorFinder(StaticJavaParser.parse(src)).findVariablesAssignedWithWrongType()
+        val errors = CompilerErrorFinder(StaticJavaParser.parse(src)).findVariablesAssignedWithWrongType()
 
         assertEquals(4, errors.size)
 

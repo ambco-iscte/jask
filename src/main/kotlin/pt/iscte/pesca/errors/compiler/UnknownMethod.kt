@@ -1,8 +1,8 @@
-package pt.iscte.pesca.compiler.errors
+package pt.iscte.pesca.errors.compiler
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
-import pt.iscte.pesca.compiler.ICompilerError
+import pt.iscte.pesca.errors.ICompilerError
 import pt.iscte.pesca.extensions.nameWithScope
 
 data class UnknownMethod(val call: MethodCallExpr, val usable: List<MethodDeclaration>): ICompilerError {

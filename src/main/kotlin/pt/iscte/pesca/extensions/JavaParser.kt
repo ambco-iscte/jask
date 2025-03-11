@@ -74,9 +74,10 @@ fun MethodDeclaration.getLocalVariables(): List<VariableDeclarator> =
     findAll(VariableDeclarationExpr::class.java).flatMap { it.variables }
 
 fun MethodDeclaration.getUsableVariables(): List<VariableDeclarator> =
-    getLocalVariables() + (findAncestor(TypeDeclaration::class.java).getOrNull?.findAll(FieldDeclaration::class.java)?.flatMap {
-        it.variables
-    } ?: listOf())
+    getLocalVariables() + (findAncestor(TypeDeclaration::class.java).getOrNull?.findAll(FieldDeclaration::class.java)
+        ?.flatMap {
+            it.variables
+        } ?: listOf())
 
 fun MethodCallExpr.nameWithScope(): String =
     (if (scope.isPresent) "${scope.get()}." else "") + nameAsString
@@ -122,35 +123,29 @@ fun Position.relativeTo(other: Position): Position =
 fun IfStmt.hasDuplicateCode(): Boolean {
     if (!elseStmt.isPresent) return false
 
-    val IfStatements = if (thenStmt.isBlockStmt) {
+    val ifStatements = if (thenStmt.isBlockStmt) {
         thenStmt.asBlockStmt().statements
     } else {
         listOf(thenStmt)  // Wrap single statement in a list
     }
 
-    val ElseStatements = if (elseStmt.get().isBlockStmt) {
+    val elseStatements = if (elseStmt.get().isBlockStmt) {
         elseStmt.get().asBlockStmt().statements
     } else {
         listOf(elseStmt.get())  // Wrap single statement in a list
     }
 
-    return ElseStatements == IfStatements
+    return elseStatements == ifStatements
 
 }
 
-fun MethodDeclaration.hasDuplicatedIfElse(): Boolean{
-    this.findAll(IfStmt::class.java).forEach { ifStmt ->
-        if (ifStmt.hasDuplicateCode()) {
-                return true
-        }
+fun MethodDeclaration.hasDuplicatedIfElse(): Boolean =
+    this.findAll(IfStmt::class.java).any { ifStmt ->
+        ifStmt.hasDuplicateCode()
     }
-    return false
-}
 
 fun Node.lineRelativeTo(other: Node): Int =
     range.get().begin.relativeTo(other.range.get().begin).line
-
-
 
 fun negateExpression(expression: Expression): Expression {
     return when (expression) {
@@ -161,32 +156,41 @@ fun negateExpression(expression: Expression): Expression {
                     negateExpression(expression.right),
                     BinaryExpr.Operator.OR
                 )
+
                 BinaryExpr.Operator.OR -> BinaryExpr(
                     negateExpression(expression.left),
                     negateExpression(expression.right),
                     BinaryExpr.Operator.AND
                 )
+
                 BinaryExpr.Operator.EQUALS -> BinaryExpr(
                     expression.left, expression.right, BinaryExpr.Operator.NOT_EQUALS
                 )
+
                 BinaryExpr.Operator.NOT_EQUALS -> BinaryExpr(
                     expression.left, expression.right, BinaryExpr.Operator.EQUALS
                 )
+
                 BinaryExpr.Operator.GREATER -> BinaryExpr(
                     expression.left, expression.right, BinaryExpr.Operator.LESS_EQUALS
                 )
+
                 BinaryExpr.Operator.GREATER_EQUALS -> BinaryExpr(
                     expression.left, expression.right, BinaryExpr.Operator.LESS
                 )
+
                 BinaryExpr.Operator.LESS -> BinaryExpr(
                     expression.left, expression.right, BinaryExpr.Operator.GREATER_EQUALS
                 )
+
                 BinaryExpr.Operator.LESS_EQUALS -> BinaryExpr(
                     expression.left, expression.right, BinaryExpr.Operator.GREATER
                 )
+
                 else -> UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Default case
             }
         }
+
         is UnaryExpr -> {
             if (expression.operator == UnaryExpr.Operator.LOGICAL_COMPLEMENT) {
                 expression.expression // Remove double negation (!!A → A)
@@ -194,6 +198,7 @@ fun negateExpression(expression: Expression): Expression {
                 UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT)
             }
         }
+
         else -> UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Default case
     }
 }
@@ -208,38 +213,59 @@ fun removeEqualsTrueOrFalse(expression: Expression): Expression {
                     removeEqualsTrueOrFalse(expression.right),
                     BinaryExpr.Operator.AND
                 )
+
                 BinaryExpr.Operator.OR -> return BinaryExpr(
                     removeEqualsTrueOrFalse(expression.left),
                     removeEqualsTrueOrFalse(expression.right),
                     BinaryExpr.Operator.OR
                 )
+
                 BinaryExpr.Operator.EQUALS -> { // Handle '=='
                     when {
                         expression.right is BooleanLiteralExpr && (expression.right as BooleanLiteralExpr).value -> {
                             return expression.left // Replace (a == true) with a
                         }
+
                         expression.left is BooleanLiteralExpr && (expression.left as BooleanLiteralExpr).value -> {
                             return expression.right // Replace (true == a) with a
                         }
+
                         expression.right is BooleanLiteralExpr && !(expression.right as BooleanLiteralExpr).value -> {
-                            return UnaryExpr(expression.left, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (a == false) with !a
+                            return UnaryExpr(
+                                expression.left,
+                                UnaryExpr.Operator.LOGICAL_COMPLEMENT
+                            ) // Replace (a == false) with !a
                         }
+
                         expression.left is BooleanLiteralExpr && !(expression.left as BooleanLiteralExpr).value -> {
-                            return UnaryExpr(expression.right, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (false == a) with !a
+                            return UnaryExpr(
+                                expression.right,
+                                UnaryExpr.Operator.LOGICAL_COMPLEMENT
+                            ) // Replace (false == a) with !a
                         }
                     }
                 }
+
                 BinaryExpr.Operator.NOT_EQUALS -> { // Handle '!='
                     when {
                         expression.right is BooleanLiteralExpr && (expression.right as BooleanLiteralExpr).value -> {
-                            return UnaryExpr(expression.left, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (a != true) with !a
+                            return UnaryExpr(
+                                expression.left,
+                                UnaryExpr.Operator.LOGICAL_COMPLEMENT
+                            ) // Replace (a != true) with !a
                         }
+
                         expression.left is BooleanLiteralExpr && (expression.left as BooleanLiteralExpr).value -> {
-                            return UnaryExpr(expression.right, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Replace (true != a) with !a
+                            return UnaryExpr(
+                                expression.right,
+                                UnaryExpr.Operator.LOGICAL_COMPLEMENT
+                            ) // Replace (true != a) with !a
                         }
+
                         expression.right is BooleanLiteralExpr && !(expression.right as BooleanLiteralExpr).value -> {
                             return expression.left // Replace (a != false) with a
                         }
+
                         expression.left is BooleanLiteralExpr && !(expression.left as BooleanLiteralExpr).value -> {
                             return expression.right // Replace (false != a) with a
                         }

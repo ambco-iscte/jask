@@ -1,17 +1,15 @@
 package pt.iscte.pesca.questions
 
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.compiler.ErrorFinder
+import pt.iscte.pesca.errors.CompilerErrorFinder
 import pt.iscte.pesca.extensions.randomBy
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class ReferencesUndefinedVariable : StaticQuestion<TypeDeclaration<*>>() {
 
     override fun isApplicable(element: TypeDeclaration<*>): Boolean =
-        ErrorFinder(element).findUnknownVariables().any { it.scope.getUsableVariables().size >= 2 }
+        CompilerErrorFinder(element).findUnknownVariables().any { it.scope.getUsableVariables().size >= 2 }
 
     override fun build(
         sources: List<SourceCode>,
@@ -19,7 +17,7 @@ class ReferencesUndefinedVariable : StaticQuestion<TypeDeclaration<*>>() {
     ): QuestionData {
         val (source, unit) = sources.getRandom<TypeDeclaration<*>>()
 
-        val errors = ErrorFinder(unit).findUnknownVariables()
+        val errors = CompilerErrorFinder(unit).findUnknownVariables()
 
         val (name, scope) = errors.randomBy { it.scope.getUsableVariables().size >= 2 }
 

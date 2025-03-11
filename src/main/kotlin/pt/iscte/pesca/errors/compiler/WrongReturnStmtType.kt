@@ -1,10 +1,10 @@
-package pt.iscte.pesca.compiler.errors
+package pt.iscte.pesca.errors.compiler
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.types.ResolvedType
-import pt.iscte.pesca.compiler.ICompilerError
+import pt.iscte.pesca.errors.ICompilerError
 import pt.iscte.pesca.extensions.success
 
 data class WrongReturnStmtType(val method: MethodDeclaration, val returnStmt: ReturnStmt): ICompilerError {

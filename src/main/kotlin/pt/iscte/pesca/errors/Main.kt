@@ -1,9 +1,12 @@
-package pt.iscte.pesca.compiler
+package pt.iscte.pesca.errors
 
 import pt.iscte.pesca.Localisation
 import pt.iscte.pesca.extensions.configureStaticJavaParser
+import pt.iscte.pesca.questions.ReferencesUndefinedVariable
 import pt.iscte.pesca.questions.compiler.AssignVarWithMethodWrongType
 import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterNumber
+import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterTypes
+import pt.iscte.pesca.questions.compiler.MethodWithWrongReturnStmt
 
 fun main() {
     configureStaticJavaParser()
@@ -59,7 +62,7 @@ fun main() {
         }
     """.trimIndent()
 
-    val qlc = CallMethodWithWrongParameterNumber()
+    val qlc = ReferencesUndefinedVariable()
     val data = qlc.generate(src, Localisation.getLanguage("pt"))
 
     println(data)

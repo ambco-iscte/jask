@@ -41,18 +41,10 @@ data class TextWithCodeStatement(override val statement: String, val code: Strin
     override fun toString(): String {
         val split = code.split("\n")
 
-        val lines = split.size
-        val lineNumberWidth = "$lines.".length
-
-        val width = split.maxOf { it.length } + lineNumberWidth
+        val width = split.maxOf { it.length }
         val sep = "-".repeat(width)
 
-        var i = 1
-        val sourceCode = split.joinToString(System.lineSeparator()) { line ->
-            val lineNumber = "${i++}."
-            val blank = " ".repeat(lineNumberWidth - lineNumber.length + 1)
-            "$lineNumber$blank$line"
-        }
+        val sourceCode = split.joinToString(System.lineSeparator())
 
         return "$statement${System.lineSeparator()}$sep${System.lineSeparator()}$sourceCode${System.lineSeparator()}$sep"
     }
@@ -75,7 +67,7 @@ data class TextWithMultipleCodeStatements(override val statement: String, val co
 
 sealed interface Option
 
-data class SimpleTextOption(val text: String): Option {
+data class SimpleTextOption(val text: String, val feedback: String? = null): Option {
 
     companion object {
         fun none(language: Language = Language.DEFAULT): SimpleTextOption =
@@ -96,12 +88,19 @@ data class SimpleTextOption(val text: String): Option {
         else -> value.toString()
     })
 
-    override fun toString() = text
+    override fun toString() = if (feedback == null) text else "$text\t[$feedback]"
 }
 
 enum class QuestionChoiceType {
     SINGLE,
     MULTIPLE
+}
+
+data class QuestionSequenceWithContext(
+    val context: QuestionStatement,
+    val questions: List<QuestionData>
+) {
+    constructor(context: QuestionStatement, question: QuestionData): this(context, listOf(question))
 }
 
 data class QuestionData (
@@ -144,9 +143,9 @@ data class QuestionData (
         )
 
         val shuffled = options.keys.filter {
-                option -> !lastUnshuffled.contains(option)
+            option -> !lastUnshuffled.contains(option)
         }.shuffled().associateWith {
-                option -> options[option]!!
+            option -> options[option]!!
         }.toMutableMap()
 
         lastUnshuffled.forEach { lastOption ->

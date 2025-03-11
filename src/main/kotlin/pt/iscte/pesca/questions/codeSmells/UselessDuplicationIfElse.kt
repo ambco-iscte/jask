@@ -12,7 +12,6 @@ import pt.iscte.pesca.extensions.*
 class UselessDuplicationIfElse : StaticQuestion<MethodDeclaration>() {
 
 
-
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.hasDuplicatedIfElse()
 
@@ -26,7 +25,6 @@ class UselessDuplicationIfElse : StaticQuestion<MethodDeclaration>() {
             .filter { it.hasDuplicateCode() }
             .random()
 
-
         val thenStmt = ifStmt.thenStmt
         val parent = ifStmt.parentNode.get()
         val statements = if (thenStmt.isBlockStmt) {
@@ -34,28 +32,28 @@ class UselessDuplicationIfElse : StaticQuestion<MethodDeclaration>() {
         } else {
             listOf(thenStmt)  // Wrap single statement in a list
         }
-        if (parent is BlockStmt){
+        if (parent is BlockStmt) {
             val parentStatements = parent.asBlockStmt().statements
             val index = parentStatements.indexOf(ifStmt)
             parentStatements.addAll(index + 1, statements)
             parentStatements.removeAt(index)
-        }else{
-            if (parent is NodeWithBody<*>){
-                (parent as NodeWithBody<*>).setBody(thenStmt)
+        } else {
+            if (parent is NodeWithBody<*>) {
+                parent.body = thenStmt
             }
             if (parent is IfStmt)
-                if((parent).thenStmt.equals(ifStmt)){
-                    (parent).thenStmt.replace(thenStmt)
-                }else{
-                    (parent).elseStmt.get().replace(thenStmt)
+                if (parent.thenStmt.equals(ifStmt)) {
+                    parent.thenStmt.replace(thenStmt)
+                } else {
+                    parent.elseStmt.get().replace(thenStmt)
                 }
         }
 
         return QuestionData(
             source,
-            TextWithCodeStatement(
+            TextWithMultipleCodeStatements(
                 language["UselessDuplicationIfElse"].format(method.nameAsString),
-                NodeList(method, methodReplaced)
+                listOf(method.toString(), methodReplaced.toString())
             ),
             true.trueOrFalse(language),
             language = language

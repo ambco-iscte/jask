@@ -1,4 +1,4 @@
-package pt.iscte.pesca.compiler
+package pt.iscte.pesca.errors
 
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node

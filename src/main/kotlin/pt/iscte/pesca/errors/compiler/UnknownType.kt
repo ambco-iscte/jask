@@ -1,9 +1,9 @@
-package pt.iscte.pesca.compiler.errors
+package pt.iscte.pesca.errors.compiler
 
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.type.Type
-import pt.iscte.pesca.compiler.ICompilerError
+import pt.iscte.pesca.errors.ICompilerError
 
 data class UnknownType(val type: Type, val location: Node, val types: List<TypeDeclaration<*>>): ICompilerError {
 
