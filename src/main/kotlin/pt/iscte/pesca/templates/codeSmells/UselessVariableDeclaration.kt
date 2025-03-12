@@ -19,10 +19,14 @@ class UselessVariableDeclaration : StaticQuestionTemplate<MethodDeclaration>() {
         val methodReplaced = method.clone()
 
         var StmtPairs = findUselessVariableDeclarations(methodReplaced)
-        for (stmtPair in StmtPairs) {
-            val newStmt = mergeVariableDeclaration(stmtPair)
-            stmtPair.first.replace(newStmt)
-            stmtPair.second.remove()
+
+        while (StmtPairs.size > 0) {
+            for (stmtPair in StmtPairs) {
+                val newStmt = mergeVariableDeclaration(stmtPair)
+                if (stmtPair.first.replace(newStmt))
+                    stmtPair.second.remove()
+            }
+            StmtPairs = findUselessVariableDeclarations(methodReplaced)
         }
 
         return Question(
@@ -44,16 +48,17 @@ fun main() {
             public void test(){
                 int y;
                 int uses_y = y;
-                y = 0;
-                y = 2;
                 
                 if(true){
                     int a;
                     a = 2;
                 }
                 
+                y = 0;
                 int b;
                 b = y + 10;
+                b = 22;
+                y = 2;
             }
         
         }
