@@ -22,10 +22,14 @@ import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.parsing.java.JP
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.vm.ArrayIndexError
+import pt.iscte.strudel.vm.DivisionByZeroError
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
+import pt.iscte.strudel.vm.LoopIterationLimitError
+import pt.iscte.strudel.vm.NullReferenceError
 import pt.iscte.strudel.vm.RuntimeError
 import pt.iscte.strudel.vm.RuntimeErrorType
+import pt.iscte.strudel.vm.UninitializedVariableError
 
 data class QLCVirtualMachine(
     val vm: IVirtualMachine,
@@ -53,7 +57,7 @@ data class QLCVirtualMachine(
 
             // Which is the length of the array?
             fun whichArrayLength(): Question {
-                val distractors = sampleSequentially(3, listOf(0, error.invalidIndex, error.array.elements.size, length - 1, length + 1)) {
+                val distractors = sampleSequentially(3, listOf(error.invalidIndex, error.array.elements.size, length - 1, length + 1, 0)) {
                     it != length
                 }
 
@@ -66,6 +70,30 @@ data class QLCVirtualMachine(
                 return Question(
                     source = source,
                     statement = SimpleTextStatement(language["WhichLengthOfArray"].format(arrayDeclaration.id)),
+                    options = options,
+                    language = language,
+                    choice = QuestionChoiceType.SINGLE,
+                    relevantSourceCode = listOf(SourceLocation(arrayDeclaration))
+                )
+            }
+
+            // Which is the length of the array?
+            fun whichLastArrayIndex(): Question {
+                val lastIndex = length - 1
+
+                val distractors = sampleSequentially(3, listOf(error.invalidIndex, error.array.elements.size, lastIndex - 1, length, length + 1, 0)) {
+                    it != lastIndex
+                }
+
+                val options: MutableMap<Option, Boolean> =
+                    distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
+                options[SimpleTextOption(lastIndex)] = true
+                if (options.size < 4)
+                    options[SimpleTextOption.none(language)] = false
+
+                return Question(
+                    source = source,
+                    statement = SimpleTextStatement(language["WhichLastValidArrayIndex"].format(arrayDeclaration.id)),
                     options = options,
                     language = language,
                     choice = QuestionChoiceType.SINGLE,
@@ -120,6 +148,7 @@ data class QLCVirtualMachine(
 
             questions.add(QuestionSequenceWithContext(context, listOf(
                 whichArrayLength(),
+                whichLastArrayIndex(),
                 whichVariableUsedToIndex(),
                 whichVariableValues()
             )))
@@ -134,6 +163,7 @@ data class QLCVirtualMachine(
                 when (e.type) {
                     // Infinite Loop
                     RuntimeErrorType.LOOP_MAX -> {
+                        val error = e as LoopIterationLimitError
                         TODO()
                     }
 
@@ -149,16 +179,19 @@ data class QLCVirtualMachine(
 
                     // Division by Zero
                     RuntimeErrorType.DIVBYZERO -> {
+                        val error = e as DivisionByZeroError
                         TODO()
                     }
 
                     // Non-initialised Variable
                     RuntimeErrorType.NONINIT_VARIABLE -> {
+                        val error = e as UninitializedVariableError
                         TODO()
                     }
 
                     // Null Pointer Exception
                     RuntimeErrorType.NULL_POINTER -> {
+                        val error = e as NullReferenceError
                         TODO()
                     }
 
