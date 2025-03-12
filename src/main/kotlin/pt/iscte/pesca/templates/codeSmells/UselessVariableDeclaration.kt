@@ -4,15 +4,12 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.*
 import pt.iscte.pesca.Language
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.extensions.removeEqualsTrueOrFalse
-import pt.iscte.pesca.extensions.trueOrFalse
-import pt.iscte.pesca.extensions.findUselessVariableDeclarations
+import pt.iscte.pesca.extensions.*
 
 class UselessVariableDeclaration : StaticQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val list = findUselessVariableDeclarations(element)
-        println(list)
         return list.isNotEmpty()
     }
 
@@ -21,12 +18,12 @@ class UselessVariableDeclaration : StaticQuestionTemplate<MethodDeclaration>() {
 
         val methodReplaced = method.clone()
 
-        // FIXME
-        var ifStmt = methodReplaced.findAll(IfStmt::class.java).firstOrNull {
-            val condition = it.condition
-            removeEqualsTrueOrFalse(condition) != condition
+        var StmtPairs = findUselessVariableDeclarations(methodReplaced)
+        for (stmtPair in StmtPairs) {
+            val newStmt = mergeVariableDeclaration(stmtPair)
+            stmtPair.first.replace(newStmt)
+            stmtPair.second.remove()
         }
-        ifStmt?.setCondition(removeEqualsTrueOrFalse(ifStmt.condition))
 
         return Question(
             source,
@@ -46,27 +43,17 @@ fun main() {
             
             public void test(){
                 int y;
-                int bb = y;
+                int uses_y = y;
                 y = 0;
                 y = 2;
-                // int y = 0; is useless
-                
                 
                 if(true){
                     int a;
                     a = 2;
                 }
-                // is useless
-                    
-                int f;
-                for(int i; i < 10; i++)
-                    f += f;
-                f = 43;
-                // is useful
                 
                 int b;
                 b = y + 10;
-                //int b =  y + 10; is useless
             }
         
         }
