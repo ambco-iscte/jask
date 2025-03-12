@@ -2,7 +2,7 @@ package compiler
 
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.ReferencesUndefinedVariable
+import pt.iscte.pesca.templates.ReferencesUndefinedVariable
 import kotlin.test.assertEquals
 
 class TestReferencesUndefinedVariable {

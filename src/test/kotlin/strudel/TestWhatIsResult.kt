@@ -1,8 +1,8 @@
 package strudel
 
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.ProcedureCall
-import pt.iscte.pesca.questions.WhatIsResult
+import pt.iscte.pesca.templates.ProcedureCall
+import pt.iscte.pesca.templates.WhatIsResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

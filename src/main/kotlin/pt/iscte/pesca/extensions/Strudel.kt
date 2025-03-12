@@ -1,13 +1,10 @@
 package pt.iscte.pesca.extensions
 
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.RecordTypeData
+import pt.iscte.pesca.templates.Option
+import pt.iscte.pesca.templates.RecordTypeData
 import pt.iscte.strudel.model.*
 import pt.iscte.strudel.model.IType
-import pt.iscte.strudel.model.roles.*
-import pt.iscte.strudel.model.roles.impl.*
-import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.parsing.java.allocateStringArray
 import pt.iscte.strudel.parsing.java.extensions.getString
 import pt.iscte.strudel.parsing.java.extensions.hasThisParameter
@@ -17,7 +14,6 @@ import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import pt.iscte.strudel.vm.NULL
-import kotlin.reflect.KClass
 
 @Suppress("UNCHECKED_CAST")
 fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue {

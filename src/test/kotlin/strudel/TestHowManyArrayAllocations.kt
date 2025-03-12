@@ -2,8 +2,8 @@ package strudel
 
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.HowManyArrayAllocations
-import pt.iscte.pesca.questions.ProcedureCall
+import pt.iscte.pesca.templates.HowManyArrayAllocations
+import pt.iscte.pesca.templates.ProcedureCall
 import kotlin.test.assertEquals
 
 class TestHowManyArrayAllocations {

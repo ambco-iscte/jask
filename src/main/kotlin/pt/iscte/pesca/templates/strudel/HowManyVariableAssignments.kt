@@ -1,0 +1,61 @@
+package pt.iscte.pesca.templates
+
+import pt.iscte.pesca.Language
+import pt.iscte.pesca.extensions.correctAndRandomDistractors
+import pt.iscte.pesca.extensions.getVariableAssignments
+import pt.iscte.pesca.extensions.procedureCallAsString
+import pt.iscte.pesca.extensions.toIValues
+import pt.iscte.strudel.model.ILoop
+import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.IVariableAssignment
+import pt.iscte.strudel.model.IVariableDeclaration
+import pt.iscte.strudel.vm.IValue
+import pt.iscte.strudel.vm.IVirtualMachine
+
+class HowManyVariableAssignments : DynamicQuestionTemplate<IProcedure>() {
+
+    val countPerVariable = mutableMapOf<IVariableDeclaration<*>, Int>()
+    var iterations = 0
+
+    // There is at least one variable that is assigned multiple times.
+    override fun isApplicable(element: IProcedure): Boolean =
+        element.getVariableAssignments().any { it.value.size > 1 }
+
+    fun setup(vm: IVirtualMachine) {
+        countPerVariable.clear()
+        vm.addListener(object : IVirtualMachine.IListener {
+            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+                countPerVariable[a.target] = (countPerVariable[a.target] ?: 0) + 1
+            }
+
+            override fun loopIteration(loop: ILoop) {
+                iterations++
+            }
+        })
+    }
+
+    override fun build(sources: List<SourceCode>, language: Language): Question {
+        val (source, module, procedure, args) = getRandomProcedure(sources)
+
+        val vm = IVirtualMachine.create()
+        setup(vm)
+        val arguments = args.toIValues(vm, module)
+
+        vm.execute(procedure, *arguments.toTypedArray())
+
+        val variable = countPerVariable.keys.random()
+        val count = countPerVariable[variable]!!
+
+        return Question(
+            source,
+            TextWithCodeStatement(language["HowManyVariableAssignments"].format(variable.id, procedureCallAsString(procedure, arguments)), procedure),
+            correctAndRandomDistractors(count,
+                setOf(
+                    count+1,
+                    count-1,
+                    iterations,
+                ) + countPerVariable.map { it.value }),
+            language
+        )
+    }
+}

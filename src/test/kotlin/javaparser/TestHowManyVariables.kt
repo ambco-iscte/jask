@@ -2,7 +2,7 @@ package javaparser
 
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.HowManyVariables
+import pt.iscte.pesca.templates.HowManyVariables
 import kotlin.test.assertEquals
 
 class TestHowManyVariables {

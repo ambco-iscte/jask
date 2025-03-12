@@ -2,9 +2,8 @@ package compiler
 
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.ReferencesUndefinedVariable
-import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterNumber
-import pt.iscte.pesca.questions.compiler.CallMethodWithWrongParameterTypes
+import pt.iscte.pesca.templates.CallMethodWithWrongParameterNumber
+import pt.iscte.pesca.templates.CallMethodWithWrongParameterTypes
 import kotlin.test.assertEquals
 
 class TestWrongMethodCall {

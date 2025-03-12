@@ -2,7 +2,7 @@ package compiler
 
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.compiler.MethodWithWrongReturnStmt
+import pt.iscte.pesca.templates.MethodWithWrongReturnStmt
 import kotlin.test.assertEquals
 
 class TestMethodWithWrongReturnStmt {

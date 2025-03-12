@@ -2,8 +2,8 @@ package strudel
 
 import org.junit.jupiter.api.Test
 import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.questions.ProcedureCall
-import pt.iscte.pesca.questions.WhatArraySize
+import pt.iscte.pesca.templates.ProcedureCall
+import pt.iscte.pesca.templates.WhatArraySize
 import kotlin.test.assertEquals
 
 class TestArraySize {

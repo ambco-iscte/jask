@@ -1,8 +1,8 @@
 package pt.iscte.pesca.extensions
 
 import pt.iscte.pesca.Language
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.SimpleTextOption
+import pt.iscte.pesca.templates.Option
+import pt.iscte.pesca.templates.SimpleTextOption
 
 fun Int.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
     SimpleTextOption(this) to true,

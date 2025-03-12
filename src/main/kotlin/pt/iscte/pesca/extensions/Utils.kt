@@ -1,10 +1,8 @@
 package pt.iscte.pesca.extensions
 
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.stmt.BlockStmt
-import com.github.javaparser.ast.stmt.IfStmt
-import pt.iscte.pesca.questions.Option
-import pt.iscte.pesca.questions.SimpleTextOption
+import pt.iscte.pesca.templates.Option
+import pt.iscte.pesca.templates.SimpleTextOption
 import java.lang.reflect.Method
 
 val Class<*>.wrapper: Class<*>
