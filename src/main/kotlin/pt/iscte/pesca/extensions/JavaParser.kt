@@ -280,11 +280,11 @@ fun removeEqualsTrueOrFalse(expression: Expression): Expression {
 }
 
 
-fun findUselessVariableDeclarations(element: MethodDeclaration): List<List<Statement>> {
-    fun checkBlock(statements: List<Statement>): List<List<Statement>> {
+fun findUselessVariableDeclarations(element: MethodDeclaration): List<Pair<Statement,Statement>> {
+    fun checkBlock(statements: List<Statement>): List<Pair<Statement,Statement>> {
         val declaredVariables = mutableMapOf<String, Int>() // Stores variable names and their declaration index
         val lastAssignedStatement = mutableMapOf<String, Int>() // Tracks last assigned statement index
-        val unnecessaryDeclarations = mutableListOf<List<Statement>>()
+        val unnecessaryDeclarations = mutableListOf<Pair<Statement,Statement>>()
 
         for (i in statements.indices) {
             val currentStmt = statements[i]
@@ -315,7 +315,7 @@ fun findUselessVariableDeclarations(element: MethodDeclaration): List<List<State
                             !stmt.findAll(NameExpr::class.java).any { it.nameAsString == variableName }
                         }
                         if (isUnusedBeforeAssignment) {
-                            unnecessaryDeclarations.add(listOf(statements[declarationIndex], currentStmt))
+                            unnecessaryDeclarations.add(Pair(statements[declarationIndex], currentStmt))
                         }
                     }
 
@@ -327,7 +327,7 @@ fun findUselessVariableDeclarations(element: MethodDeclaration): List<List<State
                             !stmt.findAll(NameExpr::class.java).any { it.nameAsString == variableName }
                         }
                         if (isUnusedBetweenAssignments) {
-                            unnecessaryDeclarations.add(listOf(statements[lastAssignmentIndex], currentStmt))
+                            unnecessaryDeclarations.add(Pair(statements[lastAssignmentIndex], currentStmt))
                         }
                     }
 
@@ -360,4 +360,38 @@ fun findUselessVariableDeclarations(element: MethodDeclaration): List<List<State
     }
 
     return checkBlock(element.body.orElse(null)?.statements ?: emptyList())
+}
+
+fun mergeVariableDeclaration(pair: Pair<Statement, Statement>): Statement? {
+    val (declaration, assignment) = pair
+
+    if (declaration is ExpressionStmt && assignment is ExpressionStmt) {
+        val declExpr = declaration.expression
+        val assignExpr = assignment.expression
+
+        if (declExpr is VariableDeclarationExpr && assignExpr is AssignExpr) {
+            if (declExpr.variables.size == 1 && assignExpr.target is NameExpr) {
+                val variable = declExpr.variables[0]
+                val assignedValue = assignExpr.value
+
+                if (variable.nameAsString == (assignExpr.target as NameExpr).nameAsString) {
+                    // Create a merged variable declaration with initialization
+                    val mergedDeclaration = VariableDeclarationExpr(variable.type, variable.nameAsString)
+                    mergedDeclaration.variables[0].setInitializer(assignedValue)
+                    return ExpressionStmt(mergedDeclaration)
+                }
+            }
+        } else if (declExpr is AssignExpr && assignExpr is AssignExpr) {
+            val declTarget = declExpr.target
+            val assignTarget = assignExpr.target
+
+            if (declTarget is NameExpr && assignTarget is NameExpr &&
+                declTarget.nameAsString == assignTarget.nameAsString) {
+
+                // Return only the second assignment, effectively removing the first one
+                return ExpressionStmt(AssignExpr(NameExpr(assignTarget.nameAsString), assignExpr.value, AssignExpr.Operator.ASSIGN))
+            }
+        }
+    }
+    return null
 }
