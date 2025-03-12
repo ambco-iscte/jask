@@ -13,7 +13,9 @@ import pt.iscte.pesca.templates.SimpleTextOption
 import pt.iscte.pesca.templates.SimpleTextStatement
 import pt.iscte.pesca.templates.SourceCode
 import pt.iscte.pesca.templates.TextWithCodeStatement
+import pt.iscte.pesca.templates.WhichVariableValues
 import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.IVariableExpression
 import pt.iscte.strudel.model.util.findAll
@@ -33,8 +35,14 @@ data class QLCVirtualMachine(
         procedure: IProcedure,
         vararg arguments: IValue
     ): Pair<IValue?, List<QuestionSequenceWithContext>> {
+        val source = SourceCode(procedure.module?.toString() ?: procedure.toString())
+        val procedureCallString = procedureCallAsString(procedure, arguments.toList())
+
+        val variableHistory = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
+
         val questions = mutableListOf<QuestionSequenceWithContext>()
 
+        // ArrayIndexOutOfBounds
         fun arrayIndexOutOfBounds(error: ArrayIndexError) {
             val indexExpression = error.indexExpression as IVariableExpression
             val length = error.array.length
@@ -43,6 +51,7 @@ data class QLCVirtualMachine(
                 error.target.isSame(it.expression())
             }
 
+            // Which is the length of the array?
             fun whichArrayLength(): Question {
                 val distractors = sampleSequentially(3, listOf(0, error.invalidIndex, error.array.elements.size, length - 1, length + 1)) {
                     it != length
@@ -55,7 +64,7 @@ data class QLCVirtualMachine(
                     options[SimpleTextOption.none(language)] = false
 
                 return Question(
-                    source = SourceCode(procedure.module?.toString() ?: procedure.toString()),
+                    source = source,
                     statement = SimpleTextStatement(language["WhichLengthOfArray"].format(arrayDeclaration.id)),
                     options = options,
                     language = language,
@@ -64,6 +73,7 @@ data class QLCVirtualMachine(
                 )
             }
 
+            // Which variable is used to index the array?
             fun whichVariableUsedToIndex(): Question {
                 val distractors = sampleSequentially(3, (procedure.localVariables + procedure.parameters).map { it.id }) {
                     it != indexExpression.toString()
@@ -76,7 +86,7 @@ data class QLCVirtualMachine(
                     options[SimpleTextOption.none(language)] = false
 
                 return Question(
-                    source = SourceCode(procedure.module?.toString() ?: procedure.toString()),
+                    source = source,
                     statement = SimpleTextStatement(language["WhichVariableUsedToIndexArray"].format(arrayDeclaration.id)),
                     options = options,
                     language = language,
@@ -85,22 +95,41 @@ data class QLCVirtualMachine(
                 )
             }
 
+            // Which values are taken by the variable?
+            fun whichVariableValues(): Question = Question(
+                source = source,
+                statement = SimpleTextStatement(language["WhichVariableValues"].format(indexExpression.id, procedureCallString)),
+                WhichVariableValues.options(
+                    variableHistory[indexExpression.variable] ?: emptyList(),
+                    variableHistory,
+                    arguments.toList(),
+                    language
+                ),
+                language = language
+            )
+
             val context = TextWithCodeStatement(
                 language["ArrayIndexOutOfBounds"].format(
-                    procedureCallAsString(procedure, arguments.toList()),
+                    procedureCallString,
                     (error.indexExpression.getProperty(JP) as Node).lineRelativeTo(procedure.getProperty(JP) as Node),
                     error.invalidIndex.toString(),
                     arrayDeclaration.id
                 ),
                 procedure
             )
+
             questions.add(QuestionSequenceWithContext(context, listOf(
                 whichArrayLength(),
-                whichVariableUsedToIndex()
+                whichVariableUsedToIndex(),
+                whichVariableValues()
             )))
         }
 
         val listener = object : IVirtualMachine.IListener {
+            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+                variableHistory[a.target] = (variableHistory[a.target] ?: emptyList()) + listOf(value)
+            }
+
             override fun executionError(e: RuntimeError) {
                 when (e.type) {
                     // Infinite Loop
