@@ -397,18 +397,3 @@ fun mergeVariableDeclaration(pair: Pair<Statement, Statement>): Statement? {
 }
 
 
-fun extractForLoops(method: MethodDeclaration): List<ForStmt> {
-    val forLoops = mutableListOf<ForStmt>()
-
-    // Iterate over all statements in the method
-    method.body.ifPresent { body ->
-        body.statements.forEach { stmt ->
-            if (stmt is ForStmt) {
-                // Add the for loop statement to the list
-                forLoops.add(stmt)
-            }
-        }
-    }
-
-    return forLoops
-}

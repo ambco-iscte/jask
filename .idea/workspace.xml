@@ -7,9 +7,9 @@
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/compiler/CallMethodWithWrongParameterNumber.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/compiler/CallMethodWithWrongParameterNumber.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/javaparser/UselessDuplicationIfElse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/questions/javaparser/UselessDuplicationIfElse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/ReplaceForWithWhile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/ReplaceForWithWhile.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,8 +42,8 @@
         <option value="Kotlin Object" />
         <option value="Kotlin Interface" />
         <option value="Kotlin File" />
-        <option value="Kotlin Class" />
         <option value="Class" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -80,9 +80,17 @@
     "Gradle.AllTests.executor": "Run",
     "Gradle.Build pesca.executor": "Run",
     "Gradle.TestIsRecursive.test.executor": "Run",
+    "Gradle.pesca [:pt.iscte.pesca.templates.codeSmells.abc.main()].executor": "Run",
     "Kotlin.MainKt.executor": "Run",
+    "Kotlin.RemoveEmptyIfKt (1).executor": "Run",
     "Kotlin.RemoveEmptyIfKt.executor": "Run",
+    "Kotlin.RemoveEmptyIfandElseKt.executor": "Run",
+    "Kotlin.ReplaceForWithWhileKt.executor": "Run",
+    "Kotlin.ReplaceWhileWithForKt.executor": "Run",
+    "Kotlin.UnnecessaryEqualsTrueOrFalseKt.executor": "Run",
     "Kotlin.UselessDuplicationIfElseKt.executor": "Run",
+    "Kotlin.UselessVariableDeclarationKt (1).executor": "Run",
+    "Kotlin.UselessVariableDeclarationKt.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -118,71 +126,43 @@
       <recent name="pt.iscte.pesca.questions.javaparser" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.RemoveEmptyIfKt">
-    <configuration name="AllTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":test" />
-            <option value="--tests" />
-            <option value="&quot;AllTests&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
+  <component name="RunManager" selected="Kotlin.ReplaceWhileWithForKt">
+    <configuration name="abc" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.codeSmells.abc" />
+      <module name="pesca.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="pt.iscte.pesca.templates.codeSmells.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
-    <configuration name="TestIsRecursive.test" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":test" />
-            <option value="--tests" />
-            <option value="&quot;staticquestions.TestIsRecursive.test&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.MainKt" />
+    <configuration name="ReplaceForWithWhileKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.ReplaceForWithWhileKt" />
       <module name="pesca.main" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="RemoveEmptyIfKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.questions.javaparser.RemoveEmptyIfKt" />
+    <configuration name="ReplaceWhileWithForKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.ReplaceWhileWithForKt" />
       <module name="pesca.main" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="UselessDuplicationIfElseKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.questions.UselessDuplicationIfElseKt" />
+    <configuration name="UselessVariableDeclarationKt (1)" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.UselessVariableDeclarationKt" />
+      <module name="pesca.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UselessVariableDeclarationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.questions.codeSmells.UselessVariableDeclarationKt" />
       <module name="pesca.main" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -190,11 +170,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Kotlin.RemoveEmptyIfKt" />
-        <item itemvalue="Kotlin.UselessDuplicationIfElseKt" />
-        <item itemvalue="Gradle.AllTests" />
-        <item itemvalue="Gradle.TestIsRecursive.test" />
-        <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Kotlin.ReplaceWhileWithForKt" />
+        <item itemvalue="Kotlin.ReplaceForWithWhileKt" />
+        <item itemvalue="Kotlin.UselessVariableDeclarationKt (1)" />
+        <item itemvalue="Application.abc" />
+        <item itemvalue="Kotlin.UselessVariableDeclarationKt" />
       </list>
     </recent_temporary>
   </component>
@@ -227,6 +207,11 @@
       <workItem from="1739459715464" duration="4724000" />
       <workItem from="1741030093309" duration="5661000" />
       <workItem from="1741200991517" duration="6768000" />
+      <workItem from="1741289430814" duration="6719000" />
+      <workItem from="1741398372152" duration="3120000" />
+      <workItem from="1741806269858" duration="6022000" />
+      <workItem from="1742325989066" duration="3195000" />
+      <workItem from="1742411090356" duration="6369000" />
     </task>
     <servers />
   </component>
