@@ -395,5 +395,30 @@ fun mergeVariableDeclaration(pair: Pair<Statement, Statement>): Statement? {
     }
     return null
 }
+// Function to check if an expression contains multiple comparisons
+fun hasMultipleComparisons(expr: Expression): Boolean {
+    if (expr is BinaryExpr) {
+        val leftIsComparison = isComparison(expr.left)
+        val rightIsComparison = isComparison(expr.right)
+        return leftIsComparison || rightIsComparison // If either side is a comparison, check further
+    }
+    return false
+}
 
+// Helper function to check if an expression is a comparison (>, <, >=, <=, ==, !=)
+fun isComparison(expr: Expression): Boolean {
+    return expr is BinaryExpr && expr.operator in listOf(
+        BinaryExpr.Operator.GREATER,
+        BinaryExpr.Operator.LESS,
+        BinaryExpr.Operator.GREATER_EQUALS,
+        BinaryExpr.Operator.LESS_EQUALS,
+        BinaryExpr.Operator.EQUALS,
+        BinaryExpr.Operator.NOT_EQUALS
+    )
+}
+
+// Function to add parentheses only when needed
+fun wrapIfNeeded(expr: Expression): Expression {
+    return if (hasMultipleComparisons(expr)) EnclosedExpr(expr) else expr
+}
 
