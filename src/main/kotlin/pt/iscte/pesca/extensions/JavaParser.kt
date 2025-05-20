@@ -198,6 +198,10 @@ fun negateExpression(expression: Expression): Expression {
                 UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT)
             }
         }
+        is BooleanLiteralExpr -> {
+            BooleanLiteralExpr(!expression.value)
+        }
+
 
         else -> UnaryExpr(expression, UnaryExpr.Operator.LOGICAL_COMPLEMENT) // Default case
     }
@@ -422,3 +426,17 @@ fun wrapIfNeeded(expr: Expression): Expression {
     return if (hasMultipleComparisons(expr)) EnclosedExpr(expr) else expr
 }
 
+fun extractReturnExpr(stmt: Statement): Expression? = when {
+    stmt.isReturnStmt ->
+        stmt.asReturnStmt().expression.orElse(null)
+
+    stmt.isBlockStmt ->                     // bloco { ... }
+        stmt.asBlockStmt()
+            .statements
+            .firstOrNull { it.isReturnStmt } // pega o primeiro return do bloco
+            ?.asReturnStmt()
+            ?.expression
+            ?.orElse(null)
+
+    else -> null
+}

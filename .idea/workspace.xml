@@ -7,7 +7,6 @@
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/ReplaceForWithWhile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/ReplaceForWithWhile.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" afterDir="false" />
     </list>
@@ -63,6 +62,10 @@
     &quot;accountId&quot;: &quot;0ffddd3d-9e3b-4179-806b-483eb89a368a&quot;
   }
 }</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -81,6 +84,7 @@
     "Gradle.Build pesca.executor": "Run",
     "Gradle.TestIsRecursive.test.executor": "Run",
     "Gradle.pesca [:pt.iscte.pesca.templates.codeSmells.abc.main()].executor": "Run",
+    "Kotlin.IFReturnConditionKt.executor": "Run",
     "Kotlin.MainKt.executor": "Run",
     "Kotlin.RemoveEmptyIfKt (1).executor": "Run",
     "Kotlin.RemoveEmptyIfKt.executor": "Run",
@@ -88,6 +92,7 @@
     "Kotlin.ReplaceForWithWhileKt.executor": "Run",
     "Kotlin.ReplaceWhileWithForKt.executor": "Run",
     "Kotlin.UnnecessaryEqualsTrueOrFalseKt.executor": "Run",
+    "Kotlin.UnnecessaryIfNestingKt.executor": "Run",
     "Kotlin.UselessDuplicationIfElseKt.executor": "Run",
     "Kotlin.UselessVariableDeclarationKt (1).executor": "Run",
     "Kotlin.UselessVariableDeclarationKt.executor": "Run",
@@ -100,7 +105,7 @@
     "ignore.virus.scanning.warn.message": "true",
     "jdk.selected.JAVA_MODULE": "17",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/5ano/PESCA/pesca",
+    "last_opened_file_path": "D:/5ano/PESCA/pesca/src/main/kotlin/pt/iscte/pesca/templates/codeSmells",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -114,6 +119,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\5ano\PESCA\pesca\src\main\kotlin\pt\iscte\pesca\templates\codeSmells" />
       <recent name="C:\Users\ASUS\IdeaProjects\pesca\src\test\resources" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -126,16 +132,10 @@
       <recent name="pt.iscte.pesca.questions.javaparser" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.ReplaceWhileWithForKt">
-    <configuration name="abc" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.codeSmells.abc" />
+  <component name="RunManager" selected="Kotlin.IFReturnConditionKt">
+    <configuration name="IFReturnConditionKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.IFReturnConditionKt" />
       <module name="pesca.main" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="pt.iscte.pesca.templates.codeSmells.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -154,6 +154,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="UnnecessaryIfNestingKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.UnnecessaryIfNestingKt" />
+      <module name="pesca.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="UselessVariableDeclarationKt (1)" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.UselessVariableDeclarationKt" />
       <module name="pesca.main" />
@@ -161,20 +168,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="UselessVariableDeclarationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.questions.codeSmells.UselessVariableDeclarationKt" />
-      <module name="pesca.main" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin.IFReturnConditionKt" />
+        <item itemvalue="Kotlin.UnnecessaryIfNestingKt" />
         <item itemvalue="Kotlin.ReplaceWhileWithForKt" />
         <item itemvalue="Kotlin.ReplaceForWithWhileKt" />
         <item itemvalue="Kotlin.UselessVariableDeclarationKt (1)" />
-        <item itemvalue="Application.abc" />
-        <item itemvalue="Kotlin.UselessVariableDeclarationKt" />
       </list>
     </recent_temporary>
   </component>
@@ -212,6 +212,8 @@
       <workItem from="1741806269858" duration="6022000" />
       <workItem from="1742325989066" duration="3195000" />
       <workItem from="1742411090356" duration="6369000" />
+      <workItem from="1742560795979" duration="6825000" />
+      <workItem from="1747739803840" duration="10659000" />
     </task>
     <servers />
   </component>
