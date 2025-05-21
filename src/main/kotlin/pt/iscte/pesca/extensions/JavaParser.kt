@@ -440,3 +440,76 @@ fun extractReturnExpr(stmt: Statement): Expression? = when {
 
     else -> null
 }
+
+fun findReturnWithDeadCode(node: Node): ReturnStmt? {
+    when (node) {
+        is BlockStmt -> {
+            val statements = node.statements
+            for (i in statements.indices) {
+                val stmt = statements[i]
+                if (stmt is ReturnStmt && i < statements.size - 1) {
+                    return stmt
+                }
+                val found = findReturnWithDeadCode(stmt)
+                if (found != null) return found
+            }
+        }
+
+        is IfStmt -> {
+            node.thenStmt.let {
+                val found = findReturnWithDeadCode(it)
+                if (found != null) return found
+            }
+            node.elseStmt.orElse(null)?.let {
+                val found = findReturnWithDeadCode(it)
+                if (found != null) return found
+            }
+        }
+
+        is WhileStmt -> {
+            node.body.let {
+                val found = findReturnWithDeadCode(it)
+                if (found != null) return found
+            }
+        }
+
+        is ForStmt -> {
+            node.body.let {
+                val found = findReturnWithDeadCode(it)
+                if (found != null) return found
+            }
+        }
+
+        is ForEachStmt -> {
+            node.body.let {
+                val found = findReturnWithDeadCode(it)
+                if (found != null) return found
+            }
+        }
+
+        is DoStmt -> {
+            node.body.let {
+                val found = findReturnWithDeadCode(it)
+                if (found != null) return found
+            }
+        }
+
+        is TryStmt -> {
+            val foundTry = findReturnWithDeadCode(node.tryBlock)
+            if (foundTry != null) return foundTry
+
+            for (catchClause in node.catchClauses) {
+                val foundCatch = findReturnWithDeadCode(catchClause.body)
+                if (foundCatch != null) return foundCatch
+            }
+
+            if (node.finallyBlock.isPresent) {
+                val foundFinally = findReturnWithDeadCode(node.finallyBlock.get())
+                if (foundFinally != null) return foundFinally
+            }
+        }
+    }
+
+    return null
+}
+
