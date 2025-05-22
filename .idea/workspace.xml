@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/RemoveEmptyIfAndElse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/RemoveEmptyIfAndElse.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" afterDir="false" />
     </list>
@@ -78,49 +78,50 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.AllTests.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build pesca.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestIsRecursive.test.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.pesca [:pt.iscte.pesca.templates.codeSmells.abc.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.IFReturnConditionKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.LonelyVariableKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.MainKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.RemoveEmptyIfKt (1).executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.RemoveEmptyIfKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.RemoveEmptyIfandElseKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.ReplaceForWithWhileKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.ReplaceWhileWithForKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.ReplacesIFsWithIfElseKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UnnecessaryCodeAfterReturnKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UnnecessaryEqualsTrueOrFalseKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UnnecessaryIfNestingKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UnnecessaryParameterKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UselessDuplicationIfElseKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UselessVariableDeclarationKt (1).executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UselessVariableDeclarationKt.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;17&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/5ano/PESCA/pesca/src/main/kotlin/pt/iscte/pesca/templates/codeSmells&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.AllTests.executor": "Run",
+    "Gradle.Build pesca.executor": "Run",
+    "Gradle.TestIsRecursive.test.executor": "Run",
+    "Gradle.pesca [:pt.iscte.pesca.templates.codeSmells.abc.main()].executor": "Run",
+    "Kotlin.IFReturnConditionKt.executor": "Run",
+    "Kotlin.LonelyVariableKt.executor": "Run",
+    "Kotlin.MainKt.executor": "Run",
+    "Kotlin.RemoveEmptyIfAndElseKt.executor": "Run",
+    "Kotlin.RemoveEmptyIfKt (1).executor": "Run",
+    "Kotlin.RemoveEmptyIfKt.executor": "Run",
+    "Kotlin.RemoveEmptyIfandElseKt.executor": "Run",
+    "Kotlin.ReplaceForWithWhileKt.executor": "Run",
+    "Kotlin.ReplaceWhileWithForKt.executor": "Run",
+    "Kotlin.ReplacesIFsWithIfElseKt.executor": "Run",
+    "Kotlin.UnnecessaryCodeAfterReturnKt.executor": "Run",
+    "Kotlin.UnnecessaryEqualsTrueOrFalseKt.executor": "Run",
+    "Kotlin.UnnecessaryIfNestingKt.executor": "Run",
+    "Kotlin.UnnecessaryParameterKt.executor": "Run",
+    "Kotlin.UselessDuplicationIfElseKt.executor": "Run",
+    "Kotlin.UselessVariableDeclarationKt (1).executor": "Run",
+    "Kotlin.UselessVariableDeclarationKt.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "jdk.selected.JAVA_MODULE": "17",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/5ano/PESCA/pesca/src/main/kotlin/pt/iscte/pesca/templates/codeSmells",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\5ano\PESCA\pesca\src\main\kotlin\pt\iscte\pesca\templates\codeSmells" />
@@ -136,7 +137,14 @@
       <recent name="pt.iscte.pesca.questions.javaparser" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.LonelyVariableKt">
+  <component name="RunManager" selected="Kotlin.RemoveEmptyIfAndElseKt">
+    <configuration name="IFReturnConditionKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.IFReturnConditionKt" />
+      <module name="pesca.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="LonelyVariableKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.LonelyVariableKt" />
       <module name="pesca.main" />
@@ -144,15 +152,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ReplacesIFsWithIfElseKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.ReplacesIFsWithIfElseKt" />
-      <module name="pesca.main" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="UnnecessaryCodeAfterReturnKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.UnnecessaryCodeAfterReturnKt" />
+    <configuration name="RemoveEmptyIfAndElseKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.RemoveEmptyIfAndElseKt" />
       <module name="pesca.main" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -174,11 +175,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin.RemoveEmptyIfAndElseKt" />
+        <item itemvalue="Kotlin.IFReturnConditionKt" />
         <item itemvalue="Kotlin.LonelyVariableKt" />
         <item itemvalue="Kotlin.UselessVariableDeclarationKt" />
         <item itemvalue="Kotlin.UnnecessaryParameterKt" />
-        <item itemvalue="Kotlin.UnnecessaryCodeAfterReturnKt" />
-        <item itemvalue="Kotlin.ReplacesIFsWithIfElseKt" />
       </list>
     </recent_temporary>
   </component>
@@ -219,7 +220,7 @@
       <workItem from="1742560795979" duration="6825000" />
       <workItem from="1747739803840" duration="18270000" />
       <workItem from="1747825966940" duration="14665000" />
-      <workItem from="1747911740003" duration="404000" />
+      <workItem from="1747911740003" duration="2093000" />
     </task>
     <servers />
   </component>
