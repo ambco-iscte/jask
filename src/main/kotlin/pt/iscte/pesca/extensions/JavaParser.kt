@@ -513,3 +513,55 @@ fun findReturnWithDeadCode(node: Node): ReturnStmt? {
     return null
 }
 
+fun findLonelyVariables(method: MethodDeclaration): List<String> {
+    val body = method.body.orElse(null) ?: return emptyList()
+
+    // Get all declared variable names
+    val declaredVars = body.findAll(VariableDeclarationExpr::class.java)
+        .flatMap { it.variables }
+        .map { it.nameAsString }
+
+    // Track names that are actually READ
+    val readVars = mutableSetOf<String>()
+
+    body.walk(NameExpr::class.java) { nameExpr ->
+        val parent = nameExpr.parentNode.orElse(null)
+        val name = nameExpr.nameAsString
+
+        val isRead = when (parent) {
+            is AssignExpr -> parent.target != nameExpr // it's on the right-hand side (i.e. read)
+            is UnaryExpr -> true // ++a or a++ might be read
+            else -> true
+        }
+
+        if (isRead) {
+            readVars.add(name)
+        }
+    }
+
+    return declaredVars.filter { it !in readVars }
+}
+
+fun findStatementsUsingVariables(root: Node, variableNames: List<String>): List<Statement> {
+    val result = mutableSetOf<Statement>()
+
+    // Find variable declarations involving lonely variables
+    root.findAll(VariableDeclarationExpr::class.java).forEach { declExpr ->
+        declExpr.variables.forEach { varDecl ->
+            if (varDecl.nameAsString in variableNames) {
+                val stmt = declExpr.findAncestor(Statement::class.java).orElse(null)
+                if (stmt != null) result.add(stmt)
+            }
+        }
+    }
+
+    // Find other statements using the variable names (e.g., assignments)
+    root.findAll(NameExpr::class.java).forEach { nameExpr ->
+        if (nameExpr.nameAsString in variableNames) {
+            val stmt = nameExpr.findAncestor(Statement::class.java).orElse(null)
+            if (stmt != null) result.add(stmt)
+        }
+    }
+
+    return result.toList()
+}
