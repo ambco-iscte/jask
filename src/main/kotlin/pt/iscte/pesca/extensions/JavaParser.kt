@@ -565,3 +565,37 @@ fun findStatementsUsingVariables(root: Node, variableNames: List<String>): List<
 
     return result.toList()
 }
+fun replaceIfWithThenBody(ifStmt: IfStmt) {
+    val parent = ifStmt.parentNode.orElse(null) ?: return
+
+    val thenStmt = ifStmt.thenStmt
+    val replacementStmts = when (thenStmt) {
+        is BlockStmt -> thenStmt.statements
+        else -> listOf(thenStmt)
+    }
+
+    when (parent) {
+        is BlockStmt -> {
+            val stmts = parent.statements
+            val index = stmts.indexOf(ifStmt)
+            if (index >= 0) {
+                stmts.removeAt(index)
+                stmts.addAll(index, replacementStmts)
+            }
+        }
+
+        is Statement -> {
+            // Single-statement context: wrap in BlockStmt
+            val block = BlockStmt()
+            block.statements.addAll(replacementStmts)
+            ifStmt.replace(block)
+        }
+
+        else -> {
+            // General fallback: try wrapping in block
+            val block = BlockStmt()
+            block.statements.addAll(replacementStmts)
+            ifStmt.replace(block)
+        }
+    }
+}

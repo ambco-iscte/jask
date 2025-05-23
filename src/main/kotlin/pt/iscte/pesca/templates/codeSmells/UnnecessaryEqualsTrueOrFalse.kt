@@ -20,11 +20,22 @@ class UnnecessaryEqualsTrueOrFalse : StaticQuestionTemplate<MethodDeclaration>()
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
         val methodReplaced = method.clone()
+        val methodReplacedWA = method.clone()
+        val methodReplacedWA2 = method.clone()
 
-        var ifStmt = methodReplaced.findAll(IfStmt::class.java).firstOrNull {
+        var ifStmt = methodReplaced.findAll(IfStmt::class.java).first {
             val condition = it.condition
             removeEqualsTrueOrFalse(condition) != condition
         }
+        var ifStmtWA = methodReplacedWA.findAll(IfStmt::class.java).first {
+            val condition = it.condition
+            removeEqualsTrueOrFalse(condition) != condition
+        }
+        var ifStmtWA2 = methodReplacedWA2.findAll(IfStmt::class.java).first {
+            val condition = it.condition
+            removeEqualsTrueOrFalse(condition) != condition
+        }
+
 
         do {
             ifStmt?.setCondition(removeEqualsTrueOrFalse(ifStmt.condition))
@@ -33,15 +44,34 @@ class UnnecessaryEqualsTrueOrFalse : StaticQuestionTemplate<MethodDeclaration>()
                 removeEqualsTrueOrFalse(condition) != condition
             }
         } while (ifStmt != null)
+        do {
+            ifStmtWA?.setCondition(removeEqualsTrueOrFalse(negateExpression(ifStmtWA.condition)))
+            ifStmtWA = methodReplacedWA.findAll(IfStmt::class.java).firstOrNull {
+                val condition = it.condition
+                removeEqualsTrueOrFalse(condition) != condition
+            }
+        } while (ifStmtWA != null)
+        do {
+            replaceIfWithThenBody(ifStmtWA2)
+            ifStmtWA2 = methodReplacedWA2.findAll(IfStmt::class.java).firstOrNull {
+                val condition = it.condition
+                removeEqualsTrueOrFalse(condition) != condition
+            }
+        } while (ifStmtWA2 != null)
 
 
         return Question(
             source,
             TextWithMultipleCodeStatements(
                 language["UnnecessaryEqualsTrueOrFalse"].format(method.nameAsString),
-                listOf(method.toString(), methodReplaced.toString())
+                listOf(method.toString())
             ),
-            true.trueOrFalse(language),
+            mapOf(
+                SimpleTextOption(methodReplaced.toString()) to true,
+                SimpleTextOption(methodReplacedWA.toString()) to false,
+                SimpleTextOption(methodReplacedWA2.toString()) to false
+
+            ),
             language = language
         )
     }
@@ -52,14 +82,12 @@ fun main() {
     val source = """
         class abc{
             
-            public void test(){
+            public int test(){
                 int y = 0;
-                if(a == true || a != true){
-                    //todo
-                }
-                if(false != a &&  a == false){
-                    //todo
-                }
+                if(a == true )
+                    return 1;
+                y = 2;
+                return y;
             }
         
         }
