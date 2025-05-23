@@ -24,12 +24,32 @@ class UselessDuplicationInsideIfElse : StaticQuestionTemplate<MethodDeclaration>
 
 
 
-        refactorIfByExtractingCommonParts(methodReplaced.hasDuplicatedInsideIfElse()!!)
-        val ifStmtWA = refactorIfByExtractingCommonParts(methodReplacedWA.hasDuplicatedInsideIfElse()!!)
-        ifStmtWA.removeElseStmt()
+
 
         val ifStmtWA2 = refactorIfByExtractingCommonParts(methodReplacedWA2.hasDuplicatedInsideIfElse()!!)
         ifStmtWA2.remove()
+
+        var options = mapOf<Option,Boolean>()
+
+        refactorIfByExtractingCommonParts(methodReplaced.hasDuplicatedInsideIfElse()!!)
+        val ifStmtWA = refactorIfByExtractingCommonParts(methodReplacedWA.hasDuplicatedInsideIfElse()!!)
+        if (ifStmtWA.elseStmt.get().asBlockStmt().isEmpty) {
+            options = mapOf<Option,Boolean>(
+                SimpleTextOption(methodReplaced.toString()) to true,
+                SimpleTextOption(methodReplacedWA2.toString()) to false,
+                SimpleTextOption(language["NoneOfTheAbove"]) to false
+            )
+
+
+        }else{
+            ifStmtWA.removeElseStmt()
+            options = mapOf<Option,Boolean>(
+                SimpleTextOption(methodReplaced.toString()) to true,
+                SimpleTextOption(methodReplacedWA2.toString()) to false,
+                SimpleTextOption(methodReplacedWA) to false
+            )
+        }
+
 
         return Question(
             source,
@@ -37,11 +57,7 @@ class UselessDuplicationInsideIfElse : StaticQuestionTemplate<MethodDeclaration>
                 language["UselessDuplicationInsideIfElse"].format(method.nameAsString),
                 listOf(method.toString())
             ),
-            mapOf(
-                SimpleTextOption(methodReplaced.toString()) to true,
-                SimpleTextOption(methodReplacedWA.toString()) to false,
-                SimpleTextOption(methodReplacedWA2.toString()) to false
-            ),
+            options,
             language = language
 
         )
@@ -60,7 +76,7 @@ fun main() {
                 }
                 else {
                     print("first");
-                    print("not the same");
+                    print("not equal");
                     print("last");
                 }
             }
