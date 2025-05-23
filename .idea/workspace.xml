@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/extensions/JavaParser.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/UnnecessaryEqualsTrueOrFalse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/UnnecessaryEqualsTrueOrFalse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/UnnecessaryIfNesting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/pesca/templates/codeSmells/UnnecessaryIfNesting.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" afterDir="false" />
     </list>
@@ -138,16 +137,9 @@
       <recent name="pt.iscte.pesca.questions.javaparser" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.UnnecessaryEqualsTrueOrFalseKt">
+  <component name="RunManager" selected="Kotlin.UnnecessaryIfNestingKt">
     <configuration name="IFReturnConditionKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.IFReturnConditionKt" />
-      <module name="pesca.main" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="LonelyVariableKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.LonelyVariableKt" />
       <module name="pesca.main" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -174,13 +166,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="UnnecessaryIfNestingKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.pesca.templates.UnnecessaryIfNestingKt" />
+      <module name="pesca.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin.UnnecessaryIfNestingKt" />
         <item itemvalue="Kotlin.UnnecessaryEqualsTrueOrFalseKt" />
         <item itemvalue="Kotlin.ReplaceForWithWhileKt" />
         <item itemvalue="Kotlin.RemoveEmptyIfAndElseKt" />
         <item itemvalue="Kotlin.IFReturnConditionKt" />
-        <item itemvalue="Kotlin.LonelyVariableKt" />
       </list>
     </recent_temporary>
   </component>
@@ -222,7 +221,7 @@
       <workItem from="1747739803840" duration="18270000" />
       <workItem from="1747825966940" duration="14665000" />
       <workItem from="1747911740003" duration="3874000" />
-      <workItem from="1748004754827" duration="875000" />
+      <workItem from="1748004754827" duration="1948000" />
     </task>
     <servers />
   </component>
