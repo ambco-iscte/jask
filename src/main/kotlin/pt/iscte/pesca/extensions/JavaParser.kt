@@ -144,6 +144,12 @@ fun MethodDeclaration.hasDuplicatedIfElse(): Boolean =
         ifStmt.hasDuplicateCode()
     }
 
+fun MethodDeclaration.hasDuplicatedInsideIfElse(): IfStmt? =
+    this.findAll(IfStmt::class.java).firstOrNull() { ifStmt ->
+        (getCommonStatements(ifStmt).first.isNotEmpty() || getCommonStatements(ifStmt).second.isNotEmpty()) &&
+                !(getCommonStatements(ifStmt).first.equals(getCommonStatements(ifStmt).second))
+    }
+
 fun Node.lineRelativeTo(other: Node): Int =
     range.get().begin.relativeTo(other.range.get().begin).line
 
@@ -599,3 +605,79 @@ fun replaceIfWithThenBody(ifStmt: IfStmt) {
         }
     }
 }
+
+fun getCommonStatements(ifStmt: IfStmt): Pair<List<Statement>, List<Statement>> {
+    if (!ifStmt.elseStmt.isPresent) return emptyList<Statement>() to emptyList()
+
+    val thenStatements = if (ifStmt.thenStmt.isBlockStmt) {
+        ifStmt.thenStmt.asBlockStmt().statements
+    } else {
+        listOf(ifStmt.thenStmt)
+    }
+
+    val elseStatements = if (ifStmt.elseStmt.get().isBlockStmt) {
+        ifStmt.elseStmt.get().asBlockStmt().statements
+    } else {
+        listOf(ifStmt.elseStmt.get())
+    }
+
+    // Common prefix
+    val prefix = mutableListOf<Statement>()
+    for (i in 0 until minOf(thenStatements.size, elseStatements.size)) {
+        if (thenStatements[i] == elseStatements[i]) {
+            prefix.add(thenStatements[i])
+        } else break
+    }
+
+    // Common suffix
+    val suffix = mutableListOf<Statement>()
+    for (i in 1..minOf(thenStatements.size, elseStatements.size)) {
+        if (thenStatements[thenStatements.size - i] == elseStatements[elseStatements.size - i]) {
+            suffix.add(0, thenStatements[thenStatements.size - i])
+        } else break
+    }
+
+    return prefix to suffix
+}
+
+fun refactorIfByExtractingCommonParts(ifStmt: IfStmt): IfStmt {
+    val (prefix, suffix) = getCommonStatements(ifStmt)
+    if (prefix.isEmpty() && suffix.isEmpty()) return ifStmt
+
+    val thenStatements = if (ifStmt.thenStmt.isBlockStmt) {
+        ifStmt.thenStmt.asBlockStmt().statements
+    } else listOf(ifStmt.thenStmt)
+
+    val elseStatements = if (ifStmt.elseStmt.get().isBlockStmt) {
+        ifStmt.elseStmt.get().asBlockStmt().statements
+    } else listOf(ifStmt.elseStmt.get())
+
+    val trimmedThen = thenStatements.subList(
+        prefix.size, thenStatements.size - suffix.size
+    )
+    val trimmedElse = elseStatements.subList(
+        prefix.size, elseStatements.size - suffix.size
+    )
+
+    val newThenBlock = BlockStmt().apply { trimmedThen.forEach { addStatement(it.clone()) } }
+    val newElseBlock = BlockStmt().apply { trimmedElse.forEach { addStatement(it.clone()) } }
+    val newIf = IfStmt(ifStmt.condition.clone(), newThenBlock, newElseBlock)
+
+    val parent = ifStmt.parentNode.orElse(null)
+    if (parent is BlockStmt) {
+        val idx = parent.statements.indexOf(ifStmt)
+        parent.statements.removeAt(idx)
+        parent.statements.addAll(idx, prefix.map { it.clone() })
+        parent.statements.add(idx + prefix.size, newIf)
+        parent.statements.addAll(idx + prefix.size + 1, suffix.map { it.clone() })
+    } else {
+        val block = BlockStmt()
+        prefix.forEach { block.addStatement(it.clone()) }
+        block.addStatement(newIf)
+        suffix.forEach { block.addStatement(it.clone()) }
+        ifStmt.replace(block)
+    }
+
+    return newIf
+}
+
