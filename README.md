@@ -1,14 +1,13 @@
 <div align="center">
 
-<br>
-
-<picture style="max-width:30%">
-  <source media="(prefers-color-scheme: dark)" srcset="resources/jask-white.png">
-  <source media="(prefers-color-scheme: light)" srcset="resources/jask-dark.png">
-  <img alt="Jask" src="resources/jask-white.png">
+<picture style="width:35%">
+  <source style="width:35%" media="(prefers-color-scheme: dark)" srcset="resources/jask-white.png">
+  <source style="width:35%" media="(prefers-color-scheme: light)" srcset="resources/jask-dark.png">
+  <img style="width:35%" alt="Jask" src="resources/jask-white.png">
 </picture>
+<br><br>
 
-**A Kotlin Library for Generating Questions about Learners' Code in Java**
+**A Library for Generating Questions about Learners' Code in Java**
 
 [What is Jask?](#what-is-jask) •
 [Question Types](#question-types) •
@@ -20,7 +19,7 @@
 
 ## ⓘ What is Jask?
 
-**Jask** is a Kotlin library for generating 
+**Jask** is a library for generating 
 [Questions about Learners' Code](http://urn.fi/URN:ISBN:978-952-64-1768-4) (QLCs) targeting Java
 code. Jask aims to reframe [previous work on QLCs](https://doi.org/10.1145/3502718.3524761) as
 a library which can be integrated into existing educational programming environments
@@ -207,9 +206,9 @@ can be loaded from any `.properties` file using `Localisation.register(File("pat
 <br>
 
 ## 📝 Publications Using Jask
+- [Jask: Generation of Questions About Learners' Code in Java](https://dl.acm.org/doi/10.1145/3502718.3524761)
 
-- **Original Work (not this library):** [Jask: Generation of Questions About Learners' Code in Java](https://dl.acm.org/doi/10.1145/3502718.3524761)
-- More publications coming soon! :)
+- Integrating Questions About Learners’ Code Into an Automated Assessment System _(coming soon!)_
 
 <br>
 
