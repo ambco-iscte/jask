@@ -9,10 +9,10 @@ import errorfinder.TestWrongReturnStmtType
 import errorfinder.WrongTypeForVariableDeclaration
 import org.junit.platform.suite.api.SelectClasses
 import org.junit.platform.suite.api.Suite
-import strudel.TestArraySize
-import strudel.TestHowManyArrayAllocations
-import javaparser.TestHowManyVariables
-import strudel.TestWhichReturnExecuted
+import dynamic.TestArraySize
+import dynamic.TestHowManyArrayAllocations
+import structural.TestHowManyVariables
+import dynamic.TestWhichReturnExecuted
 
 @Suite
 @SelectClasses(

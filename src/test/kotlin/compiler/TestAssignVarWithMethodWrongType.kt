@@ -1,7 +1,7 @@
 package compiler
 
-import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.templates.AssignVarWithMethodWrongType
+import pt.iscte.jask.Localisation
+import pt.iscte.jask.errors.compiler.templates.AssignVarWithMethodWrongType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

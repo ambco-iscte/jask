@@ -1,9 +1,9 @@
 package compiler
 
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.Localisation
-import pt.iscte.pesca.templates.CallMethodWithWrongParameterNumber
-import pt.iscte.pesca.templates.CallMethodWithWrongParameterTypes
+import pt.iscte.jask.Localisation
+import pt.iscte.jask.errors.compiler.templates.CallMethodWithWrongParameterNumber
+import pt.iscte.jask.errors.compiler.templates.CallMethodWithWrongParameterTypes
 import kotlin.test.assertEquals
 
 class TestWrongMethodCall {

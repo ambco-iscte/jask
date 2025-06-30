@@ -2,7 +2,7 @@ package errorfinder
 
 import com.github.javaparser.StaticJavaParser
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.errors.CompilerErrorFinder
+import pt.iscte.jask.errors.CompilerErrorFinder
 import kotlin.test.assertEquals
 
 class TestFindUnknownMethod {

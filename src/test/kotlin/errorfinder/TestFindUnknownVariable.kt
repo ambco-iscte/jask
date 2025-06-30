@@ -6,7 +6,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import org.junit.jupiter.api.Test
-import pt.iscte.pesca.errors.CompilerErrorFinder
+import pt.iscte.jask.errors.CompilerErrorFinder
 import kotlin.test.assertEquals
 
 class TestFindUnknownVariable {

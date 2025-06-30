@@ -1,0 +1,34 @@
+package pt.iscte.jask.templates.structural
+import pt.iscte.jask.templates.*
+
+import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.MethodCallExpr
+import pt.iscte.jask.Language
+import pt.iscte.jask.extensions.findAll
+import pt.iscte.jask.extensions.hasMethodCalls
+import pt.iscte.jask.extensions.trueOrFalse
+import pt.iscte.strudel.parsing.java.SourceLocation
+import pt.iscte.strudel.parsing.java.extensions.getOrNull
+
+class IsRecursive : StaticQuestionTemplate<MethodDeclaration>() {
+
+    override fun isApplicable(element: MethodDeclaration): Boolean =
+        element.body.getOrNull?.hasMethodCalls() == true
+
+    override fun build(sources: List<SourceCode>, language: Language): Question {
+        val (source, method) = sources.getRandom<MethodDeclaration>()
+
+        val recursiveCalls = method.findAll<MethodCallExpr>().filter { call ->
+            call.nameAsString == method.nameAsString
+        }
+        val isRecursive = recursiveCalls.isNotEmpty()
+
+        return Question(
+            source,
+            TextWithCodeStatement(language["IsRecursive"].format(method.nameAsString), method.toString()),
+            isRecursive.trueOrFalse(language),
+            language = language,
+            relevantSourceCode = recursiveCalls.map { SourceLocation(it) }
+        )
+    }
+}
