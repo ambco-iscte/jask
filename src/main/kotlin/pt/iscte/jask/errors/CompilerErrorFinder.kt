@@ -25,6 +25,8 @@ import pt.iscte.jask.errors.compiler.templates.AssignVarWithMethodWrongType
 import pt.iscte.jask.errors.compiler.templates.CallMethodWithWrongParameterNumber
 import pt.iscte.jask.errors.compiler.templates.CallMethodWithWrongParameterTypes
 import pt.iscte.jask.errors.compiler.templates.MethodWithWrongReturnStmt
+import pt.iscte.jask.errors.compiler.templates.ReferencesUndefinedClass
+import pt.iscte.jask.errors.compiler.templates.ReferencesUndefinedMethod
 import pt.iscte.jask.errors.compiler.templates.ReferencesUndefinedVariable
 import pt.iscte.jask.extensions.configureStaticJavaParser
 import pt.iscte.jask.extensions.failure
@@ -64,26 +66,28 @@ class CompilerErrorFinder<T : Node>(
         findMethodCallsWithWrongArguments()
 
     // TODO: prettify
-    fun findAllAndGenerateQLCs(): List<Question> = findAll().mapNotNull { error -> when (error) {
-        is UnknownVariable -> ReferencesUndefinedVariable(error).generate(unit, language)
+    fun findAllAndGenerateQLCs(): List<Question> = findAll().mapNotNull { error -> runCatching {
+        when (error) {
+            is UnknownVariable -> ReferencesUndefinedVariable(error).generate(unit, language)
 
-        is UnknownMethod -> null // TODO
+            is UnknownMethod -> ReferencesUndefinedMethod(error).generate(unit, language)
 
-        is UnknownType -> null // TODO
+            is UnknownType -> ReferencesUndefinedClass(error).generate(unit, language)
 
-        is WrongTypeForVariableDeclaration -> AssignVarWithMethodWrongType(error).generate(unit, language)
+            is WrongTypeForVariableDeclaration -> AssignVarWithMethodWrongType(error).generate(unit, language)
 
-        is WrongReturnStmtType -> MethodWithWrongReturnStmt(error).generate(unit, language)
+            is WrongReturnStmtType -> MethodWithWrongReturnStmt(error).generate(unit, language)
 
-        is WrongMethodCallParameters ->
-            if (error.parameterNumberMismatch)
-                CallMethodWithWrongParameterNumber(error).generate(unit, language)
-            else if (error.parameterTypeMismatch)
-                CallMethodWithWrongParameterTypes(error).generate(unit, language)
-            else null
+            is WrongMethodCallParameters ->
+                if (error.parameterNumberMismatch)
+                    CallMethodWithWrongParameterNumber(error).generate(unit, language)
+                else if (error.parameterTypeMismatch)
+                    CallMethodWithWrongParameterTypes(error).generate(unit, language)
+                else null
 
-        else -> null
-    } }
+            else -> null
+        }
+    }.getOrNull() }
 
     fun findUnknownVariables(): List<UnknownVariable> {
         val scope = VariableScoping.get(target)

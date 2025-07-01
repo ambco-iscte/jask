@@ -9,9 +9,9 @@
 
 **A Library for Generating Questions about Learners' Code in Java**
 
-[What is Jask?](#what-is-jask) •
-[Question Types](#question-types) •
-[Examples](#examples)
+[What is Jask?](#ⓘ-what-is-jask) •
+[Question Types](#-question-types) •
+[Examples](#-examples)
 
 </div>
 
@@ -114,8 +114,8 @@ static double abs(double n) {
         return n;
 }
 ------------------------------
-[x] Line 4
-[ ] Line 7
+[x] Line 3
+[ ] Line 5
 ```
 
 ### Runtime Error QLC
