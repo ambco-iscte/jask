@@ -7,7 +7,7 @@ import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 
-class WhichParametersSingleChoice : StaticQuestionTemplate<MethodDeclaration>() {
+class WhichParametersSingleChoice : StructuralQuestionTemplate<MethodDeclaration>() {
 
     // Method has at least one parameter or local variable.
     override fun isApplicable(element: MethodDeclaration): Boolean =

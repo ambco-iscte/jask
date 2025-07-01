@@ -7,7 +7,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
 
-class UnnecessaryEqualsTrueOrFalse : StaticQuestionTemplate<MethodDeclaration>() {
+class UnnecessaryEqualsTrueOrFalse : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val ifStmt = element.findAll(IfStmt::class.java).firstOrNull {

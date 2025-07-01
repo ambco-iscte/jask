@@ -10,7 +10,7 @@ import pt.iscte.jask.extensions.trueOrFalse
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
-class IsRecursive : StaticQuestionTemplate<MethodDeclaration>() {
+class IsRecursive : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasMethodCalls() == true

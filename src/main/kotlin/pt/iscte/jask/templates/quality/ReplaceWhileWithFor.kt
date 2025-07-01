@@ -11,7 +11,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
 
-public class ReplaceWhileWithFor  : StaticQuestionTemplate<MethodDeclaration>() {
+public class ReplaceWhileWithFor  : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val list = element.findAll(WhileStmt::class.java)

@@ -8,7 +8,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
 
-class IFReturnCondition : StaticQuestionTemplate<MethodDeclaration>() {
+class IFReturnCondition : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val ifStmt = element.findAll(IfStmt::class.java).firstOrNull {

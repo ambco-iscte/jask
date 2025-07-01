@@ -8,7 +8,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
 
-class ReplacesIFsWithIfElse : StaticQuestionTemplate<MethodDeclaration>() {
+class ReplacesIFsWithIfElse : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val ifStmts = element.findAll(IfStmt::class.java)

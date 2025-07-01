@@ -10,7 +10,7 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 import kotlin.collections.toSet
 
-class WhatVariables: StaticQuestionTemplate<MethodDeclaration>() {
+class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getLocalVariables().isNotEmpty()

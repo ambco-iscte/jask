@@ -12,7 +12,7 @@ import pt.iscte.jask.extensions.getUsableVariables
 import pt.iscte.jask.extensions.sample
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class WhichFixedVariables : StaticQuestionTemplate<MethodDeclaration>() {
+class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
 
     private fun MethodDeclaration.getFixedVariables(): List<VariableDeclarator> =
         getLocalVariables().filter { v ->

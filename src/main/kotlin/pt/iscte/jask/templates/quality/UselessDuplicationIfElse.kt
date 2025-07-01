@@ -10,7 +10,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
 
-class UselessDuplicationIfElse : StaticQuestionTemplate<MethodDeclaration>() {
+class UselessDuplicationIfElse : StructuralQuestionTemplate<MethodDeclaration>() {
 
 
     override fun isApplicable(element: MethodDeclaration): Boolean =

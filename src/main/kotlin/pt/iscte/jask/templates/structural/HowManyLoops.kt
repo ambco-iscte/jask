@@ -10,7 +10,7 @@ import pt.iscte.jask.extensions.multipleChoice
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
-class HowManyLoops : StaticQuestionTemplate<MethodDeclaration>() {
+class HowManyLoops : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasLoopControlStructures() == true

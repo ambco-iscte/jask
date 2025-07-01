@@ -101,16 +101,16 @@ sealed class QuestionTemplate<T : Any>(val range: IntRange = 1 .. Int.MAX_VALUE)
  * @param T The type of JavaParser - [com.github.javaparser] - node the question targets, e.g.
  * [com.github.javaparser.ast.body.MethodDeclaration] if the question targets methods.
  */
-abstract class StaticQuestionTemplate<T : Node>(range: IntRange) : QuestionTemplate<T>(range) {
+abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionTemplate<T>(range) {
 
     constructor() : this(1..Int.MAX_VALUE)
 
     protected inline fun <reified R : T> List<SourceCode>.getRandom(): Pair<SourceCode, R> {
         val source = randomByOrNull { isApplicable<R>(it, R::class) } ?:
-        throw QuestionGenerationException(this@StaticQuestionTemplate, null, "Could not find a valid source.")
+        throw QuestionGenerationException(this@StructuralQuestionTemplate, null, "Could not find a valid source.")
 
         val element = getApplicableElements<R>(source).randomOrNull() ?:
-        throw QuestionGenerationException(this@StaticQuestionTemplate, source, "Could not find applicable element of type ${R::class.simpleName} within source.")
+        throw QuestionGenerationException(this@StructuralQuestionTemplate, source, "Could not find applicable element of type ${R::class.simpleName} within source.")
 
         return Pair(source, element)
     }
@@ -124,7 +124,7 @@ abstract class StaticQuestionTemplate<T : Node>(range: IntRange) : QuestionTempl
         require(sources.size in range) { "Question should take between ${range.first} and ${range.last} sources!" }
         return build(sources, language).apply {
             if (!this.hasQuestionType)
-                questionType = this@StaticQuestionTemplate::class.simpleName ?: this@StaticQuestionTemplate::class.java.simpleName
+                questionType = this@StructuralQuestionTemplate::class.simpleName ?: this@StructuralQuestionTemplate::class.java.simpleName
         }
     }
 

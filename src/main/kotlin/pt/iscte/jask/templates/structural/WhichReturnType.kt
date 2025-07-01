@@ -9,7 +9,7 @@ import pt.iscte.jask.extensions.getUsedTypes
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class WhichReturnType : StaticQuestionTemplate<MethodDeclaration>() {
+class WhichReturnType : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getUsedTypes().size >= 2

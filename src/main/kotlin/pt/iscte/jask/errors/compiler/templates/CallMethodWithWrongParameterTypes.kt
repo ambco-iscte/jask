@@ -9,12 +9,10 @@ import pt.iscte.jask.extensions.relativeTo
 import pt.iscte.jask.templates.*
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.jask.templates.structural.*
-import pt.iscte.jask.templates.dynamic.*
-import pt.iscte.jask.templates.quality.*
 
 class CallMethodWithWrongParameterTypes(
     private val error: WrongMethodCallParameters? = null
-): StaticQuestionTemplate<TypeDeclaration<*>>() {
+): StructuralQuestionTemplate<TypeDeclaration<*>>() {
 
     init {
         if (error != null)

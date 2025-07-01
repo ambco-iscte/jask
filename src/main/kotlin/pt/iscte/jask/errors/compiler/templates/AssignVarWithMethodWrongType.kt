@@ -12,12 +12,10 @@ import pt.iscte.jask.extensions.randomBy
 import pt.iscte.jask.templates.*
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.jask.templates.structural.*
-import pt.iscte.jask.templates.dynamic.*
-import pt.iscte.jask.templates.quality.*
 
 class AssignVarWithMethodWrongType(
     private val error: WrongTypeForVariableDeclaration? = null
-): StaticQuestionTemplate<TypeDeclaration<*>>() {
+): StructuralQuestionTemplate<TypeDeclaration<*>>() {
 
     init {
         if (error != null)

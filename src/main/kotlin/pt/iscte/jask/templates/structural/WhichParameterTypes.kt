@@ -6,7 +6,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import kotlin.collections.plus
 
-class WhichParameterTypes : StaticQuestionTemplate<MethodDeclaration>() {
+class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()

@@ -11,7 +11,7 @@ import pt.iscte.jask.extensions.prettySignature
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
-class HowManyLoopsMakeSense : StaticQuestionTemplate<MethodDeclaration>() {
+class HowManyLoopsMakeSense : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasLoopControlStructures() == true

@@ -10,7 +10,7 @@ import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
-class WhichVariableHoldsReturn : StaticQuestionTemplate<MethodDeclaration>() {
+class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>() {
 
     // Return value is given by a single variable.
     override fun isApplicable(element: MethodDeclaration): Boolean =

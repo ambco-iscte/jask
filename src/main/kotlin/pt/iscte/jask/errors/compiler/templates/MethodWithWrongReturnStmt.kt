@@ -8,12 +8,10 @@ import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.jask.templates.*
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.jask.templates.structural.*
-import pt.iscte.jask.templates.dynamic.*
-import pt.iscte.jask.templates.quality.*
 
 class MethodWithWrongReturnStmt(
     private val error: WrongReturnStmtType? = null
-): StaticQuestionTemplate<MethodDeclaration>() {
+): StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean =
         if (error == null)

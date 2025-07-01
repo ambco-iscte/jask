@@ -12,7 +12,7 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 
 class CallMethodWithWrongParameterNumber(
     private val error: WrongMethodCallParameters? = null
-): StaticQuestionTemplate<TypeDeclaration<*>>() {
+): StructuralQuestionTemplate<TypeDeclaration<*>>() {
 
     init {
         if (error != null)

@@ -7,7 +7,7 @@ import pt.iscte.jask.extensions.correctAndRandomDistractors
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class HowManyVariables : StaticQuestionTemplate<MethodDeclaration>() {
+class HowManyVariables : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun build(
         sources: List<SourceCode>,

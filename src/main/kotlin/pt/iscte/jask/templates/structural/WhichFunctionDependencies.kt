@@ -12,7 +12,7 @@ import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.jask.extensions.sample
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class WhichFunctionDependencies : StaticQuestionTemplate<MethodDeclaration>() {
+class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>() {
 
     // Has at least one call statement to another function.
     override fun isApplicable(element: MethodDeclaration): Boolean =

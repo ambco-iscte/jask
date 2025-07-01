@@ -8,7 +8,7 @@ import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.multipleChoice
 import pt.iscte.strudel.parsing.java.SourceLocation
 
-class HowManyFunctionDependencies : StaticQuestionTemplate<MethodDeclaration>() {
+class HowManyFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, method) = sources.getRandom<MethodDeclaration>()

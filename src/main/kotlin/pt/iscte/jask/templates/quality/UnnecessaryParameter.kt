@@ -6,7 +6,7 @@ import com.github.javaparser.ast.stmt.ReturnStmt
 import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 
-class UnnecessaryParameter : StaticQuestionTemplate<MethodDeclaration>() {
+class UnnecessaryParameter : StructuralQuestionTemplate<MethodDeclaration>() {
 
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val body = element.body.orElse(null) ?: return false

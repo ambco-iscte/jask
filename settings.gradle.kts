@@ -1,7 +1,7 @@
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
 }
-rootProject.name = "pesca"
+rootProject.name = "jask"
 
-include(":pesca", ":strudel")
+include(":jask", ":strudel")
 project(":strudel").projectDir = file("../strudel")
