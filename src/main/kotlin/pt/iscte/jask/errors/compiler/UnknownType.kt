@@ -7,6 +7,5 @@ import pt.iscte.jask.errors.ICompilerError
 
 data class UnknownType(val type: Type, val location: Node, val types: List<TypeDeclaration<*>>): ICompilerError {
 
-    override fun message(): String = "Unknown type ${type.asString()} in: $location\n\t" +
-            "Usable declared types are: ${types.joinToString { it.nameAsString }}"
+    override fun message(): String = "Unknown type ${type.asString()} in: $location"
 }

@@ -6,7 +6,9 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.errors.CompilerErrorFinder
 import pt.iscte.jask.errors.compiler.UnknownMethod
 import pt.iscte.jask.errors.compiler.UnknownType
+import pt.iscte.jask.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.jask.extensions.randomBy
+import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.templates.Question
 import pt.iscte.jask.templates.QuestionChoiceType
 import pt.iscte.jask.templates.SimpleTextOption
@@ -21,12 +23,12 @@ class ReferencesUndefinedClass(
 
     init {
         if (error != null)
-            require(error.types.size >= 2)
+            require(error.types.isNotEmpty())
     }
 
     override fun isApplicable(element: TypeDeclaration<*>): Boolean =
         if (error == null)
-            CompilerErrorFinder(element).findUnknownClasses().any { it.types.size >= 2 }
+            CompilerErrorFinder(element).findUnknownClasses().any { it.types.isNotEmpty() }
         else
             element == error.location || element.isAncestorOf(error.location)
 
@@ -38,19 +40,23 @@ class ReferencesUndefinedClass(
 
         val errors = this.error?.let { listOf(it) } ?: CompilerErrorFinder(unit).findUnknownClasses()
 
-        val (type, location, usable) = errors.randomBy { it.types.size >= 2 }
+        val (type, location, usable) = errors.randomBy { it.types.isNotEmpty() }
 
         val unusable: Set<TypeDeclaration<*>> =
             location.findCompilationUnit().get().findAll(TypeDeclaration::class.java).minus(usable).toSet()
 
+        val primitives: Set<String> =
+            JAVA_PRIMITIVE_TYPES.minus((usable + unusable).map { it.nameAsString }).toSet()
+
         return Question(
             source = source,
             statement = TextWithCodeStatement(
-                language["ReferencesUndefinedMethod"].format(type.asString(), location.range.get().begin.line),
+                language["ReferencesUndefinedClass"].format(type.asString(), location.range.get().begin.line),
                 source.code
             ),
             options = // TODO better distractors
                 usable.associate { SimpleTextOption(it.nameAsString) to true } +
+                primitives.sample(3).associate { SimpleTextOption(it) to true } +
                 unusable.associate { SimpleTextOption(it.nameAsString) to false },
             language = language,
             choice = QuestionChoiceType.MULTIPLE,

@@ -66,28 +66,47 @@ class CompilerErrorFinder<T : Node>(
         findMethodCallsWithWrongArguments()
 
     // TODO: prettify
-    fun findAllAndGenerateQLCs(): List<Question> = findAll().mapNotNull { error -> runCatching {
+    fun findAllAndGenerateQLCs(): List<QuestionSequenceWithContext> = findAll().mapNotNull { error -> runCatching {
         when (error) {
-            is UnknownVariable -> ReferencesUndefinedVariable(error).generate(unit, language)
+            is UnknownVariable -> QuestionSequenceWithContext(
+                SimpleTextStatement(error.message()), // TODO
+                ReferencesUndefinedVariable(error).generate(unit, language)
+            )
 
-            is UnknownMethod -> ReferencesUndefinedMethod(error).generate(unit, language)
+            is UnknownMethod -> QuestionSequenceWithContext(
+                SimpleTextStatement(error.message()),
+                ReferencesUndefinedMethod(error).generate(unit, language)
+            )
 
-            is UnknownType -> ReferencesUndefinedClass(error).generate(unit, language)
+            is UnknownType -> QuestionSequenceWithContext(
+                SimpleTextStatement(error.message()),
+                ReferencesUndefinedClass(error).generate(unit, language)
+            )
 
-            is WrongTypeForVariableDeclaration -> AssignVarWithMethodWrongType(error).generate(unit, language)
+            is WrongTypeForVariableDeclaration -> QuestionSequenceWithContext(
+                SimpleTextStatement(error.message()),
+                AssignVarWithMethodWrongType(error).generate(unit, language)
+            )
 
-            is WrongReturnStmtType -> MethodWithWrongReturnStmt(error).generate(unit, language)
+            is WrongReturnStmtType -> QuestionSequenceWithContext(
+                SimpleTextStatement(error.message()),
+                MethodWithWrongReturnStmt(error).generate(unit, language)
+            )
 
             is WrongMethodCallParameters ->
-                if (error.parameterNumberMismatch)
+                if (error.parameterNumberMismatch) QuestionSequenceWithContext(
+                    SimpleTextStatement(error.message()),
                     CallMethodWithWrongParameterNumber(error).generate(unit, language)
-                else if (error.parameterTypeMismatch)
+                )
+                else if (error.parameterTypeMismatch) QuestionSequenceWithContext(
+                    SimpleTextStatement(error.message()),
                     CallMethodWithWrongParameterTypes(error).generate(unit, language)
+                )
                 else null
 
             else -> null
         }
-    }.getOrNull() }
+    }.onFailure { println("Did not generate QLC for ${error::class.simpleName} error: ${it.message}") }.getOrNull() }
 
     fun findUnknownVariables(): List<UnknownVariable> {
         val scope = VariableScoping.get(target)

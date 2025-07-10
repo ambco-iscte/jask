@@ -42,5 +42,11 @@ data class WrongMethodCallParameters(val method: MethodDeclaration, val call: Me
         require(!call.isValidFor(method)) { "Method call $call must be invalid for method ${method.nameWithScope()}!" }
     }
 
-    override fun message(): String = ""
+    override fun message(): String =
+        "Wrong method call for ${method.nameWithScope()} at $call: " + (
+            if (parameterNumberMismatch)
+                "Takes <${expected.size}> arguments, but <${actual.size}> ${if (actual.size == 1) "was" else "were"} given."
+            else
+                "Takes arguments of type(s) <${expected.joinToString(", ")}>, but was given <${actual.joinToString(", ")}>."
+        )
 }

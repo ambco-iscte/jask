@@ -22,6 +22,5 @@ data class WrongReturnStmtType(val method: MethodDeclaration, val returnStmt: Re
     val actual: ResolvedType =
         returnStmt.expression.get().calculateResolvedType()
 
-    override fun message(): String = "Incompatible return type ${actual.describe()} in: $returnStmt\n\t" +
-            "Method ${method.nameAsString} should return ${method.typeAsString}"
+    override fun message(): String = "Incompatible return type ${actual.describe()} in: $returnStmt"
 }

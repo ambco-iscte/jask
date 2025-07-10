@@ -120,9 +120,6 @@ static double abs(double n) {
 
 ### Runtime Error QLC
 
-Runtime error QLCs rely on the [**Strudel**](https://github.com/andre-santos-pt/strudel) library to execute code in a special virtual machine
-which detects runtime errors and generates QLCs.
-
 ```kotlin
 val src = """
     class ArrayUtils {
@@ -135,17 +132,10 @@ val src = """
     }
 """.trimIndent()
 
-val module = Java2Strudel().load(src)
+val (result, qlcs) = QLCVirtualMachine(src).execute("sum", listOf(1, 2, 3, 4, 5))
 
-val vm = IVirtualMachine.create()
-
-val sum = module.getProcedure("sum") as IProcedure
-val array = vm.allocateArrayOf(INT, 1, 2, 3, 4, 5)
-
-val (result, questions) = QLCVirtualMachine(vm).execute(sum, array)
-
-questions.forEach {
-    println(it)
+qlcs.forEach { 
+    println(it) 
 }
 ```
 ```

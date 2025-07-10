@@ -1,12 +1,8 @@
 package pt.iscte.jask.errors
 
 import com.github.javaparser.StaticJavaParser
-import pt.iscte.strudel.model.INT
-import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.parsing.java.Java2Strudel
-import pt.iscte.strudel.vm.IVirtualMachine
 
-fun main() {
+fun compilerExample() {
     val src = """
         class Test {
             int x;
@@ -18,8 +14,29 @@ fun main() {
         }
     """.trimIndent()
 
-    val finder = CompilerErrorFinder(StaticJavaParser.parse(src))
-    finder.findAllAndGenerateQLCs().forEach {
-        println(it)
+    CompilerErrorFinder(StaticJavaParser.parse(src)).findAllAndGenerateQLCs().forEach {
+        println(it.toString() + "\n")
     }
+}
+
+fun runtimeExample() {
+    val src = """
+        class Test {
+            static int sum(int[] a) {
+                int s = 0;
+                for (int i = 0; i <= a.length; i++) {
+                    s = s + a[i];
+                }
+                return s;
+            }
+        }
+    """.trimIndent()
+
+    val (result, questions) = QLCVirtualMachine(src).execute("sum", listOf(1,2,3,4,5))
+    questions.forEach { println(it) }
+}
+
+fun main() {
+    // compilerExample()
+    runtimeExample()
 }

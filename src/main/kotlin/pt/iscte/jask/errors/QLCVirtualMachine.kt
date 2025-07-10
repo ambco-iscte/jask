@@ -5,6 +5,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.lineRelativeTo
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.extensions.toIValue
 import pt.iscte.jask.templates.Option
 import pt.iscte.jask.templates.QuestionChoiceType
 import pt.iscte.jask.templates.Question
@@ -13,15 +14,15 @@ import pt.iscte.jask.templates.SimpleTextOption
 import pt.iscte.jask.templates.SimpleTextStatement
 import pt.iscte.jask.templates.SourceCode
 import pt.iscte.jask.templates.TextWithCodeStatement
-import pt.iscte.jask.templates.structural.*
 import pt.iscte.jask.templates.dynamic.*
-import pt.iscte.jask.templates.quality.*
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.IVariableExpression
 import pt.iscte.strudel.model.util.findAll
+import pt.iscte.strudel.model.util.isIntLiteral
 import pt.iscte.strudel.parsing.java.JP
+import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.vm.ArrayIndexError
 import pt.iscte.strudel.vm.DivisionByZeroError
@@ -35,14 +36,23 @@ import pt.iscte.strudel.vm.StackOverflowError
 import pt.iscte.strudel.vm.UninitializedVariableError
 
 data class QLCVirtualMachine(
-    val vm: IVirtualMachine,
-    val language: Language = Language.DEFAULT
+    private val source: String,
+    private val callStackMaximum: Int = 512,
+    private val loopIterationMaximum: Int = 10000,
+    private val availableMemory: Int = 1024,
+    private val language: Language = Language.DEFAULT
 ) {
     fun execute(
-        procedure: IProcedure,
-        vararg arguments: IValue
+        procedureID: String,
+        vararg args: Any?
     ): Pair<IValue?, List<QuestionSequenceWithContext>> {
-        val source = SourceCode(procedure.module?.toString() ?: procedure.toString())
+        val module = Java2Strudel().load(source)
+        val procedure = module.getProcedure(procedureID) as IProcedure
+
+        val vm = IVirtualMachine.create(callStackMaximum, loopIterationMaximum, availableMemory)
+        val arguments = args.map { it.toIValue(vm, module) }
+
+        val source = SourceCode(module.toString())
         val procedureCallString = procedureCallAsString(procedure, arguments.toList())
 
         val variableHistory = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
@@ -50,7 +60,7 @@ data class QLCVirtualMachine(
         val questions = mutableListOf<QuestionSequenceWithContext>()
 
         // Array Index Out of Bounds
-        fun arrayIndexOutOfBounds(error: ArrayIndexError) {
+        fun arrayIndexOutOfBounds(error: ArrayIndexError, indexIsVariableReference: Boolean) {
             val indexExpression = error.indexExpression as IVariableExpression
             val length = error.array.length
 
@@ -154,12 +164,12 @@ data class QLCVirtualMachine(
                 procedure
             )
 
-            questions.add(QuestionSequenceWithContext(context, listOf(
-                whichArrayLength(),
-                whichLastArrayIndex(),
-                whichVariableUsedToIndex(),
-                whichVariableValues()
-            )))
+            val seq = mutableListOf(whichArrayLength(), whichLastArrayIndex())
+            if (indexIsVariableReference) {
+                seq.add(whichVariableUsedToIndex())
+                seq.add(whichVariableValues())
+            }
+            questions.add(QuestionSequenceWithContext(context, seq))
         }
 
         // Stack Overflow
@@ -254,7 +264,9 @@ data class QLCVirtualMachine(
                     RuntimeErrorType.ARRAY_INDEX_BOUNDS -> {
                         val error = e as ArrayIndexError
                         if (error.indexExpression is IVariableExpression)
-                            arrayIndexOutOfBounds(error)
+                            arrayIndexOutOfBounds(error, true)
+                        else if (error.indexExpression.isIntLiteral())
+                            arrayIndexOutOfBounds(error, false)
                     }
 
                     // Negative Array Size
@@ -268,7 +280,7 @@ data class QLCVirtualMachine(
         }
 
         vm.addListener(listener)
-        val result = runCatching { vm.execute(procedure, *arguments) }.getOrNull()
+        val result = runCatching { vm.execute(procedure, *arguments.toTypedArray()) }.getOrNull()
         vm.removeListener(listener)
 
         return Pair(result, questions)
