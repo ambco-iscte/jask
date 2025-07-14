@@ -5,24 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c62d7534-d10b-4d39-9751-b3b5b9355cbc" name="Changes" comment="README bits and pieces">
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/jask/errors/compiler/templates/ReferencesUndefinedClass.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/jask/errors/compiler/templates/ReferencesUndefinedMethod.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/jask/templates/quality/UselessSelfAssign.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/jask/errors/CompilerErrorFinder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/jask/errors/CompilerErrorFinder.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../strudel/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../strudel/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/jask/extensions/JavaParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/pt/iscte/jask/extensions/JavaParser.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/en.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/localisation/pt.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="ChangesViewManager">
-    <option name="groupingKeys">
-      <option value="repository" />
-    </option>
   </component>
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
@@ -107,7 +100,6 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2myWGYXP74WFucSLj0LnUDi4i98" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -141,6 +133,7 @@
     "Kotlin.UnnecessaryParameterKt.executor": "Run",
     "Kotlin.UselessDuplicationIfElseKt.executor": "Run",
     "Kotlin.UselessDuplicationInsideIfElseKt.executor": "Run",
+    "Kotlin.UselessSelfAssignKt.executor": "Run",
     "Kotlin.UselessVariableDeclarationKt (1).executor": "Run",
     "Kotlin.UselessVariableDeclarationKt.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
@@ -152,7 +145,7 @@
     "ignore.virus.scanning.warn.message": "true",
     "jdk.selected.JAVA_MODULE": "17",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/5ano/PESCA/pesca/src/main/kotlin/pt/iscte/pesca/templates/codeSmells",
+    "last_opened_file_path": "D:/5ano/PESCA/pesca/src/main/kotlin/pt/iscte/jask/templates/quality",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -166,6 +159,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\5ano\PESCA\pesca\src\main\kotlin\pt\iscte\jask\templates\quality" />
       <recent name="D:\5ano\PESCA\pesca\src\main\kotlin\pt\iscte\pesca\templates\codeSmells" />
       <recent name="C:\Users\ASUS\IdeaProjects\pesca\src\test\resources" />
     </key>
@@ -183,7 +177,7 @@
       <recent name="pt.iscte.pesca.errors.compiler.templates" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.pesca [jar]">
+  <component name="RunManager" selected="Kotlin.UselessSelfAssignKt">
     <configuration name="AllTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -198,30 +192,6 @@
             <option value=":test" />
             <option value="--tests" />
             <option value="&quot;AllTests&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="TestWhichReturnExecuted" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":test" />
-            <option value="--tests" />
-            <option value="&quot;dynamic.TestWhichReturnExecuted&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -268,13 +238,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="UselessSelfAssignKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="pt.iscte.jask.templates.quality.UselessSelfAssignKt" />
+      <module name="jask.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin.UselessSelfAssignKt" />
         <item itemvalue="Gradle.pesca [jar]" />
         <item itemvalue="Kotlin.MainKt (1)" />
         <item itemvalue="Gradle.AllTests" />
         <item itemvalue="Kotlin.MainKt" />
-        <item itemvalue="Gradle.TestWhichReturnExecuted" />
       </list>
     </recent_temporary>
   </component>

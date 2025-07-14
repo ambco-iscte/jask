@@ -17,6 +17,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
 import com.github.javaparser.ast.stmt.*
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
+import com.github.javaparser.ast.visitor.GenericListVisitorAdapter
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
@@ -682,3 +683,21 @@ fun refactorIfByExtractingCommonParts(ifStmt: IfStmt): IfStmt {
     return newIf
 }
 
+fun getSelfAssignments(methodDeclaration: MethodDeclaration): List<Statement> {
+    return methodDeclaration.accept(object : GenericListVisitorAdapter<Statement, Void?>() {
+        override fun visit(n: ExpressionStmt, arg: Void?): List<Statement> {
+            val expr = n.expression
+            if (expr is AssignExpr) {
+                val target = expr.target
+                val value = expr.value
+
+                if (target is NameExpr && value is NameExpr) {
+                    if (target.nameAsString == value.nameAsString) {
+                        return listOf(n)
+                    }
+                }
+            }
+            return emptyList()
+        }
+    }, null)
+}
