@@ -69,7 +69,7 @@ class CompilerErrorFinder<T : Node>(
     fun findAllAndGenerateQLCs(): List<QuestionSequenceWithContext> = findAll().mapNotNull { error -> runCatching {
         when (error) {
             is UnknownVariable -> QuestionSequenceWithContext(
-                SimpleTextStatement(error.message()), // TODO
+                SimpleTextStatement(error.message()), // TODO actual statements (localisation)
                 ReferencesUndefinedVariable(error).generate(unit, language)
             )
 

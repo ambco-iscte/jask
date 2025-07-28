@@ -159,10 +159,8 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
             calls.forEach { call ->
                 val args = call.arguments.map { it.toIValue(vm, module) }
                 if (call.id == p.id && p.id != null) { // Specific test cases
-                    call.arguments.forEach {
-                        if (isApplicable(p) && isApplicable(p, args))
-                            pairs.add(p to call.arguments)
-                    }
+                    if (isApplicable(p) && isApplicable(p, args))
+                        pairs.add(p to call.arguments)
                 }
                 else if (call.id == null) { // Wildcard test cases
                     runCatching { vm.execute(p, *args.toTypedArray()) }.onSuccess {
