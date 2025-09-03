@@ -30,7 +30,7 @@ data class QuestionGenerationException(
         "Error generating question of type ${template::class.simpleName}: $message\n----------$source\n----------\nCause: $cause"
 }
 
-data class ProcedureCall(val id: String?, val arguments: List<Any?>)
+data class ProcedureCall(val id: String?, val arguments: List<Any?> = emptyList())
 
 data class SourceCode(val code: String, val calls: List<ProcedureCall> = emptyList()) {
 
