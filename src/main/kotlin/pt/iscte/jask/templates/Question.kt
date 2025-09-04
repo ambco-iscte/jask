@@ -65,9 +65,12 @@ data class TextWithMultipleCodeStatements(override val statement: String, val co
 }
 
 
-sealed interface Option
+sealed interface Option {
+    val feedback: String?
+        get() = null
+}
 
-data class SimpleTextOption(val text: String, val feedback: String? = null): Option {
+data class SimpleTextOption(val text: String, override val feedback: String? = null): Option {
 
     companion object {
         fun none(language: Language = Language.DEFAULT): SimpleTextOption =
@@ -88,7 +91,7 @@ data class SimpleTextOption(val text: String, val feedback: String? = null): Opt
         else -> value.toString()
     })
 
-    override fun toString() = if (feedback == null) text else "$text\t[$feedback]"
+    override fun toString() = text
 }
 
 enum class QuestionChoiceType {
