@@ -21,7 +21,6 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
 
     companion object {
         fun options(
-            values: List<IValue>,
             variableHistory: Map<IVariableDeclaration<*>, List<IValue>>,
             arguments: List<IValue>,
             language: Language
@@ -30,9 +29,23 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
             val options = mutableListOf(
                 SimpleTextOption(variableHistory.map { "${it.key.id} = ${it.value.last()}" }.joinToString()) to true,
             )
-            repeat(variableHistory.size-1) {
-                options.add(SimpleTextOption(variableHistory.map { "${it.key.id} = ${variableHistory.values.random().last()}" }.joinToString()) to false)
+
+            val values = variableHistory.map { it.value.last() }
+            val shuffled = mutableListOf<List<IValue>>()
+            repeat(4) {
+                val s = values.shuffled()
+                if(s != values && shuffled.none { it == s })
+                    shuffled.add(s)
             }
+
+            shuffled.forEach {
+                val o = variableHistory.keys.zip(it).joinToString { "${it.first.id} = ${it.second}" }
+                options.add(SimpleTextOption(o) to false)
+            }
+
+            if(options.size < 4)
+                options.add(SimpleTextOption.none(language) to false)
+
             return options.toMap()
         }
     }
@@ -55,24 +68,14 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
         val vm = IVirtualMachine.create()
         setup(vm)
         val arguments = args.toIValues(vm, module)
-
         vm.execute(procedure, *arguments.toTypedArray())
-
-        valuesPerVariable.keys.forEach {
-            if (it in procedure.parameters)
-                valuesPerVariable[it] =
-                    listOf(arguments[procedure.parameters.indexOf(it)]) + (valuesPerVariable[it] ?: emptyList())
-        }
-        val variable = valuesPerVariable.keys.random()
-        val values = valuesPerVariable[variable]!!
 
         val questionTemplate = if(arguments.isEmpty() && procedure.id == "main") language["WhichLastVariableValuesAnonCall"] else language["WhichLastVariableValues"]
         return Question(
             source,
             TextWithCodeStatement(questionTemplate.format(procedureCallAsString(procedure, arguments)), procedure),
-            options(values, valuesPerVariable, arguments, language),
-            language = language,
-            relevantSourceCode = procedure.findAll(IVariableAssignment::class).filter { it.target == variable }.map { SourceLocation(it) }
+            options(valuesPerVariable, arguments, language),
+            language = language
         )
     }
 }
