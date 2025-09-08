@@ -39,7 +39,10 @@ class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["WhatVariables"].format(method.nameAsString), method),
+            TextWithCodeStatement(
+                language["WhatVariables"].orAnonymous(method).format(method.nameAsString),
+                method
+            ),
             options,
             language = language,
             relevantSourceCode = variables.map { SourceLocation(it) }

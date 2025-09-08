@@ -1,22 +1,24 @@
 package pt.iscte.jask
 
+import com.github.javaparser.ast.body.MethodDeclaration
+import pt.iscte.strudel.model.IProcedureDeclaration
+import pt.iscte.strudel.vm.IValue
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStream
 import java.io.StringReader
+import java.net.URL
 import java.util.Properties
 
 object Localisation {
-    internal val languages = mutableSetOf<Language>()
+    internal val languages = mutableMapOf<String, Language>()
 
     internal var argumentFormatter: (String) -> String = { "[$it]" }
         private set
 
     init {
-        languages.add(Language("en", Properties().apply {
-            load(StringReader(loadResource("localisation/en.properties")!!))
-        }))
-        languages.add(Language("pt", Properties().apply {
-            load(StringReader(loadResource("localisation/pt.properties")!!))
-        }))
+        languages["en"] = Language("en", loadResource("localisation/en")!!.file)
+        languages["pt"] = Language("pt", loadResource("localisation/pt")!!.file)
     }
 
     fun setArgumentFormat(format: (String) -> String) {
@@ -34,43 +36,77 @@ object Localisation {
         return result
     }
 
-    fun loadResource(path: String): String? =
-        javaClass.classLoader.getResourceAsStream(path)?.bufferedReader(Charsets.ISO_8859_1)?.use { it.readText() }
+    private fun loadResource(path: String): URL? =
+        javaClass.classLoader.getResource(path)
 
-    val DefaultLanguage: Language = languages.first { it.code ==  "en" }
+    val DefaultLanguage: Language =
+        languages["en"]!!
 
     fun register(file: File): Language {
         val code = file.nameWithoutExtension
-        if (languages.any { it.code == code })
+        if (code in languages)
             throw IllegalArgumentException("Cannot register language ${file.name}: duplicated code $code!")
-        val lang = Language(code, Properties().apply { load(file.inputStream()) })
-        languages.add(lang)
+        val lang = Language(code, file)
+        languages[code] = lang
         return lang
     }
 
     fun getLanguage(code: String): Language =
-        languages.firstOrNull { it.code == code } ?: DefaultLanguage
+        languages[code] ?: throw NoSuchElementException("No language with code $code!")
 }
 
-data class Language(val code: String, val properties: Properties) {
+data class Language(val code: String, val folder: File) {
     //private val properties = Properties().apply { load(file.inputStream()) }
+
+    constructor(code: String, path: String): this(code, File(path))
+
+    init {
+        require(folder.isDirectory) { "Language root is not a folder: $folder" }
+    }
 
     companion object {
         val DEFAULT: Language = Localisation.DefaultLanguage
+        internal const val POSTFIX_ANONYMOUS = "AnonCall"
     }
 
-    data class Entry(val template: String) {
+    val properties = Properties().apply {
+        folder.listFiles()?.filter { it.extension == "properties" }?.forEach {
+            this@apply.load(it.inputStream())
+        }
+    }
+
+    inner class Entry(val key: String, val template: String) {
         fun format(vararg args: Any?): String =
             template.format(*args.map { when (it) {
                 is String -> Localisation.argumentFormatter(it)
                 else -> it
             } }.toTypedArray())
 
+        fun orAnonymous(arguments: List<IValue>, procedure: IProcedureDeclaration): Entry =
+            if (
+                arguments.isEmpty() && procedure.id == "main" && procedure.parameters.isEmpty()
+                && !key.endsWith(POSTFIX_ANONYMOUS)
+                && this@Language.properties.containsKey("$key$POSTFIX_ANONYMOUS")
+            )
+                this@Language.getLocalisation("$key$POSTFIX_ANONYMOUS")
+            else
+                this
+
+        fun orAnonymous(method: MethodDeclaration): Entry =
+            if (
+                method.parameters.isEmpty() && method.nameAsString == "main"
+                && !key.endsWith(POSTFIX_ANONYMOUS)
+                && this@Language.properties.containsKey("$key$POSTFIX_ANONYMOUS")
+            )
+                this@Language.getLocalisation("$key$POSTFIX_ANONYMOUS")
+            else
+                this
+
         override fun toString(): String = template
     }
 
     fun getLocalisation(key: String): Entry =
-        if (properties.containsKey(key)) Entry(properties.getProperty(key))
+        if (properties.containsKey(key)) this.Entry(key, properties.getProperty(key))
         else throw NoSuchElementException("No $code translation for $key!")
 
     operator fun get(key: String): Entry = getLocalisation(key)

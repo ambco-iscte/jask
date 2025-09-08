@@ -67,10 +67,11 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
         if(distractors.size < 3)
             distractors.add(language["NoneOfTheAbove"])
 
+        val statement = language[HowManyArrayAllocations::class.simpleName!!].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
-                language[HowManyArrayAllocations::class.simpleName!!].format(procedureCallAsString(procedure, arguments)), procedure
+                statement.format(procedureCallAsString(procedure, arguments)), procedure
             ),
             correctAndRandomDistractors(allocations.size, distractors),
             language = language

@@ -20,7 +20,10 @@ class HowManyVariables : StructuralQuestionTemplate<MethodDeclaration>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["HowManyVariables"].format(method.nameAsString), method.toString()),
+            TextWithCodeStatement(
+                language["HowManyVariables"].orAnonymous(method).format(method.nameAsString),
+                method.toString()
+            ),
             correctAndRandomDistractors(
                 howManyVariables,
                 setOf(method.parameters.size, method.parameters.size + howManyVariables, 0, 1, 2, 3, 4),

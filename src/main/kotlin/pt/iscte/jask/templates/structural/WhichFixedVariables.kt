@@ -58,7 +58,10 @@ class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["WhichFixedVariables"].format(method.nameAsString), method),
+            TextWithCodeStatement(
+                language["WhichFixedVariables"].orAnonymous(method).format(method.nameAsString),
+                method
+            ),
             options,
             language = language,
             relevantSourceCode = fixedVariables.map { SourceLocation(it) }

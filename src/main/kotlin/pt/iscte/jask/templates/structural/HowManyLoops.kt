@@ -23,7 +23,10 @@ class HowManyLoops : StructuralQuestionTemplate<MethodDeclaration>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["HowManyLoops"].format(method.nameAsString), method),
+            TextWithCodeStatement(
+                language["HowManyLoops"].orAnonymous(method).format(method.nameAsString),
+                method
+            ),
             howManyLoops.multipleChoice(language),
             language = language,
             relevantSourceCode = loops.map { SourceLocation(it as Statement) },

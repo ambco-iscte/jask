@@ -70,10 +70,13 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
         val arguments = args.toIValues(vm, module)
         vm.execute(procedure, *arguments.toTypedArray())
 
-        val questionTemplate = if(arguments.isEmpty() && procedure.id == "main") language["WhichLastVariableValuesAnonCall"] else language["WhichLastVariableValues"]
+        val questionTemplate = language["WhichLastVariableValues"].orAnonymous(arguments, procedure)
         return Question(
             source,
-            TextWithCodeStatement(questionTemplate.format(procedureCallAsString(procedure, arguments)), procedure),
+            TextWithCodeStatement(
+                questionTemplate.format(procedureCallAsString(procedure, arguments)),
+                procedure
+            ),
             options(valuesPerVariable, arguments, language),
             language = language
         )

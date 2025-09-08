@@ -1,8 +1,13 @@
-package pt.iscte.jask.templates.dynamic
-import pt.iscte.jask.templates.*
+package pt.iscte.jask.templates.structural
 
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.sample
+import pt.iscte.jask.templates.DynamicQuestionTemplate
+import pt.iscte.jask.templates.Option
+import pt.iscte.jask.templates.Question
+import pt.iscte.jask.templates.SimpleTextOption
+import pt.iscte.jask.templates.SourceCode
+import pt.iscte.jask.templates.TextWithCodeStatement
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.roles.IVariableRole
 import pt.iscte.strudel.model.roles.impl.ArrayIndexIterator
@@ -47,9 +52,13 @@ class WhichVariableRole : DynamicQuestionTemplate<IProcedure>() {
         }.toMutableMap()
         options[SimpleTextOption(roleName)] = true
 
+        val statement = language["WhichVariableRole"].orAnonymous(emptyList(), procedure)
         return Question(
             source,
-            TextWithCodeStatement(language["WhichVariableRole"].format(variable.id, procedure.id), procedure),
+            TextWithCodeStatement(
+                statement.format(variable.id, procedure.id),
+                procedure
+            ),
             options,
             language = language
         )

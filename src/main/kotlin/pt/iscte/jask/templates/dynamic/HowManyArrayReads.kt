@@ -90,10 +90,11 @@ class HowManyArrayReads : DynamicQuestionTemplate<IProcedure>() {
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 
+        val statement = language["HowManyArrayReads"].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
-                language["HowManyArrayReads"].format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, arguments)),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             options,

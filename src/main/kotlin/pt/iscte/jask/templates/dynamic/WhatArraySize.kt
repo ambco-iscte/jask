@@ -70,10 +70,12 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
             allocation?.plus(1) ?: 0,
         ) + arrayArgsLengths
 
+        val statement = language[this::class.simpleName!!].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
-                language[this::class.simpleName!!].format(procedureCallAsString(procedure, arguments)), procedure
+                statement.format(procedureCallAsString(procedure, arguments)),
+                procedure
             ),
             correctAndRandomDistractors(allocation ?: language["NoneOfTheAbove"], distractors),
             language = language

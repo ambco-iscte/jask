@@ -92,9 +92,13 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         val variable = valuesPerVariable.keys.random()
         val values = valuesPerVariable[variable]!!
 
+        val statement = language["WhichVariableValues"].orAnonymous(arguments, procedure)
         return Question(
             source,
-            TextWithCodeStatement(language["WhichVariableValues"].format(variable.id, procedureCallAsString(procedure, arguments)), procedure),
+            TextWithCodeStatement(
+                statement.format(variable.id, procedureCallAsString(procedure, arguments)),
+                procedure
+            ),
             options(values, valuesPerVariable, arguments, language),
             language = language,
             relevantSourceCode = procedure.findAll(IVariableAssignment::class).filter { it.target == variable }.map { SourceLocation(it) }

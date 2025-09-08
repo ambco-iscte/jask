@@ -69,10 +69,11 @@ class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 
+        val statement = language["HowManyLoopIterations"].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
-                language["HowManyLoopIterations"].format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, arguments)),
                 procedure
             ),
             options,
