@@ -71,7 +71,8 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(procedureCallAsString(procedure, arguments)), procedure
+                statement.format(procedureCallAsString(procedure, arguments)),
+                procedure
             ),
             correctAndRandomDistractors(allocations.size, distractors),
             language = language

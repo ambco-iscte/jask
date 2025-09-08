@@ -5,10 +5,15 @@ import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.vm.IValue
 import java.io.BufferedReader
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.StringReader
 import java.net.URL
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.Properties
+import kotlin.io.path.extension
 
 object Localisation {
     internal val languages = mutableMapOf<String, Language>()
@@ -17,8 +22,8 @@ object Localisation {
         private set
 
     init {
-        languages["en"] = Language("en", loadResource("localisation/en")!!.file)
-        languages["pt"] = Language("pt", loadResource("localisation/pt")!!.file)
+        languages["en"] = loadLanguageFromResource("en")
+        languages["pt"] = loadLanguageFromResource("pt")
     }
 
     fun setArgumentFormat(format: (String) -> String) {
@@ -45,34 +50,54 @@ object Localisation {
     fun register(file: File): Language {
         val code = file.nameWithoutExtension
         if (code in languages)
-            throw IllegalArgumentException("Cannot register language ${file.name}: duplicated code $code!")
-        val lang = Language(code, file)
+            return languages[code]!!
+        val lang = Language(code, Properties().apply { load(file.inputStream()) })
         languages[code] = lang
         return lang
+    }
+
+    private fun loadLanguageFromResource(code: String): Language {
+        val path = "localisation/$code"
+        val url = this::class.java.classLoader.getResource(path)
+            ?: throw FileNotFoundException("No such resource: $path")
+
+        val properties = Properties()
+
+        when (url.protocol) {
+            // Run in IDE
+            "file" -> {
+                val dir = Paths.get(url.toURI())
+                Files.list(dir).filter { it.extension == "properties" }.forEach { p ->
+                    Files.newInputStream(p).use { properties.load(it) }
+                }
+            }
+
+            // Run from packaged JAR
+            "jar" -> {
+                FileSystems.newFileSystem(url.toURI(), emptyMap<String, Any>()).use { fileSystem ->
+                    val dir = fileSystem.getPath(path)
+                    Files.list(dir).filter { it.extension == "properties" }.forEach { p ->
+                        fileSystem.provider().newInputStream(p).use { properties.load(it) }
+                    }
+                }
+            }
+
+            else -> throw UnsupportedOperationException("Unsupported URL protocol: ${url.protocol}")
+        }
+
+        return Language(code, properties)
     }
 
     fun getLanguage(code: String): Language =
         languages[code] ?: throw NoSuchElementException("No language with code $code!")
 }
 
-data class Language(val code: String, val folder: File) {
+data class Language(val code: String, val properties: Properties) {
     //private val properties = Properties().apply { load(file.inputStream()) }
-
-    constructor(code: String, path: String): this(code, File(path))
-
-    init {
-        require(folder.isDirectory) { "Language root is not a folder: $folder" }
-    }
 
     companion object {
         val DEFAULT: Language = Localisation.DefaultLanguage
         internal const val POSTFIX_ANONYMOUS = "AnonCall"
-    }
-
-    val properties = Properties().apply {
-        folder.listFiles()?.filter { it.extension == "properties" }?.forEach {
-            this@apply.load(it.inputStream())
-        }
     }
 
     inner class Entry(val key: String, val template: String) {
