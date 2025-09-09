@@ -34,3 +34,20 @@ class HowManyVariables : StructuralQuestionTemplate<MethodDeclaration>() {
         )
     }
 }
+
+fun main() {
+    val source = """
+        class Test {
+            static void main() {
+                int c = 0;
+                c = c + 1;
+                c = c + 1;
+                c = c + 1;
+            }
+        }
+    """.trimIndent()
+
+    val template = HowManyVariables()
+    val qlc = template.generate(source)
+    println(qlc)
+}
