@@ -7,6 +7,7 @@ import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.strudel.model.DOUBLE
 import pt.iscte.strudel.model.ILiteral
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IReturn
@@ -15,6 +16,7 @@ import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
+import kotlin.math.absoluteValue
 
 class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
 
@@ -40,7 +42,11 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
         setup(vm)
         val arguments = args.toIValues(vm, module)
 
-        val result = vm.execute(procedure, *arguments.toTypedArray())!!
+        var result = vm.execute(procedure, *arguments.toTypedArray())!!
+
+        // Ugly edge case (works for now)
+        if (result.type == DOUBLE && result.value == -0.0)
+            result = vm.getValue(0.0)
 
         val returnLiterals = procedure.findAll(IReturn::class).filter {
             it.expression != null && it.expression!! is ILiteral
@@ -56,7 +62,13 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
 
         val lastVariableValues = valuesPerVariable.values.map { it.last() }
 
-        val distractors = sampleSequentially(3, returnLiterals, literalExpressions, lastVariableValues, arguments) {
+        val distractors = sampleSequentially(
+            3,
+            returnLiterals,
+            literalExpressions,
+            lastVariableValues,
+            arguments
+        ) {
             it.value != result.value && it.type == procedure.returnType
         }
 
@@ -66,7 +78,7 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
         options[SimpleTextOption(result)] = true
         if (options.size < 4) {
             returnExpressions.sample(4 - options.size).forEach {
-                if (it.toString() != result.toString())
+                if (it != result.toString())
                     options[SimpleTextOption(it)] = false
             }
         }
@@ -75,9 +87,26 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["WhatIsResult"].format(procedureCallAsString(procedure, arguments)), procedure),
+            TextWithCodeStatement(
+                language["WhatIsResult"].format(procedureCallAsString(procedure, arguments)),
+                procedure
+            ),
             options,
             language = language
         )
     }
+}
+
+fun main() {
+    val source = """
+        class Test {
+            static double neg(double n) {
+                return -n;
+            }
+        }
+    """.trimIndent()
+
+    val template = WhatIsResult()
+    val qlc = template.generate(source, ProcedureCall("neg", listOf(0.0)))
+    println(qlc)
 }

@@ -54,7 +54,7 @@ fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, p
 fun correctAndRandomDistractors(correct: Any, distractors: Map<Any, String?>, maxDistractors: Int = 3): Map<Option, Boolean> =
     mapOf(SimpleTextOption(correct) to true) +
     distractors
-    .filter { it != correct }
+    .filter { it.key != correct }
     .sample(maxDistractors).map { SimpleTextOption(it.key, it.value) to false }.toMap()
 
 fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<Option,Boolean> =
