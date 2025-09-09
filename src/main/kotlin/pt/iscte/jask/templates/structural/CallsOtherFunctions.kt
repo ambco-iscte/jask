@@ -20,7 +20,10 @@ class CallsOtherFunctions : StructuralQuestionTemplate<MethodDeclaration>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["CallsOtherFunctions"].format(method.nameAsString), method),
+            TextWithCodeStatement(
+                language["CallsOtherFunctions"].format(method.nameAsString),
+                method
+            ),
             callsOtherFunctions.trueOrFalse(language),
             language = language,
             relevantSourceCode = otherFunctions.map { SourceLocation(it) }

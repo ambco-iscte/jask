@@ -86,10 +86,10 @@ data class SimpleTextOption(val text: String, override val feedback: String? = n
             SimpleTextOption(language["No"])
     }
 
-    constructor(value: Any?): this(when (value) {
+    constructor(value: Any?, feedback: String? = null): this(when (value) {
         is Collection<*> -> value.joinToString()
         else -> value.toString()
-    })
+    }, feedback)
 
     override fun toString() = text
 }

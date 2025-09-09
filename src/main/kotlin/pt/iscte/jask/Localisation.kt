@@ -22,8 +22,8 @@ object Localisation {
         private set
 
     init {
-        languages["en"] = loadLanguageFromResource("en")
-        languages["pt"] = loadLanguageFromResource("pt")
+        loadLanguageFromResource("en")
+        loadLanguageFromResource("pt")
     }
 
     fun setArgumentFormat(format: (String) -> String) {
@@ -41,22 +41,11 @@ object Localisation {
         return result
     }
 
-    private fun loadResource(path: String): URL? =
-        javaClass.classLoader.getResource(path)
-
     val DefaultLanguage: Language =
         languages["en"]!!
 
-    fun register(file: File): Language {
-        val code = file.nameWithoutExtension
-        if (code in languages)
-            return languages[code]!!
-        val lang = Language(code, Properties().apply { load(file.inputStream()) })
-        languages[code] = lang
-        return lang
-    }
-
-    private fun loadLanguageFromResource(code: String): Language {
+    // Thank you, ChatGPT (I'm quite certain java.nio.file.FileSystems is dark magic)
+    fun loadLanguageFromResource(code: String): Language {
         val path = "localisation/$code"
         val url = this::class.java.classLoader.getResource(path)
             ?: throw FileNotFoundException("No such resource: $path")
@@ -85,7 +74,9 @@ object Localisation {
             else -> throw UnsupportedOperationException("Unsupported URL protocol: ${url.protocol}")
         }
 
-        return Language(code, properties)
+        val lang = Language(code, properties)
+        languages[code] = lang
+        return lang
     }
 
     fun getLanguage(code: String): Language =

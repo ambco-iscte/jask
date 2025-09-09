@@ -47,7 +47,7 @@ class HowManyVariableAssignments : DynamicQuestionTemplate<IProcedure>() {
         val variable = countPerVariable.keys.random()
         val count = countPerVariable[variable]!!
 
-        val statement = language["HowManyVariableAssignments"]
+        val statement = language["HowManyVariableAssignments"].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
