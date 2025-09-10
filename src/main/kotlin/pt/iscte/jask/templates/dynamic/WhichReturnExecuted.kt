@@ -8,6 +8,7 @@ import pt.iscte.jask.extensions.toIValues
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IReturn
 import pt.iscte.strudel.model.util.findAll
+import pt.iscte.strudel.parsing.java.JP
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
@@ -34,15 +35,11 @@ class WhichReturnExecuted : DynamicQuestionTemplate<IProcedure>() {
 
         vm.execute(procedure, *arguments.toTypedArray())
 
-        val line = returnInst?.getProperty(SourceLocation::class.java)?.startLine
-            ?: throw RuntimeException("return line not found")
+        val exec = returnInst?.getProperty(JP)?.toString() ?: throw RuntimeException("return source not found")
 
         val distractors = procedure.findAll(IReturn::class).mapNotNull {
-            val l = it.getProperty(SourceLocation::class.java)?.startLine
-            if(l != line)
-                l
-            else
-                null
+            val l = it.getProperty(JP)?.toString()
+            if(l != exec) l else null
         }
 
         return Question(
@@ -51,10 +48,9 @@ class WhichReturnExecuted : DynamicQuestionTemplate<IProcedure>() {
                 language[this::class.simpleName!!].format(procedureCallAsString(procedure, arguments)), procedure
             ),
             correctAndRandomDistractors(
-                "${language["Line"]} $line",
-                distractors.map {
-                    "${language["Line"]} $it"
-                }.toSet()),
+                exec,
+                distractors.toSet()
+            ),
             language = language
         )
     }
