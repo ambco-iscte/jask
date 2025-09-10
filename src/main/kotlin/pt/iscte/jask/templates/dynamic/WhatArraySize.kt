@@ -78,8 +78,12 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
                 procedure
             ),
             correctAndRandomDistractors(
-                (allocation ?: language["NoneOfTheAbove"]) to
-                language["WhatArraySize_NoneOfTheAboveCorrect"].format(),
+                (
+                    if (allocation == null)
+                        language["NoneOfTheAbove"] to language["WhatArraySize_NoneOfTheAboveCorrect"].format()
+                    else
+                        allocation!! to null
+                ),
                 distractors.toMap(),
             ),
             language = language
