@@ -54,12 +54,18 @@ class HowManyVariableAssignments : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(variable.id, procedureCallAsString(procedure, arguments)),
                 procedure
             ),
-            correctAndRandomDistractors(count,
-                setOf(
-                    count+1,
-                    count-1,
-                    iterations,
-                ) + countPerVariable.map { it.value }),
+            correctAndRandomDistractors(
+                count to language["HowManyVariableAssignments_Correct"].format("x", "x = ...;"),
+                (
+                    setOf(count + 1 to null, count - 1 to null, iterations to null) +
+                    countPerVariable.map {
+                        it.value to language["HowManyVariableAssignments_DistractorWrongVariable"].format(
+                            it.key.id,
+                            variable.id
+                        )
+                    }
+                ).toMap()
+            ),
             language
         )
     }

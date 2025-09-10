@@ -24,32 +24,47 @@ class WhichReturnExecuted : DynamicQuestionTemplate<IProcedure>() {
 
         val vm = IVirtualMachine.create()
         val arguments = args.toIValues(vm, module)
+        val callAsString = procedureCallAsString(procedure, arguments)
 
+        val otherReturns = mutableListOf<IReturn>()
         var returnInst: IReturn? = null
         vm.addListener(object : IVirtualMachine.IListener {
             override fun returnCall(s: IReturn, returnValue: IValue?) {
                 if (vm.callStack.size == 1) // first call
                     returnInst = s
+                otherReturns.add(s)
             }
         })
 
         vm.execute(procedure, *arguments.toTypedArray())
 
-        val exec = returnInst?.getProperty(JP)?.toString() ?: throw RuntimeException("return source not found")
+        if (returnInst == null)
+            throw RuntimeException("No return calls executed at call stack size 1")
 
-        val distractors = procedure.findAll(IReturn::class).mapNotNull {
+        val exec = returnInst.getProperty(JP)?.toString() ?:
+        throw RuntimeException("Return instruction not bound to JavaParser source")
+
+        val allReturns = procedure.findAll(IReturn::class) + otherReturns
+        val distractors: Map<String, String?> = allReturns.mapNotNull {
             val l = it.getProperty(JP)?.toString()
-            if(l != exec) l else null
-        }
+            if (l != exec && l != null) {
+                if (it.ownerProcedure == procedure)
+                    l to language["WhichReturnExecuted_DistractorRightProcedureWrongStmt"].format(procedure.id, callAsString)
+                else
+                    l to language["WhichReturnExecuted_DistractorWrongProcedure"].format(it.ownerProcedure.id, procedure.id)
+            }
+            else null
+        }.toSet().toMap()
 
         return Question(
             source,
             TextWithCodeStatement(
-                language[this::class.simpleName!!].format(procedureCallAsString(procedure, arguments)), procedure
+                language[this::class.simpleName!!].format(callAsString),
+                procedure
             ),
             correctAndRandomDistractors(
-                exec,
-                distractors.toSet()
+                exec to null,
+                distractors.toMap(),
             ),
             language = language
         )

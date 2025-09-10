@@ -11,10 +11,14 @@ import pt.iscte.strudel.model.IArrayLength
 import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.IVariableAssignment
+import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.vm.IArray
 import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
+import kotlin.collections.firstOrNull
+import kotlin.collections.joinToString
 
 class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
 
@@ -22,6 +26,8 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
     var countReads = 0
     var len = 0
     var allocated  = 0
+    val allocations = mutableListOf<Pair<IVariableDeclaration<*>, IArray>>()
+    val writes = mutableListOf<String>()
 
     // There is at least one array access.
     override fun isApplicable(element: IProcedure): Boolean =
@@ -33,12 +39,23 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
         len = 0
         allocated = 0
         vm.addListener(object : IVirtualMachine.IListener {
+            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+                if (value.type.isArrayReference)
+                    allocations.add(a.target to (value as IReference<IArray>).target)
+                else if (value.type.isArray)
+                    allocations.add(a.target to value as IArray)
+            }
+
             override fun arrayAllocated(ref: IReference<IArray>) {
                 allocated++
                 len += ref.target.length
                 ref.target.addListener(object : IArray.IListener {
                     override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
                         countWrites++
+
+                        val arrayVar = allocations.firstOrNull { it.second == ref.target }?.first
+                        if (arrayVar != null)
+                            writes.add("${arrayVar.id}[$index] = $newValue")
                     }
 
                     override fun elementRead(index: Int, value: IValue) {
@@ -66,28 +83,31 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
             }
         })
 
-        val distractors = sampleSequentially(3,
+        val distractors: Set<Pair<Int, String?>> = sampleSequentially(3,
             listOf(
-                allocated,
-                countReads,
-                countReads + 1,
-                countReads - 1,
-                countWrites + 1,
-                countWrites - 1,
+                allocated to language["HowManyArrayWrites_DistractorNumAllocated"].format(allocations.joinToString { it.first.id!! }),
+                countReads to language["HowManyArrayWrites_DistractorReads"].format("a[i] = x", "x", "a", "i"),
+                countReads + 1 to null,
+                countReads - 1 to null,
+                countWrites + 1 to null,
+                countWrites - 1 to null,
                 // countReads + countWrites
-                allocated + 1,
-                allocated - 1,
-                arrayLengthAccess
+                allocated + 1 to null,
+                allocated - 1 to null,
+                arrayLengthAccess to language["HowManyArrayWrites_DistractorLengthAccesses"].format("length")
             ),
-            listOf(len, len + 1, len - 1)
+            listOf(len to language["HowManyArrayWrites_DistractorLengthOfAllocated"].format(), len + 1 to null, len - 1 to null)
         ) {
-            it != countWrites && it >= 0
+            it.first != countWrites && it.first >= 0
         }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
-            SimpleTextOption(it) to false
+            SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
-        options[SimpleTextOption(countWrites)] = true
+        options[SimpleTextOption(
+            countWrites,
+            language["HowManyArrayWrites_Correct"].format("a", "i", "a[i]", writes.joinToString())
+        )] = true
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 

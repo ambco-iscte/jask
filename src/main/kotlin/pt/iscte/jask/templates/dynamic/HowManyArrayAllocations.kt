@@ -8,12 +8,16 @@ import pt.iscte.jask.extensions.toIValues
 import pt.iscte.strudel.model.IArrayAllocation
 import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.IVariableAssignment
+import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.vm.IArray
 import pt.iscte.strudel.vm.IReference
+import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
     val allocations = mutableListOf<Int>()
+    val allocated = mutableListOf<Pair<IVariableDeclaration<*>, IArray>>()
 
     override fun isApplicable(element: IProcedure): Boolean {
         var count = 0
@@ -34,6 +38,13 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
                 if(!vm.callStack.isEmpty)
                     allocations.add(ref.target.length)
             }
+
+            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+                if (value.type.isArrayReference)
+                    allocated.add(a.target to (value as IReference<IArray>).target)
+                else if (value.type.isArray)
+                    allocated.add(a.target to value as IArray)
+            }
         })
     }
 
@@ -50,22 +61,28 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
         val v = object : IBlock.IVisitor {
             override fun visit(exp: IArrayAllocation): Boolean {
                 countAllocationInstructions++
-                return true;
+                return true
             }
         }
         procedure.block.accept(v)
 
-        val distractors = mutableSetOf<Any>(
-            countAllocationInstructions + procedure.parameters.count { it.type.isArrayReference },
-            procedure.parameters.count { it.type.isArrayReference },
-            countAllocationInstructions,
-            allocations.size + 1,
-            if (allocations.isNotEmpty()) allocations.size - 1 else 0,
-            0
+        val distractors = mutableSetOf<Pair<Any, String?>>(
+            countAllocationInstructions + procedure.parameters.count { it.type.isArrayReference } to null,
+            procedure.parameters.count {
+                it.type.isArrayReference
+            } to language["HowManyArrayAllocations_DistractorArrayParams"].format(),
+            allocations.sum() to language["HowManyArrayAllocations_DistractorTotalLength"].format(),
+            countAllocationInstructions to null,
+            allocations.size + 1 to null,
+            if (allocations.isNotEmpty())
+                allocations.size - 1 to null
+            else
+                0 to null,
+            0 to null
         )
 
-        if(distractors.size < 3)
-            distractors.add(language["NoneOfTheAbove"])
+        if (distractors.size < 3)
+            distractors.add(language["NoneOfTheAbove"] to null)
 
         val statement = language[HowManyArrayAllocations::class.simpleName!!].orAnonymous(arguments, procedure)
         return Question(
@@ -74,7 +91,10 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(procedureCallAsString(procedure, arguments)),
                 procedure
             ),
-            correctAndRandomDistractors(allocations.size, distractors),
+            correctAndRandomDistractors(
+                allocations.size to language["HowManyArrayAllocations_Correct"].format(allocated.joinToString { it.first.id!! }),
+                distractors.toMap()
+            ),
             language = language
         )
     }

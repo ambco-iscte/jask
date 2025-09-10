@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "pt.iscte"
-version = "0.4.20"
+version = "0.5.0"
 
 repositories {
     mavenCentral()

@@ -13,6 +13,7 @@ import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 class HowManyFunctionCalls : DynamicQuestionTemplate<IProcedure>() {
+
     val proceduresToConsider: MutableList<IProcedureDeclaration> = mutableListOf()
     val count: MutableMap<String, Int> = mutableMapOf()
 
@@ -49,16 +50,16 @@ class HowManyFunctionCalls : DynamicQuestionTemplate<IProcedure>() {
         val randomProcedure = depProcedures.random()
         val correct = count[randomProcedure.id!!] ?: 0
 
-        val distractors = sampleSequentially(3,
-            count.values,
+        val distractors: Set<Pair<Int, String?>> = sampleSequentially(3,
+            count.map { it.value to language["HowManyFunctionCalls_DistractorWrongProcedure"].format(it.key, randomProcedure.id) },
             listOf(
-                count.values.sum(),
-                count.values.sum() + 1,
-                count.values.sum() - 1,
-                correct + 1,
-                correct - 1
+                count.values.sum() to language["HowManyFunctionCalls_DistractorTotalAllProcedures"].format(randomProcedure.id),
+                count.values.sum() + 1 to null,
+                count.values.sum() - 1 to null,
+                correct + 1 to null,
+                correct - 1 to null
             )
-        ) { it != correct && it >= 0 }
+        ) { it.first != correct && it.first >= 0 }
 
         val options: MutableMap<Option, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()

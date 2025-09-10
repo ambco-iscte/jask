@@ -148,8 +148,7 @@ fun MethodDeclaration.hasDuplicatedIfElse(): Boolean =
 fun MethodDeclaration.hasDuplicatedInsideIfElse(): IfStmt? =
     this.findAll(IfStmt::class.java).firstOrNull() { ifStmt ->
         val (prefix, suffix) = getCommonStatements(ifStmt)
-        (prefix.isNotEmpty() || suffix.isNotEmpty()) &&
-                !prefix.equals(suffix)
+        (prefix.isNotEmpty() || suffix.isNotEmpty()) && prefix != suffix
     }
 
 fun Node.lineRelativeTo(other: Node): Int =

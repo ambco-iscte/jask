@@ -145,6 +145,7 @@ data class QLCVirtualMachine(
                 source = source,
                 statement = SimpleTextStatement(language["WhichVariableValues"].format(indexExpression.id, procedureCallString)),
                 WhichVariableValues.options(
+                    indexExpression.variable,
                     variableHistory[indexExpression.variable] ?: emptyList(),
                     variableHistory,
                     arguments.toList(),

@@ -31,10 +31,10 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
             )
 
             val values = variableHistory.map { it.value.last() }
-            val shuffled = mutableListOf<List<IValue>>()
+            val shuffled = mutableSetOf<List<IValue>>()
             repeat(4) {
                 val s = values.shuffled()
-                if(s != values && shuffled.none { it == s })
+                if (s != values)
                     shuffled.add(s)
             }
 
@@ -70,11 +70,11 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
         val arguments = args.toIValues(vm, module)
         vm.execute(procedure, *arguments.toTypedArray())
 
-        val questionTemplate = language["WhichLastVariableValues"].orAnonymous(arguments, procedure)
+        val statement = language["WhichLastVariableValues"].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
-                questionTemplate.format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, arguments)),
                 procedure
             ),
             options(valuesPerVariable, arguments, language),

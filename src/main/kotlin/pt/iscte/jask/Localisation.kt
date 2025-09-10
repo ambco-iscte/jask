@@ -84,7 +84,6 @@ object Localisation {
 }
 
 data class Language(val code: String, val properties: Properties) {
-    //private val properties = Properties().apply { load(file.inputStream()) }
 
     companion object {
         val DEFAULT: Language = Localisation.DefaultLanguage
@@ -122,8 +121,12 @@ data class Language(val code: String, val properties: Properties) {
     }
 
     fun getLocalisation(key: String): Entry =
-        if (properties.containsKey(key)) this.Entry(key, properties.getProperty(key))
-        else throw NoSuchElementException("No $code translation for $key!")
+        if (properties.containsKey(key))
+            this.Entry(key, properties.getProperty(key))
+        else if (DEFAULT.properties.containsKey(key))
+            DEFAULT.Entry(key, DEFAULT.properties.getProperty(key))
+        else
+            throw NoSuchElementException("No localisation entry for $key!")
 
     operator fun get(key: String): Entry = getLocalisation(key)
 }

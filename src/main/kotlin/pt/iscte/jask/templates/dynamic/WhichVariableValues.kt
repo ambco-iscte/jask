@@ -21,29 +21,42 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
 
     companion object {
         fun options(
+            correct: IVariableDeclaration<*>,
             values: List<IValue>,
             variableHistory: Map<IVariableDeclaration<*>, List<IValue>>,
             arguments: List<IValue>,
             language: Language
         ): Map<Option, Boolean> {
+            val otherValues = variableHistory.values.filter { it.size > 1 }
             val distractors = sampleSequentially(3,
                 if (values.size > 1) listOf(
-                    values.subList(1, values.size),
-                    values.subList(0, values.size - 1)
+                    values.subList(1, values.size) to null,                     // Correct with first removed
+                    values.subList(0, values.size - 1) to null                  // Correct with last removed
                 ) else emptyList(),
-                variableHistory.values.filter { it.size > 1 }.map { it.subList(1, it.size) },
-                variableHistory.values.filter { it.size > 1 }.map { it.subList(0, it.size - 1) },
-                variableHistory.values,
-                variableHistory.values.filter { it.size > 1 }.map { it.reversed() },
-                variableHistory.values.filter { it.size > 1 }.map { it.reversed().subList(1, it.size) },
-                variableHistory.values.filter { it.size > 1 }.map { it.reversed().subList(0, it.size - 1) },
-                listOf(listOf(variableHistory.keys.size), arguments)
+                otherValues.map { it.subList(1, it.size) to null },             // Others with first removed
+                otherValues.map { it.subList(0, it.size - 1) to null },         // Others with last removed
+
+                // Other variables
+                variableHistory.map {
+                    it.value to
+                    language["WhichVariableValues_DistractorWrongVariable"].format(it.key.id, correct.id)
+                },
+
+                otherValues.flatMap {
+                    val reversed = it.reversed()
+                    listOf(
+                        reversed to null,                                       // Others reversed
+                        reversed.subList(1, it.size) to null,                   // Others reversed with first removed
+                        reversed.subList(0, it.size - 1) to null                // Others reversed with last removed
+                    )
+                },
+                listOf(listOf(variableHistory.keys.size) to null, arguments to null)
             ) {
-                it != values && it.isNotEmpty()
+                it.first != values && it.first.isNotEmpty()
             }
 
             val options: MutableMap<Option, Boolean> = mutableMapOf(SimpleTextOption(values) to true)
-            distractors.forEach { options[SimpleTextOption(it)] = false }
+            distractors.forEach { options[SimpleTextOption(it.first, it.second)] = false }
             if (options.size < 4)
                 options[SimpleTextOption.none(language)] = false
 
@@ -51,6 +64,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
+    // At least one variable was assigned at least 2 values.
     override fun isApplicable(element: IProcedure): Boolean =
         element.getVariableAssignments().any { it.value.size > 1 }
 
@@ -59,7 +73,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         val assigns = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                assigns[a.target] = (assigns[a.target] ?: emptyList()) + listOf(value)
+                assigns[a.target] = (assigns[a.target] ?: emptyList()).plus(value)
             }
         })
         vm.execute(element, *args.toTypedArray())
@@ -85,9 +99,10 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         vm.execute(procedure, *arguments.toTypedArray())
 
         valuesPerVariable.keys.forEach {
-            if (it in procedure.parameters)
-                valuesPerVariable[it] =
-                    listOf(arguments[procedure.parameters.indexOf(it)]) + (valuesPerVariable[it] ?: emptyList())
+            if (it in procedure.parameters) {
+                val argument = arguments[procedure.parameters.indexOf(it)]
+                valuesPerVariable[it] = listOf(argument) + (valuesPerVariable[it] ?: emptyList())
+            }
         }
         val variable = valuesPerVariable.keys.random()
         val values = valuesPerVariable[variable]!!
@@ -99,9 +114,11 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(variable.id, procedureCallAsString(procedure, arguments)),
                 procedure
             ),
-            options(values, valuesPerVariable, arguments, language),
+            options(variable, values, valuesPerVariable, arguments, language),
             language = language,
-            relevantSourceCode = procedure.findAll(IVariableAssignment::class).filter { it.target == variable }.map { SourceLocation(it) }
+            relevantSourceCode = procedure.findAll(IVariableAssignment::class).filter {
+                it.target == variable
+            }.map { SourceLocation(it) }
         )
     }
 }

@@ -17,6 +17,9 @@ class HowDeepCallStack : DynamicQuestionTemplate<IProcedure>() {
 
     var depth: Int = 0
     var numFunctionCalls: Int = 0
+    val currentSequence = mutableListOf<ProcedureCall>()
+    val sequences = mutableListOf<List<ProcedureCall>>()
+    val functionCalls: MutableList<ProcedureCall> = mutableListOf()
 
     override fun isApplicable(element: IProcedure): Boolean =
         element.getProcedureCalls().isNotEmpty()
@@ -24,10 +27,22 @@ class HowDeepCallStack : DynamicQuestionTemplate<IProcedure>() {
     fun setup(vm: IVirtualMachine) {
         depth = 0
         numFunctionCalls = 0
+        functionCalls.clear()
+        sequences.clear()
+        currentSequence.clear()
+
         vm.addListener(object : IVirtualMachine.IListener {
             override fun procedureCall(procedure: IProcedureDeclaration, args: List<IValue>, caller: IProcedure?) {
                 numFunctionCalls++
-                depth = max(depth, vm.callStack.size)
+                functionCalls.add(ProcedureCall(procedure.id, args))
+
+                if (vm.callStack.size > depth) {
+                    currentSequence.add(ProcedureCall(procedure.id, args))
+                    depth = vm.callStack.size
+                } else {
+                    sequences.add(currentSequence.toList())
+                    currentSequence.clear()
+                }
             }
         })
     }
@@ -41,13 +56,21 @@ class HowDeepCallStack : DynamicQuestionTemplate<IProcedure>() {
 
         vm.execute(procedure, *arguments.toTypedArray())
 
-        val distractors = sampleSequentially(3, listOf(depth + 1, numFunctionCalls, numFunctionCalls + 1, 0)) {
-            it != depth
+        val distractors: Set<Pair<Int, String?>> = sampleSequentially(3, listOf(
+            depth + 1 to null,
+            numFunctionCalls to language["HowDeepCallStack_DistractorNumFunctionCalls"].format(),
+            numFunctionCalls + 1 to null,
+            0 to null
+        )) {
+            it.first != depth
         }
 
         val options: MutableMap<Option, Boolean> =
-            distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
-        options[SimpleTextOption(depth)] = true
+            distractors.associate { SimpleTextOption(it.first, it.second) to false }.toMutableMap()
+        options[SimpleTextOption(
+            depth,
+            language["HowDeepCallStack_Correct"].format(sequences.maxBy { it.size }.joinToString())
+        )] = true
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 

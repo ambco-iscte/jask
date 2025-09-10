@@ -60,14 +60,14 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
 
         vm.execute(procedure, *arguments.toTypedArray())
 
-        val arrayArgsLengths = arguments.filter { it is IReference<*> && it.target is IArray }.map {
-            ((it as IReference<*>).target as IArray).length
+        val arrayArgsLengths = arguments.filter { it is IReference<*> && it.target is IArray }.mapIndexed { i, value ->
+            ((value as IReference<*>).target as IArray).length to
+            language["WhatArraySize_DistractorParameter"].format("${procedure.parameters[i].id} = $value")
         }
 
-        val distractors = mutableSetOf<Any>(
-            allocation?: language["NoneOfTheAbove"],
-            allocation?.minus(1) ?: 0,
-            allocation?.plus(1) ?: 0,
+        val distractors: Set<Pair<Any, String?>> = mutableSetOf(
+            (allocation?.minus(1) ?: 0) to null,
+            (allocation?.plus(1) ?: 0) to null,
         ) + arrayArgsLengths
 
         val statement = language[this::class.simpleName!!].orAnonymous(arguments, procedure)
@@ -77,7 +77,11 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(procedureCallAsString(procedure, arguments)),
                 procedure
             ),
-            correctAndRandomDistractors(allocation ?: language["NoneOfTheAbove"], distractors),
+            correctAndRandomDistractors(
+                (allocation ?: language["NoneOfTheAbove"]) to
+                language["WhatArraySize_NoneOfTheAboveCorrect"].format(),
+                distractors.toMap(),
+            ),
             language = language
         )
     }

@@ -48,38 +48,45 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
         if (result.type == DOUBLE && result.value == -0.0)
             result = vm.getValue(0.0)
 
-        val returnLiterals = procedure.findAll(IReturn::class).filter {
+        val returnLiterals: List<Pair<IValue, String?>> = procedure.findAll(IReturn::class).filter {
             it.expression != null && it.expression!! is ILiteral
         }.map {
-            vm.getValue((it.expression!! as ILiteral).stringValue)
+            vm.getValue((it.expression!! as ILiteral).stringValue) to null
         }
 
-        val returnExpressions = procedure.findAll(IReturn::class).filter {
+        val returnExpressions: List<Pair<String, String?>> = procedure.findAll(IReturn::class).filter {
             it.expression != null
-        }.map { it.expression.toString() }
+        }.map {
+            val exp = it.expression.toString()
+            exp to language["WhatIsResult_DistractorReturnExpression"].format(procedure.returnType.id, exp)
+        }
 
-        val literalExpressions = procedure.getLiteralExpressions().map { vm.getValue(it.stringValue) }
+        val literalExpressions: List<Pair<IValue, String?>> = procedure.getLiteralExpressions().map {
+            vm.getValue(it.stringValue) to null
+        }
 
-        val lastVariableValues = valuesPerVariable.values.map { it.last() }
+        val lastVariableValues: List<Pair<IValue, String?>> = valuesPerVariable.map { (variable, values) ->
+            values.last() to language["WhatIsResult_DistractorLastVariableValue"].format(variable.id)
+        }
 
-        val distractors = sampleSequentially(
+        val distractors: Set<Pair<IValue, String?>> = sampleSequentially(
             3,
             returnLiterals,
             literalExpressions,
             lastVariableValues,
-            arguments
+            arguments.map { it to null }
         ) {
-            it.value != result.value && it.type == procedure.returnType
+            it.first.value != result.value && it.first.type == procedure.returnType
         }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
-            SimpleTextOption(it) to false
+            SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(result)] = true
         if (options.size < 4) {
             returnExpressions.sample(4 - options.size).forEach {
-                if (it != result.toString())
-                    options[SimpleTextOption(it)] = false
+                if (it.first != result.toString())
+                    options[SimpleTextOption(it.first, it.second)] = false
             }
         }
         if (options.size < 4)

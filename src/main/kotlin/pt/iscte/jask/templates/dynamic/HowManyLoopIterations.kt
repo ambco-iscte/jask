@@ -9,26 +9,32 @@ import pt.iscte.jask.extensions.toIValues
 import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.ILoop
 import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.IVariableAssignment
+import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.IVariableExpression
+import pt.iscte.strudel.model.util.find
 import pt.iscte.strudel.model.util.findAll
+import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
 
     var count: Int = 0
-    var guard: IExpression? = null
+    val variableHistories = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
 
     override fun isApplicable(element: IProcedure): Boolean =
         element.findAll(ILoop::class).size == 1
 
     fun setup(vm: IVirtualMachine) {
         count = 0
-        guard = null
+        variableHistories.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun loopIteration(loop: ILoop) {
                 count++
-                if (guard == null)
-                    guard = loop.guard
+            }
+
+            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+                variableHistories[a.target] = (variableHistories[a.target] ?: emptyList()).plus(value)
             }
         })
     }
@@ -40,31 +46,35 @@ class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
         setup(vm)
         val arguments = args.toIValues(vm, module)
 
-        vm.execute(procedure, *arguments.toTypedArray())
-
-        val distractors = sampleSequentially(3,
-            listOf(count + 1, count - 1, count + 2),
-        ) {
-            it != count && it >= 0
-        }
-
-        val variablesInGuard = mutableSetOf<String>()
-        guard?.accept(object : IExpression.IVisitor {
+        val guard = procedure.find(ILoop::class).guard
+        val variablesInGuard = mutableSetOf<IVariableDeclaration<*>>()
+        guard.accept(object : IExpression.IVisitor {
             override fun visit(exp: IVariableExpression) {
-                if (exp.variable.id != null)
-                    variablesInGuard.add(exp.variable.id!!)
+                variablesInGuard.add(exp.variable)
             }
         })
 
+        vm.execute(procedure, *arguments.toTypedArray())
+
+        val distractors = sampleSequentially(3, listOf(
+            count + 1 to language["HowManyLoopIterations_DistractorOneMore"].format(guard, false),
+            count - 1 to null,
+            count + 2 to null
+        )) {
+            it.first != count && it.first >= 0
+        }
+
+
+
         val options: MutableMap<Option, Boolean> = distractors.associate {
-            SimpleTextOption(it) to false
+            SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(count)] = true
-        if (options.size < 4 && guard != null)
+        if (options.size < 4)
             options[SimpleTextOption(guard)] = false
         if (options.size < 4)
             variablesInGuard.sample(4 - options.size).forEach {
-                options[SimpleTextOption(it)] = false
+                options[SimpleTextOption(it.id)] = false
             }
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
