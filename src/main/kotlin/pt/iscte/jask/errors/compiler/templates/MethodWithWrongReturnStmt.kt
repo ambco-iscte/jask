@@ -34,7 +34,7 @@ class MethodWithWrongReturnStmt(
                 method.nameWithScope()),
                 method
             ),
-            WhichReturnType.distractors(method),
+            WhichReturnType.options(method, language),
             language = language,
             relevantSourceCode = listOf(SourceLocation(method.type), SourceLocation(error.returnStmt))
         )

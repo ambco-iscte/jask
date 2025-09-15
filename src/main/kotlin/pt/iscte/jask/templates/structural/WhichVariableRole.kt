@@ -21,7 +21,7 @@ class WhichVariableRole : DynamicQuestionTemplate<IProcedure>() {
 
     // There is at least one variable whose role can be determined.
     override fun isApplicable(element: IProcedure): Boolean =
-        element.localVariables.any { IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE }
+        element.localVariables.any { IVariableRole.match(it) != IVariableRole.NONE }
 
     private fun variableRoles(language: Language): Map<KClass<out IVariableRole>, String> = mapOf(
         FixedValue::class to language["FixedValue"].toString(),
@@ -36,14 +36,14 @@ class WhichVariableRole : DynamicQuestionTemplate<IProcedure>() {
         val (source, module, procedure, args) = getRandomProcedure(sources)
 
         // Choose a random variable whose role can be determined.
-        // As per the precondition, there is guaranteed to be at least one.
+        // Per the precondition, there is guaranteed to be at least one.
         val variable = procedure.localVariables.filter {
-            IVariableRole.Companion.match(it) != IVariableRole.Companion.NONE
+            IVariableRole.match(it) != IVariableRole.NONE
         }.random()
 
         // Determine that variable's role.
         val varRoles = variableRoles(language)
-        val role = IVariableRole.Companion.match(variable)
+        val role = IVariableRole.match(variable)
         val roleName = varRoles[role::class]!!
 
         // Generate fancy options. :)

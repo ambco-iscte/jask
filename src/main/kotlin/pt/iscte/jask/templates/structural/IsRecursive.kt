@@ -5,6 +5,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.findAll
+import pt.iscte.jask.extensions.formatted
 import pt.iscte.jask.extensions.hasMethodCalls
 import pt.iscte.jask.extensions.trueOrFalse
 import pt.iscte.strudel.parsing.java.SourceLocation
@@ -23,12 +24,51 @@ class IsRecursive : StructuralQuestionTemplate<MethodDeclaration>() {
         }
         val isRecursive = recursiveCalls.isNotEmpty()
 
+        val options = mutableMapOf<Option, Boolean>()
+
+        if (isRecursive) {
+            options[SimpleTextOption.yes(
+                language,
+                language["IsRecursive_YesCorrect"].format(method.nameAsString, recursiveCalls.joinToString())
+            )] = true
+
+            options[SimpleTextOption.no(
+                language,
+                language["IsRecursive_NoIncorrect"].format()
+            )] = false
+        } else {
+            options[SimpleTextOption.no(
+                language,
+                language["IsRecursive_NoCorrect"].format(method.nameAsString)
+            )] = true
+
+            options[SimpleTextOption.yes(
+                language,
+                language["IsRecursive_YesIncorrect"].format()
+            )] = false
+        }
+
         return Question(
             source,
             TextWithCodeStatement(language["IsRecursive"].format(method.nameAsString), method.toString()),
-            isRecursive.trueOrFalse(language),
+            options,
             language = language,
             relevantSourceCode = recursiveCalls.map { SourceLocation(it) }
         )
     }
+}
+
+fun main() {
+    val source = """
+        class Test {
+            static int factorial(int n) {
+                if (n == 0) return 1;
+                return n * factorial(n - 1);
+            }
+        }
+    """.trimIndent()
+
+    val template = IsRecursive()
+    val qlc = template.generate(source)
+    println(qlc)
 }

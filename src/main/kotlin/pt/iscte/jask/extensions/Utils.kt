@@ -72,3 +72,13 @@ fun <T> success(body: () -> T): Boolean =
 fun <T> failure(body: () -> T): Boolean =
     runCatching(body).isFailure
 
+fun <T, R> Collection<T>.toSetBy(map: (T) -> R): Set<T> {
+    val result = mutableSetOf<T>()
+    val setBy = mutableSetOf<R>()
+    toList().forEach { element ->
+        if (setBy.add(map(element)))
+            result.add(element)
+    }
+    return result
+}
+

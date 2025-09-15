@@ -56,7 +56,7 @@ class AssignVarWithMethodWrongType(
                 ),
                 NodeList(VariableDeclarationExpr(error.variable), methodUsedToInitialise)
             ),
-            WhichReturnType.distractors(methodUsedToInitialise),
+            WhichReturnType.options(methodUsedToInitialise, language),
             language = language,
             relevantSourceCode = listOf(SourceLocation(error.variable), SourceLocation(methodUsedToInitialise.type))
         )

@@ -7,6 +7,7 @@ import pt.iscte.jask.extensions.getUsedProceduresWithinModule
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.IArrayLength
 import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IExpression
@@ -99,14 +100,14 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
             listOf(len to language["HowManyArrayWrites_DistractorLengthOfAllocated"].format(), len + 1 to null, len - 1 to null)
         ) {
             it.first != countWrites && it.first >= 0
-        }
+        }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(
             countWrites,
-            language["HowManyArrayWrites_Correct"].format("a", "i", "a[i]", writes.joinToString())
+            language["HowManyArrayWrites_Correct"].format("x", "a", "i", "a[i] = x", writes.joinToString())
         )] = true
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false

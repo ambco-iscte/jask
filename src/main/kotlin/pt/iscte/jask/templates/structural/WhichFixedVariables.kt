@@ -6,10 +6,13 @@ import com.github.javaparser.ast.body.VariableDeclarator
 import pt.iscte.jask.Language
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.LiteralExpr
+import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.UnaryExpr
+import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getUsableVariables
 import pt.iscte.jask.extensions.sample
+import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
@@ -23,8 +26,12 @@ class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
 
             // And no pesky modifying unary expressions either!
             val noModifies = findAll(UnaryExpr::class.java).none { expr ->
-                expr.operator != UnaryExpr.Operator.PLUS && expr.operator != UnaryExpr.Operator.MINUS &&
-                expr.expression.toString() == v.nameAsString
+                expr.operator !in setOf(
+                    UnaryExpr.Operator.PREFIX_INCREMENT,
+                    UnaryExpr.Operator.POSTFIX_INCREMENT,
+                    UnaryExpr.Operator.PREFIX_DECREMENT,
+                    UnaryExpr.Operator.POSTFIX_DECREMENT
+                ) && expr.expression.toString() == v.nameAsString
             }
 
             noAssigns && noModifies
@@ -37,24 +44,39 @@ class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
-        val fixedVariables = method.getFixedVariables()
-        val fixedVariablesNames = fixedVariables.map { it.nameAsString }
+        val fixedVariables = method.getFixedVariables().toSet()
+        val fixedVariablesNames = fixedVariables.map { it.nameAsString }.toSet()
 
-        val inScope = method.getUsableVariables().map { it.nameAsString }.toSet()
+        val localVariables = method.getLocalVariables().map { it.nameAsString }.toSet()
+        val notFixedVariables = localVariables.minus(fixedVariablesNames)
         val params = method.parameters.map { it.nameAsString }.toSet()
         val literals = method.findAll(LiteralExpr::class.java).map { it.toString() }
 
-        val others = mutableListOf<Set<String>>()
-        while (others.size < 3) {
-            val choice = (fixedVariablesNames + inScope + params + literals).toSet().sample(null).toSet()
-            if (choice != fixedVariablesNames)
-                others.add(choice)
+        val randomNotFixed = notFixedVariables.randomOrNull()
+        val randomNotFixedAssignment = method.findAll<AssignExpr> {
+            it.target is NameExpr && it.target.asNameExpr().nameAsString == randomNotFixed
+        }.randomOrNull()?.toString()
+
+        val distractors = sampleSequentially(3, listOf(
+            params to language["WhichFixedVariables_DistractorParams"].format(method.nameAsString),
+            literals to language["WhichFixedVariables_DistractorLiterals"].format(),
+            notFixedVariables to language["WhichFixedVariables_DistractorNotFixed"].format(randomNotFixedAssignment, randomNotFixed),
+            localVariables to language["WhichFixedVariables_DistractorAllLocal"].format(randomNotFixedAssignment, randomNotFixed)
+        )) {
+            it.first.toSet() != fixedVariables.toSet() && it.first.isNotEmpty()
         }
 
-        val options: MutableMap<Option, Boolean> =
-            others.associate { SimpleTextOption(it) to false }.toMutableMap()
-        options[SimpleTextOption(fixedVariablesNames)] = true
-        options[SimpleTextOption.none(language)] = false
+        val options: MutableMap<Option, Boolean> = distractors.associate {
+            SimpleTextOption(it.first, it.second) to false
+        }.toMutableMap()
+
+        options[SimpleTextOption(
+            fixedVariablesNames,
+            language["WhichFixedVariables_Correct"].format(fixedVariablesNames.joinToString())
+        )] = true
+
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
 
         return Question(
             source,
@@ -67,4 +89,22 @@ class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
             relevantSourceCode = fixedVariables.map { SourceLocation(it) }
         )
     }
+}
+
+fun main() {
+    val source = """
+        class Test {
+            static void foo(int m) {
+                int c = 0;
+                int d = 0;
+                c = c + 1;
+                c = c + 1;
+                c = c + 1;
+            }
+        }
+    """.trimIndent()
+
+    val template = WhichFixedVariables()
+    val qlc = template.generate(source)
+    println(qlc)
 }

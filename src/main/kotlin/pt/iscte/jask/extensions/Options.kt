@@ -20,8 +20,8 @@ fun Double.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
 
 fun Char.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
     SimpleTextOption(this) to true,
-    SimpleTextOption((this + 1).toChar()) to false,
-    SimpleTextOption((this - 1).toChar()) to false,
+    SimpleTextOption(this + 1) to false,
+    SimpleTextOption(this - 1) to false,
     SimpleTextOption.none(language) to false
 )
 

@@ -3,13 +3,18 @@ import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
+import com.github.javaparser.ast.stmt.DoStmt
+import com.github.javaparser.ast.stmt.ForEachStmt
 import com.github.javaparser.ast.stmt.ForStmt
 import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.WhileStmt
 import pt.iscte.jask.Language
+import pt.iscte.jask.extensions.getLoopControlStructures
 import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.jask.extensions.sample
+import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.strudel.model.IReturn
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>() {
@@ -24,33 +29,48 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
         val calls = method.findAll(MethodCallExpr::class.java)
-        val callsNames = calls.map { it.nameWithScope()  }
+        val callsNames = calls.map { it.nameWithScope() }.toSet()
 
-        val herrings = mutableListOf<String>(method.nameAsString)
-        if (method.findAll(WhileStmt::class.java).isNotEmpty())
-            herrings.add("while")
-        if (method.findAll(ForStmt::class.java).isNotEmpty())
-            herrings.add("for")
-        if (method.findAll(IfStmt::class.java).isNotEmpty())
-            herrings.add("if")
-        if (method.findAll(ReturnStmt::class.java).isNotEmpty())
-            herrings.add("return")
+        val controlStructures = method.getLoopControlStructures().map { control ->
+            when (control) {
+                is IfStmt -> "if"
+                is WhileStmt, is DoStmt -> "while"
+                is ForStmt, is ForEachStmt -> "for"
+                else -> toString()
+            }
+        }.toSet()
 
-        val others = mutableListOf<Set<String>>()
-        while (others.size < 3) {
-            val choice = (callsNames + herrings).toSet().sample(null).toSet()
-            if (choice != callsNames)
-                others.add(choice)
-        }
+        val returns =
+            if (method.findFirst(ReturnStmt::class.java).isPresent) setOf("return")
+            else emptySet()
 
-        val options: MutableMap<Option, Boolean> =
-            others.associate { SimpleTextOption(it) to false }.toMutableMap()
-        options[SimpleTextOption(callsNames)] = true
-        options[SimpleTextOption.none(language)] = false
+        val distractors = sampleSequentially(3, listOf(
+            controlStructures to language["WhichFunctionDependencies_DistractorControlStructures"].format(controlStructures.joinToString()),
+            callsNames.plus(controlStructures) to language["WhichFunctionDependencies_DistractorNamesAndControlStructures"].format(controlStructures.joinToString()),
+            returns to language["WhichFunctionDependencies_DistractorReturnStmts"].format("return"),
+            controlStructures.plus(returns) to language["WhichFunctionDependencies_DistractorControlsAndReturns"].format(controlStructures.joinToString(), "return"),
+            callsNames.plus(returns) to null,
+            callsNames.plus(controlStructures).plus(returns) to null,
+            callsNames.plus(method.nameAsString) to null
+        )) {
+            it.first != callsNames && it.first.isNotEmpty()
+        }.toMutableList()
+
+        val options: MutableMap<Option, Boolean> = distractors.associate {
+            SimpleTextOption(it.first, it.second) to false
+        }.toMutableMap()
+
+        options[SimpleTextOption(
+            callsNames,
+            language["WhichFunctionDependencies_Correct"].format()
+        )] = true
+
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
 
         return Question(
             source,
-            TextWithCodeStatement(language[this::class.simpleName!!].format(method.nameAsString), method),
+            TextWithCodeStatement(language["WhichFunctionDependencies"].format(method.nameAsString), method),
             options,
             language = language,
             relevantSourceCode = calls.map { SourceLocation(it) }

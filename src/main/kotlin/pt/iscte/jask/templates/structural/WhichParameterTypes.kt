@@ -4,7 +4,7 @@ import pt.iscte.jask.templates.*
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
-import kotlin.collections.plus
+import pt.iscte.jask.extensions.sampleSequentially
 
 class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -12,45 +12,35 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
         element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()
 
     companion object {
-        fun getDistractors(method: MethodDeclaration, language: Language): Map<Option, Boolean> {
-            val parameters = method.parameters.map { it.nameAsString }
-            val paramTypes = method.parameters.map { it.typeAsString } // TODO can be equal to one of the others ugghh
+        fun options(method: MethodDeclaration, language: Language): Map<Option, Boolean> {
+            val parameters = method.parameters.map { it.nameAsString }.toSet()
+            val paramTypes = method.parameters.map { it.typeAsString }.toSet()
             val returnType = method.typeAsString
 
-            val localVars = method.getLocalVariables().map { it.nameAsString }
-            val localVarTypes = method.getLocalVariables().map { it.typeAsString }
+            val localVars = method.getLocalVariables().map { it.nameAsString }.toSet()
+            val localVarTypes = method.getLocalVariables().map { it.typeAsString }.toSet()
 
             val methodName = method.nameAsString
 
-            val options = (if (parameters.isNotEmpty() && localVars.isNotEmpty()) // Method has both parameters and local variables.
-                mapOf(
-                    SimpleTextOption(parameters) to false,
-                    SimpleTextOption(paramTypes) to true,
-                    SimpleTextOption(returnType) to false,
-                    SimpleTextOption(parameters + localVars) to false
-                )
-                else if (parameters.isNotEmpty()) // Method only has parameters.
-                    mapOf(
-                        SimpleTextOption(parameters) to false,
-                        SimpleTextOption(parameters + listOf(methodName)) to false,
-                        SimpleTextOption(paramTypes) to true,
-                        SimpleTextOption(returnType + listOf(methodName)) to false,
-                    )
-                else if (localVars.isNotEmpty()) // Method only has local variables.
-                    mapOf(
-                        SimpleTextOption(localVars) to false,
-                        SimpleTextOption(localVars + listOf(methodName)) to false,
-                        SimpleTextOption(localVarTypes) to false,
-                        SimpleTextOption(language["FunctionTakesNoParameters"]) to true,
-                    )
-                else
-                    emptyMap() // This case is never applied, as per the isApplicable method.
-            ).toMutableMap()
+            val distractors = sampleSequentially(3, listOf(
+                parameters to language["WhichParameterTypes_DistractorParameters"].format(method.nameAsString),
+                localVars to language["WhichParameterTypes_DistractorLocalVars"].format(method.nameAsString),
+                localVarTypes to language["WhichParameterTypes_DistractorLocalVarTypes"].format(method.nameAsString),
+                paramTypes.plus(returnType) to language["WhichParameterTypes_DistractorParamTypesAndReturnType"].format(method.nameAsString, returnType),
+                paramTypes.plus(methodName) to null,
+                listOf(returnType, methodName) to null
+            )) {
+                it.first != paramTypes && it.first.isNotEmpty()
+            }
 
-            options[SimpleTextOption(paramTypes)] = true
+            val options: MutableMap<Option, Boolean> = distractors.associate {
+                SimpleTextOption(it.first, it.second) to false
+            }.toMutableMap()
+
+            options[SimpleTextOption(paramTypes)] = paramTypes.isNotEmpty()
 
             if (options.size < 4)
-                options[SimpleTextOption.none(language)] = false
+                options[SimpleTextOption.none(language)] = paramTypes.isEmpty()
 
             return options.toMap()
         }
@@ -61,7 +51,7 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
         return Question(
             source,
             TextWithCodeStatement(language["WhichParameterTypes"].format(method.nameAsString), method),
-            getDistractors(method, language),
+            options(method, language),
             language = language
         )
     }

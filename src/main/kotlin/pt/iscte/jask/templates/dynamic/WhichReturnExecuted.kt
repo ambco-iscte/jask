@@ -41,7 +41,7 @@ class WhichReturnExecuted : DynamicQuestionTemplate<IProcedure>() {
         if (returnInst == null)
             throw RuntimeException("No return calls executed at call stack size 1")
 
-        val exec = returnInst.getProperty(JP)?.toString() ?:
+        val exec = returnInst!!.getProperty(JP)?.toString() ?:
         throw RuntimeException("Return instruction not bound to JavaParser source")
 
         val allReturns = procedure.findAll(IReturn::class) + otherReturns

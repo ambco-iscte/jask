@@ -5,6 +5,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.sample
+import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 
@@ -17,15 +18,27 @@ class WhichParametersMultipleChoice : StructuralQuestionTemplate<MethodDeclarati
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
-        val parameters = method.parameters.map { it.nameAsString }
-        val paramTypes = method.parameters.map { it.typeAsString }
+        val parameters = method.parameters.map { it.nameAsString }.toSet()
+        val paramTypes = method.parameters.map { it.typeAsString }.toSet()
 
-        val localVars = method.getLocalVariables().map { it.nameAsString }
-        val localVarTypes = method.getLocalVariables().map { it.typeAsString }
+        val localVars = method.getLocalVariables().map { it.nameAsString }.toSet()
+        val localVarTypes = method.getLocalVariables().map { it.typeAsString }.toSet()
 
-        val options: Map<Option, Boolean> =
-            parameters.associate { SimpleTextOption(it) to true } +
-            (localVars + paramTypes + localVarTypes).sample(4).associate { SimpleTextOption(it) to false }
+        val distractors = sampleSequentially(4,
+            paramTypes.map { it to language["WhichParametersMultipleChoice_DistractorParamTypes"].format() },
+            localVars.map { it to language["WhichParametersMultipleChoice_DistractorLocalVars"].format(method.nameAsString) },
+            localVarTypes.map { it to language["WhichParametersMultipleChoice_DistractorLocalVarTypes"].format(method.nameAsString) }
+        ) {
+            it.first !in parameters
+        }
+
+        val options: MutableMap<Option, Boolean> = distractors.associate {
+            SimpleTextOption(it.first, it.second) to false
+        }.toMutableMap()
+
+        parameters.forEach { parameter ->
+            options[SimpleTextOption(parameter, null)] = true
+        }
 
         return Question(
             source,

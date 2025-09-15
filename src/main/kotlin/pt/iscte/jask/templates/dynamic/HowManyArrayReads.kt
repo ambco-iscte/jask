@@ -7,6 +7,7 @@ import pt.iscte.jask.extensions.getUsedProceduresWithinModule
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.IArrayLength
 import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IExpression
@@ -97,7 +98,7 @@ class HowManyArrayReads : DynamicQuestionTemplate<IProcedure>() {
             )
         ) {
             it.first != countReads && it.first >= 0
-        }
+        }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false

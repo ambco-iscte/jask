@@ -4,6 +4,7 @@ import pt.iscte.jask.templates.*
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
+import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 
@@ -16,38 +17,31 @@ class WhichParametersSingleChoice : StructuralQuestionTemplate<MethodDeclaration
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
-        val parameters = method.parameters.map { it.nameAsString }
-        val paramTypes = method.parameters.map { it.typeAsString }
+        val parameters = method.parameters.map { it.nameAsString }.toSet()
+        val paramTypes = method.parameters.map { it.typeAsString }.toSet()
 
-        val localVars = method.getLocalVariables().map { it.nameAsString }
-        val localVarTypes = method.getLocalVariables().map { it.typeAsString }
+        val localVars = method.getLocalVariables().map { it.nameAsString }.toSet()
+        val localVarTypes = method.getLocalVariables().map { it.typeAsString }.toSet()
 
         val methodName = method.nameAsString
 
-        val options: Map<Option, Boolean> =
-            if (parameters.isNotEmpty() && localVars.isNotEmpty()) // Method has both parameters and local variables.
-                mapOf(
-                    SimpleTextOption(parameters) to true,
-                    SimpleTextOption(paramTypes) to false,
-                    SimpleTextOption(localVars) to false,
-                    SimpleTextOption(parameters + localVars) to false
-                )
-            else if (parameters.isNotEmpty()) // Method only has parameters.
-                mapOf(
-                    SimpleTextOption(parameters) to true,
-                    SimpleTextOption(parameters + listOf(methodName)) to false,
-                    SimpleTextOption(paramTypes) to false,
-                    SimpleTextOption(paramTypes + listOf(methodName)) to false,
-                )
-            else if (localVars.isNotEmpty()) // Method only has local variables.
-                mapOf(
-                    SimpleTextOption(localVars) to false,
-                    SimpleTextOption(localVars + listOf(methodName)) to false,
-                    SimpleTextOption(localVarTypes) to false,
-                    SimpleTextOption(language["FunctionTakesNoParameters"]) to true,
-                )
-            else
-                emptyMap() // This case is never applied, as per the isApplicable method.
+        val distractors = sampleSequentially(3, listOf(
+            parameters.plus(method.nameAsString) to language["WhichParametersSingleChoice_DistractorParamAndName"].format(),
+            paramTypes to language["WhichParametersSingleChoice_DistractorParamTypes"].format(),
+            localVars to language["WhichParametersSingleChoice_DistractorLocalVars"].format(method.nameAsString),
+            localVarTypes to language["WhichParametersSingleChoice_DistractorLocalVarTypes"].format(method.nameAsString)
+        )) {
+            it.first != parameters && it.first.isNotEmpty()
+        }
+
+        val options: MutableMap<Option, Boolean> = distractors.associate {
+            SimpleTextOption(it.first, it.second) to false
+        }.toMutableMap()
+
+        options[SimpleTextOption(parameters)] = true
+
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
 
         return Question(
             source,

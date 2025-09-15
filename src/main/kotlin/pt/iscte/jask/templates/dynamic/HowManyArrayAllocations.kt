@@ -70,7 +70,7 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
             countAllocationInstructions + procedure.parameters.count { it.type.isArrayReference } to null,
             procedure.parameters.count {
                 it.type.isArrayReference
-            } to language["HowManyArrayAllocations_DistractorArrayParams"].format(),
+            } to language["HowManyArrayAllocations_DistractorArrayParams"].format(procedure.id),
             allocations.sum() to language["HowManyArrayAllocations_DistractorTotalLength"].format(),
             countAllocationInstructions to null,
             allocations.size + 1 to null,

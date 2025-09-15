@@ -7,6 +7,7 @@ import pt.iscte.jask.extensions.getUsedProceduresWithinModule
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.vm.IValue
@@ -63,7 +64,7 @@ class HowDeepCallStack : DynamicQuestionTemplate<IProcedure>() {
             0 to null
         )) {
             it.first != depth
-        }
+        }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> =
             distractors.associate { SimpleTextOption(it.first, it.second) to false }.toMutableMap()

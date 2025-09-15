@@ -1,6 +1,7 @@
 package pt.iscte.jask
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import pt.iscte.jask.extensions.isMain
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.vm.IValue
 import java.io.BufferedReader
@@ -99,7 +100,7 @@ data class Language(val code: String, val properties: Properties) {
 
         fun orAnonymous(arguments: List<IValue>, procedure: IProcedureDeclaration): Entry =
             if (
-                arguments.isEmpty() && procedure.id == "main" && procedure.parameters.isEmpty()
+                arguments.isEmpty() && procedure.isMain
                 && !key.endsWith(POSTFIX_ANONYMOUS)
                 && this@Language.properties.containsKey("$key$POSTFIX_ANONYMOUS")
             )
@@ -109,7 +110,7 @@ data class Language(val code: String, val properties: Properties) {
 
         fun orAnonymous(method: MethodDeclaration): Entry =
             if (
-                method.parameters.isEmpty() && method.nameAsString == "main"
+                method.isMain
                 && !key.endsWith(POSTFIX_ANONYMOUS)
                 && this@Language.properties.containsKey("$key$POSTFIX_ANONYMOUS")
             )

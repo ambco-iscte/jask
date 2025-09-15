@@ -6,6 +6,7 @@ import pt.iscte.jask.extensions.getVariableAssignments
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
@@ -53,7 +54,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 listOf(listOf(variableHistory.keys.size) to null, arguments to null)
             ) {
                 it.first != values && it.first.isNotEmpty()
-            }
+            }.toSetBy { it.first }
 
             val options: MutableMap<Option, Boolean> = mutableMapOf(SimpleTextOption(values) to true)
             distractors.forEach { options[SimpleTextOption(it.first, it.second)] = false }

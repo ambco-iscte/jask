@@ -166,3 +166,6 @@ fun procedureCallAsString(procedure: IProcedureDeclaration, arguments: List<IVal
         "${arguments.first().asString()}.${procedure.id}(${arguments.subList(1, arguments.size).joinAsString()})"
     else
         "${procedure.id}(${arguments.joinAsString()})"
+
+val IProcedureDeclaration.isMain: Boolean
+    get() = parameters.isEmpty() && id == "main" && (parameters.isEmpty() || (parameters.size == 1 && parameters[0].type.isArrayReference && (((parameters[0].type as? IReferenceType)?.target as? IArrayType)?.componentType as? HostRecordType)?.type == String::class.java))

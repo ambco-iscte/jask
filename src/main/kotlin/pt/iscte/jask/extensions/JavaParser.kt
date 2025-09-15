@@ -15,8 +15,11 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithBody
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
 import com.github.javaparser.ast.stmt.*
+import com.github.javaparser.ast.type.ArrayType
+import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
+import com.github.javaparser.ast.type.VoidType
 import com.github.javaparser.ast.visitor.GenericListVisitorAdapter
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
@@ -54,6 +57,9 @@ fun Node.getLoopControlStructures(): List<NodeWithBody<*>> =
 fun Node.hasLoopControlStructures(): Boolean =
     getLoopControlStructures().isNotEmpty()
 
+fun Node.getBranches(): List<IfStmt> =
+    findAll(IfStmt::class.java)
+
 val JAVA_PRIMITIVE_TYPES: Set<String> =
     PrimitiveType.Primitive.values().map { it.name.lowercase(Locale.getDefault()) }.toSet()
 
@@ -65,7 +71,6 @@ fun MethodDeclaration.getUsedTypes(): List<Type> =
     parameters.map { it.type } +
     findAll(VariableDeclarationExpr::class.java).flatMap { it.variables.map { it.type } }
 
-// TODO probably super weak
 fun MethodDeclaration.getReturnVariables(): Map<ReturnStmt, List<NodeWithSimpleName<*>>> =
     findAll(ReturnStmt::class.java).associateWith { ret ->
         ret.findAll(Node::class.java).filterIsInstance<NodeWithSimpleName<*>>()
@@ -79,6 +84,9 @@ fun MethodDeclaration.getUsableVariables(): List<VariableDeclarator> =
         ?.flatMap {
             it.variables
         } ?: listOf())
+
+val MethodDeclaration.isMain: Boolean
+    get() = isStatic && type is VoidType && nameAsString == "main" && (parameters.isEmpty() || (parameters.size == 1 && ((parameters[0].type as? ArrayType)?.componentType as? ClassOrInterfaceType)?.nameAsString == String::class.java.canonicalName))
 
 fun MethodCallExpr.nameWithScope(): String =
     (if (scope.isPresent) "${scope.get()}." else "") + nameAsString

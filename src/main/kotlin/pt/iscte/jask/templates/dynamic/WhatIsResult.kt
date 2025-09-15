@@ -7,6 +7,7 @@ import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.DOUBLE
 import pt.iscte.strudel.model.ILiteral
 import pt.iscte.strudel.model.IProcedure
@@ -77,7 +78,7 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
             arguments.map { it to null }
         ) {
             it.first.value != result.value && it.first.type == procedure.returnType
-        }
+        }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false

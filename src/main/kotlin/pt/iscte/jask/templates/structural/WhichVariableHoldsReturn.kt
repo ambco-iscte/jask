@@ -13,9 +13,12 @@ import pt.iscte.strudel.parsing.java.extensions.getOrNull
 class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>() {
 
     // Return value is given by a single variable.
-    override fun isApplicable(element: MethodDeclaration): Boolean =
-        element.findAll(ReturnStmt::class.java).all { it.expression.getOrNull?.isNameExpr == true } &&
-        element.findAll(ReturnStmt::class.java).map { it.expression?.toString() }.toSet().size == 1
+    override fun isApplicable(element: MethodDeclaration): Boolean {
+        val returns = element.findAll(ReturnStmt::class.java)
+        return returns.all {
+            it.expression.getOrNull?.isNameExpr == true
+        } && returns.map { it.expression?.toString() }.toSet().size == 1
+    }
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, method) = sources.getRandom<MethodDeclaration>()
@@ -28,7 +31,7 @@ class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>()
         val distractors = sampleSequentially(3,
             method.getUsableVariables().map { it.nameAsString },
             method.parameters.map { it.nameAsString },
-            returns.map { it.key.expression }.filter { it != returnStmt.expression }.map { it.toString() },
+            returns.map { it.key.expression }.filter { it.getOrNull != returnStmt.expression.getOrNull }.map { it.toString() },
             listOf(method.nameAsString)
         ) {
             it != returnVariableName
@@ -36,7 +39,9 @@ class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>()
 
         val options: MutableMap<Option, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
+
         options[SimpleTextOption(returnVariableName)] = true
+
         if (distractors.size < 3)
             options[SimpleTextOption.none(language)] = false
 

@@ -6,6 +6,7 @@ import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.ILoop
 import pt.iscte.strudel.model.IProcedure
@@ -57,14 +58,12 @@ class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
         vm.execute(procedure, *arguments.toTypedArray())
 
         val distractors = sampleSequentially(3, listOf(
-            count + 1 to language["HowManyLoopIterations_DistractorOneMore"].format(guard, false),
+            count + 1 to language["HowManyLoopIterations_DistractorOneMore"].format(guard.toString(), "false"),
             count - 1 to null,
             count + 2 to null
         )) {
             it.first != count && it.first >= 0
-        }
-
-
+        }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false

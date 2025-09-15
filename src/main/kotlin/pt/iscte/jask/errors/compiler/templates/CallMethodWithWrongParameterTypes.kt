@@ -44,7 +44,7 @@ class CallMethodWithWrongParameterTypes(
             TextWithCodeStatement(language["CallMethodWithWrongParameterTypes"].format(
                 call.toString(), line, callTarget.nameAsString
             ), callTarget.toString()),
-            WhichParameterTypes.getDistractors(callTarget, language),
+            WhichParameterTypes.options(callTarget, language),
             language = language,
             relevantSourceCode = callTarget.parameters.map { SourceLocation(it) } + listOf(SourceLocation(call))
         )

@@ -21,7 +21,7 @@ data class SimpleTextStatement(override val statement: String): QuestionStatemen
 
 data class TextWithCodeStatement(override val statement: String, val code: String): QuestionStatement {
 
-    constructor(statement: String, code: MethodDeclaration): this(statement, code.toString())
+    constructor(statement: String, code: Node): this(statement, code.toString())
 
     constructor(statement: String, code: NodeList<Node>): this(statement, code.joinToString(System.lineSeparator().repeat(2)) {
         if (it is Expression && !it.toString().endsWith(";"))
@@ -73,17 +73,17 @@ sealed interface Option {
 data class SimpleTextOption(val text: String, override val feedback: String? = null): Option {
 
     companion object {
-        fun none(language: Language = Language.DEFAULT): SimpleTextOption =
-            SimpleTextOption(language["NoneOfTheAbove"])
+        fun none(language: Language = Language.DEFAULT, feedback: String? = null): SimpleTextOption =
+            SimpleTextOption(language["NoneOfTheAbove"], feedback)
 
-        fun all(language: Language = Language.DEFAULT): SimpleTextOption =
-            SimpleTextOption(language["AllOfTheAbove"])
+        fun all(language: Language = Language.DEFAULT, feedback: String? = null): SimpleTextOption =
+            SimpleTextOption(language["AllOfTheAbove"], feedback)
 
-        fun yes(language: Language = Language.DEFAULT): SimpleTextOption =
-            SimpleTextOption(language["Yes"])
+        fun yes(language: Language = Language.DEFAULT, feedback: String? = null): SimpleTextOption =
+            SimpleTextOption(language["Yes"], feedback)
 
-        fun no(language: Language = Language.DEFAULT): SimpleTextOption =
-            SimpleTextOption(language["No"])
+        fun no(language: Language = Language.DEFAULT, feedback: String? = null): SimpleTextOption =
+            SimpleTextOption(language["No"], feedback)
     }
 
     constructor(value: Any?, feedback: String? = null): this(when (value) {
@@ -138,9 +138,15 @@ data class Question (
     init {
         require(options.size >= 2) { "Question must have at least two options!\n$this" }
         require(options.any { option -> option.value }) { "Question must have at least one correct option!\n$this" }
+        require(options.keys.map { it.toString() }.toSet().size == options.keys.map { it.toString() }.size) {
+            "Question has duplicate options!"
+        }
     }
 
-    fun options(shuffled: Boolean = false): Map<Option, Boolean> {
+    fun options(shuffle: Boolean = false): Map<Option, Boolean> {
+        if (!shuffle)
+            return options
+
         val lastUnshuffled = listOf(
             SimpleTextOption.none(language),
             SimpleTextOption.all(language),
@@ -165,7 +171,11 @@ data class Question (
     val solution: List<Option>
         get() = options.filter { it.value }.map { it.key }
 
-    override fun toString(): String = "$statement\n${options(true).toList().joinToString(System.lineSeparator()) { 
-        option -> "[${if (option.second) "x" else " "}] ${option.first}"
+    override fun toString(): String = "$statement\n${options.toList().joinToString("\n") { (option, correct) ->
+        val feedback = option.feedback
+        if (feedback == null)
+            "[${if (correct) "x" else " "}] $option"
+        else
+            "[${if (correct) "x" else " "}] $option\t\t-> $feedback"
     }}"
 }
