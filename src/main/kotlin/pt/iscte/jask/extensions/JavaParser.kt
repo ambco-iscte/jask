@@ -48,11 +48,11 @@ val MethodDeclaration.prettySignature: String
 fun Node.hasMethodCalls(): Boolean =
     findAll(MethodCallExpr::class.java).isNotEmpty()
 
-fun Node.getLoopControlStructures(): List<NodeWithBody<*>> =
-    findAll(ForStmt::class.java) +
-    findAll(DoStmt::class.java) +
-    findAll(WhileStmt::class.java) +
-    findAll(ForEachStmt::class.java)
+fun Node.getLoopControlStructures(): List<Pair<NodeWithBody<*>, Expression?>> =
+    findAll(ForStmt::class.java).map { it to it.compare.getOrNull } +
+    findAll(DoStmt::class.java).map { it to it.condition } +
+    findAll(WhileStmt::class.java).map { it to it.condition } +
+    findAll(ForEachStmt::class.java).map { it to null }
 
 fun Node.hasLoopControlStructures(): Boolean =
     getLoopControlStructures().isNotEmpty()
@@ -66,10 +66,10 @@ val JAVA_PRIMITIVE_TYPES: Set<String> =
 fun MethodDeclaration.returnsPrimitiveOrArrayOrString(): Boolean =
     type.isPrimitiveType || type.isArrayType || type.toString() == String::class.simpleName
 
-fun MethodDeclaration.getUsedTypes(): List<Type> =
-    listOf(type) +
+fun MethodDeclaration.getUsedTypes(): Set<Type> =
+    setOf(type) +
     parameters.map { it.type } +
-    findAll(VariableDeclarationExpr::class.java).flatMap { it.variables.map { it.type } }
+    findAll(VariableDeclarationExpr::class.java).flatMap { it.variables.map { v -> v.type } }
 
 fun MethodDeclaration.getReturnVariables(): Map<ReturnStmt, List<NodeWithSimpleName<*>>> =
     findAll(ReturnStmt::class.java).associateWith { ret ->

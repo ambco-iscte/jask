@@ -112,7 +112,7 @@ fun IProcedure.getVariableAssignments(): Map<IVariableDeclaration<*>, List<IVari
     val map = mutableMapOf<IVariableDeclaration<*>, List<IVariableAssignment>>()
     val v = object : IBlock.IVisitor {
         override fun visit(assignment: IVariableAssignment): Boolean {
-            map[assignment.target] = (map[assignment.target] ?: emptyList()) + listOf(assignment)
+            map[assignment.target] = (map[assignment.target] ?: emptyList()).plus(assignment)
             return true
         }
     }
@@ -135,6 +135,11 @@ fun IProcedure.countArrayAccesses(): Int {
     var count = 0
     block.accept(object : IBlock.IVisitor {
         override fun visit(exp: IArrayAccess): Boolean {
+            count++
+            return true
+        }
+
+        override fun visit(assignment: IArrayElementAssignment): Boolean {
             count++
             return true
         }

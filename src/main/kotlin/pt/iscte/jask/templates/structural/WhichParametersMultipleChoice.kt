@@ -6,6 +6,7 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 
@@ -24,19 +25,25 @@ class WhichParametersMultipleChoice : StructuralQuestionTemplate<MethodDeclarati
         val localVars = method.getLocalVariables().map { it.nameAsString }.toSet()
         val localVarTypes = method.getLocalVariables().map { it.typeAsString }.toSet()
 
-        val distractors = sampleSequentially(4,
+        val distractors = sampleSequentially(3,
             paramTypes.map { it to language["WhichParametersMultipleChoice_DistractorParamTypes"].format() },
             localVars.map { it to language["WhichParametersMultipleChoice_DistractorLocalVars"].format(method.nameAsString) },
-            localVarTypes.map { it to language["WhichParametersMultipleChoice_DistractorLocalVarTypes"].format(method.nameAsString) }
+            localVarTypes.map { it to language["WhichParametersMultipleChoice_DistractorLocalVarTypes"].format(method.nameAsString) },
+            setOf(method.nameAsString to null)
         ) {
             it.first !in parameters
-        }
+        }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 
-        parameters.forEach { parameter ->
+        if (parameters.isEmpty())
+            options[SimpleTextOption.none(
+                language,
+                language["WhichParametersMultipleChoice_NoneCorrect"].format(method.nameAsString)
+            )] = true
+        else parameters.forEach { parameter ->
             options[SimpleTextOption(parameter, null)] = true
         }
 

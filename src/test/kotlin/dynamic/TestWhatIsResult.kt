@@ -20,6 +20,7 @@ class TestWhatIsResult {
         """.trimIndent()
 
         val qlc = WhatIsResult().generate(src, ProcedureCall("average", listOf(10, 11)), Localisation.getLanguage("pt"))
+        println(qlc)
         assertEquals("10.5", qlc.solution.first().toString())
 
     }

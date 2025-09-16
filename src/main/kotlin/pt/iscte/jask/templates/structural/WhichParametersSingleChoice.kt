@@ -5,6 +5,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 
@@ -23,25 +24,28 @@ class WhichParametersSingleChoice : StructuralQuestionTemplate<MethodDeclaration
         val localVars = method.getLocalVariables().map { it.nameAsString }.toSet()
         val localVarTypes = method.getLocalVariables().map { it.typeAsString }.toSet()
 
-        val methodName = method.nameAsString
-
         val distractors = sampleSequentially(3, listOf(
             parameters.plus(method.nameAsString) to language["WhichParametersSingleChoice_DistractorParamAndName"].format(),
             paramTypes to language["WhichParametersSingleChoice_DistractorParamTypes"].format(),
             localVars to language["WhichParametersSingleChoice_DistractorLocalVars"].format(method.nameAsString),
+            localVars.plus(method.nameAsString) to null,
             localVarTypes to language["WhichParametersSingleChoice_DistractorLocalVarTypes"].format(method.nameAsString)
         )) {
             it.first != parameters && it.first.isNotEmpty()
-        }
+        }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 
-        options[SimpleTextOption(parameters)] = true
+        if (parameters.isNotEmpty())
+            options[SimpleTextOption(parameters)] = true
 
-        if (options.size < 4)
-            options[SimpleTextOption.none(language)] = false
+        if (parameters.isEmpty() || options.size < 4)
+            options[SimpleTextOption.none(
+                language,
+                if (parameters.isEmpty()) language["WhichParametersSingleChoice_NoneCorrect"].format(method.nameAsString) else null
+            )] = parameters.isEmpty()
 
         return Question(
             source,

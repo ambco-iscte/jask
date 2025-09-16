@@ -78,7 +78,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
             }
         })
         vm.execute(element, *args.toTypedArray())
-        return assigns.keys.size > 1 && assigns.values.any { it.size > 1 }
+        return assigns.values.any { it.size > 1 }
     }
 
     fun setup(vm: IVirtualMachine) {

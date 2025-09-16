@@ -1,4 +1,4 @@
-package errorfinder
+package compiler
 
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import pt.iscte.jask.errors.CompilerErrorFinder
 import kotlin.test.assertEquals
 
-class WrongTypeForVariableDeclaration {
+class TestWrongTypeForVariableDeclaration {
 
     init {
         StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20

@@ -25,6 +25,8 @@ class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
         val variables = method.getLocalVariables()
         val variableNames = variables.map { it.nameAsString  }.toSet()
 
+        val variableTypes = variables.map { it.type.toString() }.toSet()
+
         val inScope = method.getUsableVariables().map { it.nameAsString }.toSet()
         val params = method.parameters.map { it.nameAsString }.toSet()
         val name = method.nameAsString
@@ -33,7 +35,8 @@ class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
 
         val distractors = sampleSequentially(3, listOf(
             literals to language["WhatVariables_DistractorLiterals"].format(),
-            variableNames.plus(literals) to language["WhatVariables_DistractorVarsAndLiterals"].format(method.nameAsString)
+            variableNames.plus(literals) to language["WhatVariables_DistractorVarsAndLiterals"].format(method.nameAsString),
+            variableTypes to language["WhatVariables_DistractorVarTypes"].format(method.nameAsString),
         ), (if (method.isMain) emptyList() else listOf(
             inScope to language["WhatVariables_DistractorAllInScope"].format(method.nameAsString),
             params to language["WhatVariables_DistractorParams"].format(method.nameAsString),

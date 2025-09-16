@@ -1,4 +1,4 @@
-package errorfinder
+package compiler
 
 import com.github.javaparser.StaticJavaParser
 import org.junit.jupiter.api.Test

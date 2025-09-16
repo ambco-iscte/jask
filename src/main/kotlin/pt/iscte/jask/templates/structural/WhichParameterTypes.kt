@@ -37,10 +37,14 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
                 SimpleTextOption(it.first, it.second) to false
             }.toMutableMap()
 
-            options[SimpleTextOption(paramTypes)] = paramTypes.isNotEmpty()
+            if (paramTypes.isNotEmpty())
+                options[SimpleTextOption(paramTypes)] = true
 
-            if (options.size < 4)
-                options[SimpleTextOption.none(language)] = paramTypes.isEmpty()
+            if (paramTypes.isEmpty() || options.size < 4)
+                options[SimpleTextOption.none(
+                    language,
+                    if (paramTypes.isEmpty()) language["WhichParameterTypes_NoneCorrect"].format(method.nameAsString) else null
+                )] = paramTypes.isEmpty()
 
             return options.toMap()
         }

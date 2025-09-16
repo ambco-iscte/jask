@@ -27,7 +27,7 @@ class HowManyLoopsMakeSense : StructuralQuestionTemplate<MethodDeclaration>() {
             TextWithCodeStatement(language["HowManyLoopsMakeSense"].format(method.nameAsString), method.prettySignature),
             howManyLoops.multipleChoice(language),
             language = language,
-            relevantSourceCode = loops.map { SourceLocation(it as Statement) },
+            relevantSourceCode = loops.map { SourceLocation(it.first as Statement) },
         )
     }
 }

@@ -17,14 +17,16 @@ class HowManyParams : StructuralQuestionTemplate<MethodDeclaration>() {
         val local = method.getLocalVariables().size
 
         val distractors = sampleSequentially(3, listOf(
+            parameters + 2 to null,
             parameters + 1 to null,
             parameters - 1 to null,
-            local to language["HowManyParams_DistractorLocalVars"].format(),
+            local to (if (local > 0) language["HowManyParams_DistractorLocalVars"].format() else null),
+            local + parameters to null,
+            local + 2 to null,
             local + 1 to null,
-            local - 1 to null,
-            0 to null
+            local - 1 to null
         )) {
-            it.first != parameters && it.first > 0
+            it.first != parameters && it.first >= 0
         }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
@@ -36,7 +38,7 @@ class HowManyParams : StructuralQuestionTemplate<MethodDeclaration>() {
             if (parameters == 0)
                 language["HowManyParams_ZeroCorrect"].format(method.signature)
             else
-                language["HowManyParams_Correct"].format(method.signature, method.parameters.joinToString { it.nameAsString })
+                language["HowManyParams_Correct"].format(method.signature.toString(), method.parameters.joinToString { it.nameAsString })
         )] = true
 
         if (options.size < 4)
@@ -50,4 +52,18 @@ class HowManyParams : StructuralQuestionTemplate<MethodDeclaration>() {
             relevantSourceCode = method.parameters.map { SourceLocation(it) }
         )
     }
+}
+
+fun main() {
+    val source = """
+        class Test {
+            static int next(int n) {
+                return n + 1;
+            }
+        }
+    """.trimIndent()
+
+    val template = HowManyParams()
+    val qlc = template.generate(source)
+    println(qlc)
 }

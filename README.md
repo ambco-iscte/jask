@@ -9,6 +9,10 @@
 
 **A Library for Generating Questions about Learners' Code in Java**
 
+[![ACM ITiCSE '22 - Check out Jask's original paper!](https://img.shields.io/badge/ACM_ITiCSE_'22-Check_out_Jask's_original_paper!-0068a7?logo=acm)](https://doi.org/10.1145/3502718.3524761)
+
+[![ICPEC 2025 - Check out a small study using Jask!](https://img.shields.io/static/v1?label=ICPEC+2025&message=Check+out+a+small+study+using+Jask!&color=ebc034&logo=doi&logoColor=white)](https://doi.org/10.4230/OASIcs.ICPEC.2025.5)
+
 [What is Jask?](#ⓘ-what-is-jask) •
 [Question Types](#-question-types) •
 [Examples](#-examples)
@@ -196,9 +200,9 @@ can be loaded from any `.properties` file using `Localisation.register(File("pat
 <br>
 
 ## 📝 Publications Using Jask
-- [Jask: Generation of Questions About Learners' Code in Java](https://dl.acm.org/doi/10.1145/3502718.3524761)
+- [Integrating Questions About Learners’ Code Into an Automated Assessment System](https://doi.org/10.4230/OASIcs.ICPEC.2025.5)
 
-- Integrating Questions About Learners’ Code Into an Automated Assessment System _(coming soon!)_
+- [Jask: Generation of Questions About Learners' Code in Java](https://dl.acm.org/doi/10.1145/3502718.3524761)
 
 <br>
 
@@ -206,4 +210,4 @@ can be loaded from any `.properties` file using `Localisation.register(File("pat
 
 - **Supervision:** [André L. Santos](https://ciencia.iscte-iul.pt/authors/andre-leal-santos/cv)
 - **Structural, Dynamic, and Error QLCs:** [Afonso B. Caniço](https://ciencia.iscte-iul.pt/authors/afonso-canico/cv)
-- **Quality QLCs:** [Gonçalo Serrano](https://www.linkedin.com/in/gon%C3%A7alo-serrano-207574232/)
+- **Code Quality QLCs:** [Gonçalo Serrano](https://www.linkedin.com/in/gon%C3%A7alo-serrano-207574232/)

@@ -47,6 +47,26 @@ class HowManyVariableAssignments : DynamicQuestionTemplate<IProcedure>() {
         val variable = countPerVariable.keys.random()
         val count = countPerVariable[variable]!!
 
+        val variablesPerCount = mutableMapOf<Int, List<IVariableDeclaration<*>>>()
+        countPerVariable.forEach { (variable, count) ->
+            variablesPerCount[count] = (variablesPerCount[count] ?: emptyList()).plus(variable)
+        }
+
+        val options = correctAndRandomDistractors(
+    count to language["HowManyVariableAssignments_Correct"].format("a", "a = ...;"), (
+            setOf(count + 1 to null, count - 1 to null, iterations to null) +
+                    variablesPerCount.map { (count, variables) ->
+                        count to language["HowManyVariableAssignments_DistractorWrongVariable"].format(
+                            variables.joinToString { it.id.toString() },
+                            variable.id
+                        )
+                    }
+            ).toMap()
+        ).toMutableMap()
+
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
+
         val statement = language["HowManyVariableAssignments"].orAnonymous(arguments, procedure)
         return Question(
             source,
@@ -54,18 +74,7 @@ class HowManyVariableAssignments : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(variable.id, procedureCallAsString(procedure, arguments)),
                 procedure
             ),
-            correctAndRandomDistractors(
-                count to language["HowManyVariableAssignments_Correct"].format("a", "a = ...;"),
-                (
-                    setOf(count + 1 to null, count - 1 to null, iterations to null) +
-                    countPerVariable.map {
-                        it.value to language["HowManyVariableAssignments_DistractorWrongVariable"].format(
-                            it.key.id,
-                            variable.id
-                        )
-                    }
-                ).toMap()
-            ),
+            options,
             language
         )
     }

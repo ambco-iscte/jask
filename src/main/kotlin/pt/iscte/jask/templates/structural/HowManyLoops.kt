@@ -2,6 +2,7 @@ package pt.iscte.jask.templates.structural
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.stmt.Statement
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getBranches
@@ -27,17 +28,31 @@ class HowManyLoops : StructuralQuestionTemplate<MethodDeclaration>() {
         val howManyBranches = method.body.get().getBranches().size
         val howManyDistinctLoops = loops.map { it::class }.toSet().size
 
+        val guard =
+            if (loops.size == 1) loops[0].second
+            else loops.fold(loops[0].second) { acc, loop ->
+                BinaryExpr(acc, loop.second, BinaryExpr.Operator.AND)
+            }
+
         val distractors = sampleSequentially(3, listOf(
-            howManyBranches to language["HowManyLoops_DistractorBranches"].orAnonymous(method).format("if", method.nameAsString),
+            howManyBranches to (if (howManyBranches > 0) language["HowManyLoops_DistractorBranches"].orAnonymous(method).format("if", method.nameAsString) else null),
+            howManyBranches + 2 to null,
             howManyBranches + 1 to null,
             howManyBranches - 1 to null,
-            howManyDistinctLoops to language["HowManyLoops_DistractorDistinctLoops"].orAnonymous(method).format("for, while"),
+            howManyDistinctLoops to language["HowManyLoops_DistractorDistinctLoops"].orAnonymous(method).format("for, while", method.nameAsString),
+            howManyDistinctLoops + 2 to null,
             howManyDistinctLoops + 1 to null,
             howManyDistinctLoops - 1 to null,
+            howManyLoops + 2 to null,
             howManyLoops + 1 to null,
-            howManyLoops - 1 to null
+            howManyLoops - 1 to null,
+            howManyLoops + howManyBranches + 2 to null,
+            howManyLoops + howManyBranches + 1 to null,
+            howManyLoops + howManyBranches - 1 to null,
+
+            language["HowManyLoops_OptionHoweverManyNeededForGuard"].format(guard.toString(), "false") to language["HowManyLoops_DistractorGuardCondition"].format()
         )) {
-            it.first != howManyLoops && it.first > 0
+            it.first != howManyLoops && (if (it.first is Int) (it.first as Int) > 0 else true)
         }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
@@ -57,7 +72,7 @@ class HowManyLoops : StructuralQuestionTemplate<MethodDeclaration>() {
             ),
             options,
             language = language,
-            relevantSourceCode = loops.map { SourceLocation(it as Statement) },
+            relevantSourceCode = loops.map { SourceLocation(it.first as Statement) },
         )
     }
 }

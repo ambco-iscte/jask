@@ -30,6 +30,9 @@ data class QuestionGenerationException(
         "Error generating question of type ${template::class.simpleName}: $message\n----------$source\n----------\nCause: $cause"
 }
 
+operator fun String.invoke(vararg arguments: Any?): ProcedureCall =
+    ProcedureCall(this, arguments.toList())
+
 data class ProcedureCall(val id: String?, val arguments: List<Any?> = emptyList()) {
     override fun toString(): String =
         "$id(${arguments.joinToString()})"
@@ -209,13 +212,14 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
         }
     }
 
-    fun generate(src: String, call: ProcedureCall, language: Language = Language.DEFAULT) = generate(
-        listOf(SourceCode(src, listOf(call))), language
-    )
+    fun generate(source: SourceCode, language: Language = Language.DEFAULT): Question =
+        generate(listOf(source), language)
 
-    fun generate(unit: CompilationUnit, call: ProcedureCall, language: Language = Language.DEFAULT) = generate(
-        listOf(SourceCode(unit, listOf(call))), language
-    )
+    fun generate(src: String, call: ProcedureCall, language: Language = Language.DEFAULT) =
+        generate(listOf(SourceCode(src, listOf(call))), language)
+
+    fun generate(unit: CompilationUnit, call: ProcedureCall, language: Language = Language.DEFAULT) =
+        generate(listOf(SourceCode(unit, listOf(call))), language)
 
     protected open fun isApplicable(element: T, args: List<IValue>): Boolean = isApplicable(element)
 

@@ -70,26 +70,33 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
             values.last() to language["WhatIsResult_DistractorLastVariableValue"].format(variable.id)
         }
 
-        val distractors: Set<Pair<IValue, String?>> = sampleSequentially(
-            3,
+        val distractors: Set<Pair<Any?, String?>> = sampleSequentially(3,
             returnLiterals,
             literalExpressions,
             lastVariableValues,
-            arguments.map { it to null }
+            arguments.map { it to null },
+            returnExpressions
         ) {
-            it.first.value != result.value && it.first.type == procedure.returnType
+            if (it.first is IValue)
+                (it.first as IValue).value != result.value && (it.first as IValue).type == procedure.returnType
+            else
+                it.first.toString() != result.toString()
         }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(result)] = true
+
+        /*
         if (options.size < 4) {
             returnExpressions.sample(4 - options.size).forEach {
                 if (it.first != result.toString())
                     options[SimpleTextOption(it.first, it.second)] = false
             }
         }
+         */
+
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 

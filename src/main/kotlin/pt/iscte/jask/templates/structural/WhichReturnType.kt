@@ -20,7 +20,10 @@ class WhichReturnType : StructuralQuestionTemplate<MethodDeclaration>() {
 
             val exprTypes = method.findAll(Expression::class.java).filter { expression ->
                 runCatching { expression.calculateResolvedType() }.isSuccess
-            }.map { it.calculateResolvedType().describe() }
+            }.map {
+                val name = it.calculateResolvedType().describe()
+                name.split(".").lastOrNull() ?: name
+            }
 
             val distractors = sampleSequentially(3,
                 otherTypes.map { it to null },
@@ -35,7 +38,7 @@ class WhichReturnType : StructuralQuestionTemplate<MethodDeclaration>() {
                 SimpleTextOption(it.first, it.second) to false
             }.toMutableMap()
 
-            options[SimpleTextOption(method.type, language["WhichReturnType_Correct"].format())] = true
+            options[SimpleTextOption(method.type.asString(), language["WhichReturnType_Correct"].format())] = true
 
             if (options.size < 4)
                 options[SimpleTextOption.none(language)] = false

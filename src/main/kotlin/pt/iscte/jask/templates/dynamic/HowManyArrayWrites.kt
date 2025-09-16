@@ -32,7 +32,7 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
 
     // There is at least one array access.
     override fun isApplicable(element: IProcedure): Boolean =
-        element.countArrayAccesses() != 0
+        element.countArrayAccesses() > 0
 
     fun setup(vm: IVirtualMachine) {
         countWrites = 0

@@ -1,42 +1,51 @@
-import compiler.TestAssignVarWithMethodWrongType
-import compiler.TestMethodWithWrongReturnStmt
-import compiler.TestReferencesUndefinedVariable
-import compiler.TestWrongMethodCall
-import errorfinder.TestFindUnknownMethod
-import errorfinder.TestFindUnknownType
-import errorfinder.TestFindUnknownVariable
-import errorfinder.TestWrongReturnStmtType
-import errorfinder.WrongTypeForVariableDeclaration
 import org.junit.platform.suite.api.SelectClasses
 import org.junit.platform.suite.api.Suite
-import dynamic.TestArraySize
-import dynamic.TestHowManyArrayAllocations
-import structural.TestHowManyVariables
-import dynamic.TestWhichReturnExecuted
+
+import dynamic.*
+import structural.*
+import compiler.*
 
 @Suite
 @SelectClasses(
-    // Static Questions
-    TestHowManyVariables::class,
-    // TODO
-
     // Dynamic Questions
-    TestArraySize::class,
+    TestHowDeepCallStack::class,
     TestHowManyArrayAllocations::class,
+    TestHowManyArrayReads::class,
+    TestHowManyArrayWrites::class,
+    TestHowManyFunctionCalls::class,
+    TestHowManyLoopIterations::class,
+    TestHowManyVariableAssignments::class,
+    TestWhatArraySize::class,
+    TestWhatIsResult::class,
+    TestWhichLastVariableValues::class,
     TestWhichReturnExecuted::class,
-    // TODO
+    TestWhichVariableValues::class,
 
-    // Compiler Questions
+    // Structural Questions
+    TestCallsOtherFunctions::class,
+    TestHowManyFunctionDependencies::class,
+    TestHowManyLoops::class,
+    TestHowManyParams::class,
+    TestHowManyVariables::class,
+    TestIsRecursive::class,
+    TestWhatVariables::class,
+    TestWhichFixedVariables::class,
+    TestWhichFunctionDependencies::class,
+    TestWhichParameters::class,
+    TestWhichParameterTypes::class,
+    TestWhichReturnType::class,
+    TestWhichVariableHoldsReturn::class,
+    TestWhichVariableRole::class,
+
+    // Compiler Errors
     TestAssignVarWithMethodWrongType::class,
     TestMethodWithWrongReturnStmt::class,
     TestReferencesUndefinedVariable::class,
     TestWrongMethodCall::class,
-
-    // Compiler Errors
     TestFindUnknownMethod::class,
     TestFindUnknownType::class,
     TestFindUnknownVariable::class,
     TestWrongReturnStmtType::class,
-    WrongTypeForVariableDeclaration::class
+    TestWrongTypeForVariableDeclaration::class
 )
 class AllTests

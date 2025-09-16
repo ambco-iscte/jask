@@ -42,19 +42,43 @@ fun <K, V> Map<K, V>.sample(amount: Int): Map<K, V> =
 
 fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, predicate: (T) -> Boolean = { true }): Set<T> {
     require(collections.isNotEmpty())
-    val result = mutableSetOf<T>()
-    collections.forEach {
-        result.addAll(it.filter { predicate(it) }.sample(targetSize))
-        if (result.size >= targetSize)
-            return@forEach
+
+    val valid = collections.flatMap { it.filter(predicate) }.toSet()
+
+    val solvable = valid.size >= targetSize
+
+    /*
+    require(solvable) {
+        "Sampling requires $targetSize elements, but only ${valid.size} satisfy the given predicate:\n${valid.joinToString("\n")}"
     }
+     */
+
+    val result = mutableSetOf<T>()
+
+    fun step() {
+        collections.forEach {
+            result.addAll(it.minus(result).filter(predicate).sample(targetSize))
+            if (result.size >= targetSize)
+                return@forEach
+        }
+    }
+
+    if (solvable) {
+        while (result.size < targetSize) {
+            step()
+        }
+    } else {
+        System.err.println("Sampling requires $targetSize elements, but only ${valid.size} satisfy the given predicate:\n${valid.joinToString("\n")}")
+        step()
+    }
+
     return result.take(targetSize).toSet()
 }
 
 fun correctAndRandomDistractors(correct: Pair<Any, String?>, distractors: Map<Any, String?>, maxDistractors: Int = 3): Map<Option, Boolean> =
     mapOf(SimpleTextOption(correct.first, correct.second) to true) +
     distractors
-    .filter { it.key != correct }
+    .filter { it.key != correct.first }
     .sample(maxDistractors).map { SimpleTextOption(it.key, it.value) to false }.toMap()
 
 fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<Option,Boolean> =

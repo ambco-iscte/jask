@@ -10,6 +10,7 @@ import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.WhileStmt
 import pt.iscte.jask.Language
+import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getLoopControlStructures
 import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.jask.extensions.sample
@@ -29,9 +30,9 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
         val calls = method.findAll(MethodCallExpr::class.java)
-        val callsNames = calls.map { it.nameWithScope() }.toSet()
+        val callsNames = calls.map { it.nameAsString }.toSet()
 
-        val controlStructures = method.getLoopControlStructures().map { control ->
+        val controlStructures = method.getLoopControlStructures().map { (control, condition) ->
             when (control) {
                 is IfStmt -> "if"
                 is WhileStmt, is DoStmt -> "while"
@@ -44,6 +45,10 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             if (method.findFirst(ReturnStmt::class.java).isPresent) setOf("return")
             else emptySet()
 
+        val types = listOf(method.type.toString()).plus(method.getLocalVariables().map { it.typeAsString }).plus(method.parameters.map { it.typeAsString }).toSet()
+
+        val modifiers = method.modifiers.map { it.keyword.asString() }.toSet()
+
         val distractors = sampleSequentially(3, listOf(
             controlStructures to language["WhichFunctionDependencies_DistractorControlStructures"].format(controlStructures.joinToString()),
             callsNames.plus(controlStructures) to language["WhichFunctionDependencies_DistractorNamesAndControlStructures"].format(controlStructures.joinToString()),
@@ -51,7 +56,12 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             controlStructures.plus(returns) to language["WhichFunctionDependencies_DistractorControlsAndReturns"].format(controlStructures.joinToString(), "return"),
             callsNames.plus(returns) to null,
             callsNames.plus(controlStructures).plus(returns) to null,
-            callsNames.plus(method.nameAsString) to null
+            callsNames.plus(method.nameAsString) to null,
+            types to language["WhichFunctionDependencies_DistractorTypes"].format(),
+            modifiers to language["WhichFunctionDependencies_DistractorModifiers"].format("public", "static"),
+            types.plus(modifiers) to null,
+            callsNames.plus(types) to null,
+            callsNames.plus(modifiers) to null,
         )) {
             it.first != callsNames && it.first.isNotEmpty()
         }.toMutableList()
@@ -61,7 +71,7 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         }.toMutableMap()
 
         options[SimpleTextOption(
-            callsNames,
+            callsNames.minus(method.nameAsString),
             language["WhichFunctionDependencies_Correct"].format()
         )] = true
 

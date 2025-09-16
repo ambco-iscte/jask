@@ -2,10 +2,12 @@ package pt.iscte.jask.templates.structural
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.LiteralExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getReturnVariables
 import pt.iscte.jask.extensions.getUsableVariables
+import pt.iscte.jask.extensions.getUsedTypes
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
@@ -15,7 +17,7 @@ class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>()
     // Return value is given by a single variable.
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val returns = element.findAll(ReturnStmt::class.java)
-        return returns.all {
+        return returns.isNotEmpty() && returns.all {
             it.expression.getOrNull?.isNameExpr == true
         } && returns.map { it.expression?.toString() }.toSet().size == 1
     }
@@ -27,12 +29,15 @@ class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>()
         val returnStmt = returns.keys.random()
         val returnVariable = returns[returnStmt]!!.random()
         val returnVariableName = returnVariable.nameAsString
+        val literals = method.findAll(LiteralExpr::class.java).map { it.toString() }
 
         val distractors = sampleSequentially(3,
             method.getUsableVariables().map { it.nameAsString },
             method.parameters.map { it.nameAsString },
             returns.map { it.key.expression }.filter { it.getOrNull != returnStmt.expression.getOrNull }.map { it.toString() },
-            listOf(method.nameAsString)
+            setOf(method.nameAsString),
+            method.getUsedTypes().map { it.asString() }.toSet(),
+            literals
         ) {
             it != returnVariableName
         }
@@ -42,7 +47,7 @@ class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>()
 
         options[SimpleTextOption(returnVariableName)] = true
 
-        if (distractors.size < 3)
+        if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 
         return Question(
