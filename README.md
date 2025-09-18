@@ -13,6 +13,14 @@
 
 [![ICPEC 2025 - Check out a small study using Jask!](https://img.shields.io/static/v1?label=ICPEC+2025&message=Check+out+a+small+study+using+Jask!&color=ebc034&logo=doi&logoColor=white)](https://doi.org/10.4230/OASIcs.ICPEC.2025.5)
 
+**Jask** is a library for generating
+[Questions about Learners' Code](http://urn.fi/URN:ISBN:978-952-64-1768-4) (QLCs) targeting Java
+code. Jask aims to reframe [previous work on QLCs](https://doi.org/10.1145/3502718.3524761) as
+a library which can be integrated into existing educational programming environments
+to promote program comprehension. Jask provides **question templates** which can be applied to snippets of Java code to generate
+concrete **questions** targeting that code.
+
+[Installation](#-installation) • 
 [What is Jask?](#ⓘ-what-is-jask) •
 [Question Types](#-question-types) •
 [Examples](#-examples)
@@ -21,35 +29,42 @@
 
 <br><br>
 
-## ⓘ What is Jask?
+## ⚙️ Installation
 
-**Jask** is a library for generating 
-[Questions about Learners' Code](http://urn.fi/URN:ISBN:978-952-64-1768-4) (QLCs) targeting Java
-code. Jask aims to reframe [previous work on QLCs](https://doi.org/10.1145/3502718.3524761) as
-a library which can be integrated into existing educational programming environments
-to promote program comprehension.
+> [!IMPORTANT]
+> Jask requires [Strudel](https://github.com/andre-santos-pt/strudel).
 
-Jask provides **question templates** which can be applied to snippets of Java code to generate
-concrete **questions** targeting that code.
+**Jask** is an experimental library, and as such is not yet available in build automation tools (Gradle, etc.)
+
+To use Jask in your project, first build its .jar file using Gradle's build task. The .jar file is generated under
+the project root in `/build/libs`. This file should be copied to your own project's `libs` folder,
+and then added as a dependency in your build automation tool of choice. For example (in Kotlin Gradle):
+```kotlin
+dependencies {
+    implementation(files("libs/jask-0.5.5.jar"))
+}
+```
+The file name can change depending on the version of Jask, and should be changed
+in your dependency specification accordingly.
 
 <br>
 
 ## 🤔 Question Types
 
-### Structural (`pt.iscte.jask.templates.structural`)
+### Structural -- `pt.iscte.jask.templates.structural`
 
 **Structural** QLCs target structural/static aspects of code.
 
-### Dynamic (`pt.iscte.jask.templates.dynamic`)
+### Dynamic -- `pt.iscte.jask.templates.dynamic`
 
 **Dynamic** QLCs target dynamic aspects of the code's execution.
 
-### Quality (`pt.iscte.jask.templates.quality`)
+### Quality -- `pt.iscte.jask.templates.quality`
 
 Quality QLCs target anti-patterns and code refactor opportunities. The aim of these QLCs is to provide students with an
 an opportunity to reflect about how the quality of their code could be improved.
 
-### Errors (`pt.iscte.jask.errors`)
+### Errors -- `pt.iscte.jask.errors`
 
 **Error** QLCs target compiler and runtime errors. The aim of these QLCs is to provide students with an opportunity
 to reflect critically about their code's errors.
@@ -195,7 +210,8 @@ when using that translation.
 
 If you want to add a new language and make it available in Jask, feel free to make a pull request with your
 own language files! You can add these to the `init`block of the initialisation module. Otherwise, a language
-can be loaded from any `.properties` file using `Localisation.register(File("path/to/file.properties"))`.
+can be loaded from any folder (containing the `.properties` files) located in the project's `resources` folder using 
+`Localisation.loadLanguageFromResource("name of language folder")`.
 
 <br>
 
