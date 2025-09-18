@@ -36,9 +36,9 @@ class HowManyParams : StructuralQuestionTemplate<MethodDeclaration>() {
         options[SimpleTextOption(
             parameters,
             if (parameters == 0)
-                language["HowManyParams_ZeroCorrect"].format(method.signature)
+                language["HowManyParams_ZeroCorrect"].format(method.nameAsString)
             else
-                language["HowManyParams_Correct"].format(method.signature.toString(), method.parameters.joinToString { it.nameAsString })
+                language["HowManyParams_Correct"].format(method.nameAsString, method.parameters.joinToString { it.nameAsString })
         )] = true
 
         if (options.size < 4)
