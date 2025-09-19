@@ -4,13 +4,8 @@ import pt.iscte.jask.templates.*
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getVariableAssignments
 import pt.iscte.jask.extensions.procedureCallAsString
-import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
-import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.IVariableAssignment
-import pt.iscte.strudel.model.IVariableDeclaration
-import pt.iscte.strudel.model.util.findAll
-import pt.iscte.strudel.parsing.java.SourceLocation
+import pt.iscte.strudel.model.*
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.collections.set
@@ -21,17 +16,34 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
 
     companion object {
         fun options(
+            vm: IVirtualMachine,
             variableHistory: Map<IVariableDeclaration<*>, List<IValue>>,
+            procedure: IProcedure,
             arguments: List<IValue>,
             language: Language
         ): Map<Option, Boolean> {
 
+            val argumentsAndLiterals = arguments.toMutableSet()
+            procedure.block.accept(object : IBlock.IVisitor {
+                override fun visit(exp: ILiteral) {
+                    argumentsAndLiterals.add(vm.getValue(exp.stringValue))
+                }
+            })
+
+            val varHist = variableHistory.toMutableMap()
+
+            procedure.localVariables.forEach {
+                if(!varHist.containsKey(it))
+                    varHist[it] = listOf()
+            }
+
             val options = mutableListOf(
-                SimpleTextOption(variableHistory.map { "${it.key.id} = ${it.value.last()}" }.joinToString()) to true,
+                SimpleTextOption(varHist.map { "${it.key.id} = ${it.value.lastOrNull() ?: "indefinido" }" }.joinToString()) to true,
             )
 
-            val values = variableHistory.map { it.value.last() }
-            val shuffled = mutableSetOf<List<IValue>>()
+            val values = varHist.map { it.value.lastOrNull() }
+
+            val shuffled = mutableSetOf<List<IValue?>>()
             repeat(4) {
                 val s = values.shuffled()
                 if (s != values)
@@ -39,8 +51,16 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
             }
 
             shuffled.forEach {
-                val o = variableHistory.keys.zip(it).joinToString { "${it.first.id} = ${it.second}" }
+                val o = varHist.keys.zip(it).joinToString { "${it.first.id} = ${it.second ?: "indefinido"}" }
                 options.add(SimpleTextOption(o) to false)
+            }
+
+            repeat(2) {
+                if (options.size < 4) {
+                    val text = varHist.map { "${it.key.id} = ${argumentsAndLiterals.randomOrNull() ?: "indefinido"}" }.joinToString()
+                    if(options.none { it.first.text == text })
+                         options.add(SimpleTextOption(text) to false)
+                }
             }
 
             if(options.size < 4)
@@ -77,7 +97,7 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(procedureCallAsString(procedure, arguments)),
                 procedure
             ),
-            options(valuesPerVariable, arguments, language),
+            options(vm, valuesPerVariable, procedure, arguments, language),
             language = language
         )
     }
