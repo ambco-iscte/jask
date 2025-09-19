@@ -13,12 +13,12 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
 
     companion object {
         fun options(method: MethodDeclaration, language: Language): Map<Option, Boolean> {
-            val parameters = method.parameters.map { it.nameAsString }.toSet()
-            val paramTypes = method.parameters.map { it.typeAsString }.toSet()
+            val parameters = method.parameters.map { it.nameAsString }
+            val paramTypes = method.parameters.map { it.typeAsString }
             val returnType = method.typeAsString
 
-            val localVars = method.getLocalVariables().map { it.nameAsString }.toSet()
-            val localVarTypes = method.getLocalVariables().map { it.typeAsString }.toSet()
+            val localVars = method.getLocalVariables().map { it.nameAsString }
+            val localVarTypes = method.getLocalVariables().map { it.typeAsString }
 
             val methodName = method.nameAsString
 
@@ -30,7 +30,7 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
                 paramTypes.plus(methodName) to null,
                 listOf(returnType, methodName) to null
             )) {
-                it.first != paramTypes && it.first.isNotEmpty()
+                it.first.toSet() != paramTypes.toSet() && it.first.isNotEmpty()
             }
 
             val options: MutableMap<Option, Boolean> = distractors.associate {
