@@ -14,6 +14,9 @@ dependencies {
     testApi("org.junit.platform:junit-platform-suite:1.9.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     api(project(":strudel"))
+
+    // https://mvnrepository.com/artifact/com.openai/openai-java
+    implementation("com.openai:openai-java:3.6.1")
 }
 
 tasks.test {

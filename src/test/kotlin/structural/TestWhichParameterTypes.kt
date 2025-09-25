@@ -41,6 +41,16 @@ class TestWhichParameterTypes {
         println(qlc3)
         assertEquals(1, qlc3.solution.size)
         assertEquals("int, boolean", qlc3.solution[0].toString())
+
+        val src4 = """
+            class Test {
+                static void foo(int n, int m) { int x = 42; }
+            }
+        """.trimIndent()
+        val qlc4 = assertDoesNotThrow { WhichParameterTypes().generate(src4) }
+        println(qlc4)
+        assertEquals(1, qlc4.solution.size)
+        assertEquals("int, int", qlc4.solution[0].toString())
     }
 
     @Test

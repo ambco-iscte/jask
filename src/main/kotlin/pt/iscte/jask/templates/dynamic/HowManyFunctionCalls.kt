@@ -63,7 +63,7 @@ class HowManyFunctionCalls : DynamicQuestionTemplate<IProcedure>() {
         ) { it.first != correct && it.first >= 0 }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> =
-            distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
+            distractors.associate { SimpleTextOption(it.first, it.second) to false }.toMutableMap()
         options[SimpleTextOption(correct)] = true
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
