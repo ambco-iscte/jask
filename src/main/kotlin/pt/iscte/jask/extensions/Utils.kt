@@ -68,7 +68,8 @@ fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, p
             step()
         }
     } else {
-        System.err.println("Sampling requires $targetSize elements, but only ${valid.size} satisfy the given predicate:\n${valid.joinToString("\n")}")
+        System.err.println("Sampling requires $targetSize elements, but only ${valid.size} satisfy the given " +
+                "predicate:\n${valid.joinToString("\n")}")
         step()
     }
 

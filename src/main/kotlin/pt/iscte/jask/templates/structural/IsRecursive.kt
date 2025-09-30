@@ -13,6 +13,36 @@ import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
 class IsRecursive : StructuralQuestionTemplate<MethodDeclaration>() {
 
+    companion object {
+        fun options(functionName: String, isRecursive: Boolean, recursiveCalls: String, language: Language): Map<Option, Boolean> {
+            val options = mutableMapOf<Option, Boolean>()
+
+            if (isRecursive) {
+                options[SimpleTextOption.yes(
+                    language,
+                    language["IsRecursive_YesCorrect"].format(functionName, recursiveCalls)
+                )] = true
+
+                options[SimpleTextOption.no(
+                    language,
+                    language["IsRecursive_NoIncorrect"].format()
+                )] = false
+            } else {
+                options[SimpleTextOption.no(
+                    language,
+                    language["IsRecursive_NoCorrect"].format(functionName)
+                )] = true
+
+                options[SimpleTextOption.yes(
+                    language,
+                    language["IsRecursive_YesIncorrect"].format()
+                )] = false
+            }
+
+            return options
+        }
+    }
+
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasMethodCalls() == true
 
@@ -24,29 +54,7 @@ class IsRecursive : StructuralQuestionTemplate<MethodDeclaration>() {
         }
         val isRecursive = recursiveCalls.isNotEmpty()
 
-        val options = mutableMapOf<Option, Boolean>()
-
-        if (isRecursive) {
-            options[SimpleTextOption.yes(
-                language,
-                language["IsRecursive_YesCorrect"].format(method.nameAsString, recursiveCalls.joinToString())
-            )] = true
-
-            options[SimpleTextOption.no(
-                language,
-                language["IsRecursive_NoIncorrect"].format()
-            )] = false
-        } else {
-            options[SimpleTextOption.no(
-                language,
-                language["IsRecursive_NoCorrect"].format(method.nameAsString)
-            )] = true
-
-            options[SimpleTextOption.yes(
-                language,
-                language["IsRecursive_YesIncorrect"].format()
-            )] = false
-        }
+        val options = options(method.nameAsString, isRecursive, recursiveCalls.joinToString(), language)
 
         return Question(
             source,

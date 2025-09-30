@@ -14,6 +14,10 @@ class TestWhichFunctionDependencies {
         val src1 = """
             class Test {
                 static void foo() { bar(); baz(); }
+                
+                static void hello() { }
+                
+                static void world() { }
             }
         """.trimIndent()
         val qlc1 = assertDoesNotThrow { WhichFunctionDependencies().generate(src1) }
