@@ -8,6 +8,7 @@ import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.util.findAll
@@ -18,6 +19,7 @@ import kotlin.collections.set
 
 class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
 
+    var procedure: IProcedure? = null
     val valuesPerVariable = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
 
     companion object {
@@ -71,27 +73,30 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
 
     override fun isApplicable(element: IProcedure, args: List<IValue>): Boolean {
         val vm = IVirtualMachine.create()
-        val assigns = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
+        val variableHistory = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                assigns[a.target] = (assigns[a.target] ?: emptyList()).plus(value)
+                if (a.ownerProcedure == element)
+                    variableHistory[a.target] = (variableHistory[a.target] ?: emptyList()).plus(value)
             }
         })
         vm.execute(element, *args.toTypedArray())
-        return assigns.values.any { it.size > 1 }
+        return variableHistory.values.any { it.size > 1 }
     }
 
     fun setup(vm: IVirtualMachine) {
         valuesPerVariable.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                valuesPerVariable[a.target] = (valuesPerVariable[a.target] ?: emptyList()) + listOf(value)
+                if (a.ownerProcedure == procedure)
+                    valuesPerVariable[a.target] = (valuesPerVariable[a.target] ?: emptyList()) + listOf(value)
             }
         })
     }
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, module, procedure, args) = getRandomProcedure(sources)
+        this.procedure = procedure
 
         val vm = IVirtualMachine.create()
         setup(vm)
@@ -122,4 +127,79 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
             }.map { SourceLocation(it) }
         )
     }
+}
+
+fun main() {
+    val src = """
+        class Divisors {
+          static int countDivisors(int n) {
+                int d = 1;
+                int i = 1;
+                while(i <= n / 2) {
+                    if(n % i == 0) {
+                        d = d + 1;
+                    }
+                    i = i + 1;
+                }
+                return d;
+            }
+            static int sumProperDivisors(int n) {
+                int s = 0;
+                int i = 1;
+                while(i < n) {
+                    if(n % i == 0) {
+                        s = s + i;
+                    }
+                    i = i + 1;
+                }
+                return s;
+            }
+            static boolean isPrime(int n) {
+                if(n == 1) {
+                    return false;
+                }
+                int i = 2;
+                while(i <= n / 2) {
+                    if(n % i == 0) {
+                        return false;
+                    }
+                    i = i + 1;
+                }
+                return true;
+            }
+        }
+        
+        class Primes {
+            static int countPrimes(int max) {
+                int i = 1;
+                int c = 0;
+                while(i <= max) {
+                    if(Divisors.isPrime(i)) {
+                        c = c + 1;
+                    }
+                    i = i + 1;
+                }
+                return c;
+            }
+            static boolean existsPrimeBetween(int min, int max) {
+                int i = min + 1;
+                while(i < max) {
+                    if(Divisors.isPrime(i)) {
+                        return true;
+                    }
+                    i = i + 1;
+                }
+                return false;
+            }
+        }
+    """.trimIndent()
+
+    val qlc = WhichVariableValues().generate(SourceCode(
+        src,
+        listOf(
+            "existsPrimeBetween"(5, 9),
+            "existsPrimeBetween"(31, 37)
+        )
+    ))
+    println(qlc)
 }
