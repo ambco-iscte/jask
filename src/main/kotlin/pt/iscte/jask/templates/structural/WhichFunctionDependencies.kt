@@ -13,10 +13,10 @@ import com.github.javaparser.ast.stmt.WhileStmt
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getLoopControlStructures
-import pt.iscte.jask.extensions.nameWithScope
+import pt.iscte.jask.extensions.permutations
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
-import pt.iscte.strudel.model.IReturn
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
@@ -32,7 +32,8 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
         val calls = method.findAll(MethodCallExpr::class.java)
-        val callsNames = calls.map { it.nameAsString }.toSet()
+        val dependencyNames = calls.map { it.nameAsString }.toSet().minus(method.nameAsString)
+        val n = dependencyNames.size
 
         val controlStructures = method.getLoopControlStructures().map { (control, condition) ->
             when (control) {
@@ -60,34 +61,37 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         val modifiers = method.modifiers.map { it.keyword.asString() }.toSet()
 
         val distractors = sampleSequentially(3, listOf(
-            callsNames.plus(method.nameAsString) to null,
-            otherFunctions to null,
-            // classes to null,
+            dependencyNames.plus(method.nameAsString) to null
+        ),
+            dependencyNames.plus(classes).permutations().map { it to null },
+            dependencyNames.plus(otherFunctions).permutations().map { it to null },
+            dependencyNames.plus(otherFunctions).plus(classes).permutations().map { it to null },
+        listOf(
             otherFunctions.plus(method.nameAsString) to null,
-            // classes.plus(method.nameAsString) to null,
-            listOf(method.nameAsString) to null,
+            classes.plus(method.nameAsString) to null,
+            listOf(method.nameAsString) to null
         ), listOf(
             controlStructures to language["WhichFunctionDependencies_DistractorControlStructures"].format(controlStructures.joinToString()),
-            callsNames.plus(controlStructures) to language["WhichFunctionDependencies_DistractorNamesAndControlStructures"].format(controlStructures.joinToString()),
+            dependencyNames.plus(controlStructures) to language["WhichFunctionDependencies_DistractorNamesAndControlStructures"].format(controlStructures.joinToString()),
             returns to language["WhichFunctionDependencies_DistractorReturnStmts"].format("return"),
             controlStructures.plus(returns) to language["WhichFunctionDependencies_DistractorControlsAndReturns"].format(controlStructures.joinToString(), "return"),
-            callsNames.plus(returns) to null,
-            callsNames.plus(controlStructures).plus(returns) to null,
+            dependencyNames.plus(returns) to null,
+            dependencyNames.plus(controlStructures).plus(returns) to null,
             types to language["WhichFunctionDependencies_DistractorTypes"].format(),
             modifiers to language["WhichFunctionDependencies_DistractorModifiers"].format("public", "static"),
             types.plus(modifiers) to null,
-            callsNames.plus(types) to null,
-            callsNames.plus(modifiers) to null
+            dependencyNames.plus(types) to null,
+            dependencyNames.plus(modifiers) to null
         )) {
-            it.first != callsNames && it.first.isNotEmpty()
-        }.toMutableList()
+            it.first.isNotEmpty() && it.first.toSet() != dependencyNames.toSet()
+        }.toSetBy { it.first.toSet() }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 
         options[SimpleTextOption(
-            callsNames.minus(method.nameAsString),
+            dependencyNames,
             language["WhichFunctionDependencies_Correct"].format()
         )] = true
 

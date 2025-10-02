@@ -40,6 +40,12 @@ fun <T> Collection<T>.sample(amount: Int?): List<T> =
 fun <K, V> Map<K, V>.sample(amount: Int): Map<K, V> =
     toList().shuffled().take(amount).toMap()
 
+fun <T> Collection<T>.permutations(): Set<List<T>> =
+    if (isEmpty()) setOf(emptyList())
+    else flatMap { head ->
+        minus(head).permutations().map { listOf(head).plus(it) }
+    }.toSet()
+
 fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, predicate: (T) -> Boolean = { true }): Set<T> {
     require(collections.isNotEmpty())
 
