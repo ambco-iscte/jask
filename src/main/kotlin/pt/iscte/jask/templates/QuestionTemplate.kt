@@ -164,7 +164,7 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
         module.procedures.filterIsInstance<IProcedure>().filter { !it.hasFlag(CONSTRUCTOR_FLAG) }.forEach { p ->
             calls.forEach { call ->
                 val args = call.arguments.map { it.toIValue(vm, module) }
-                if (call.id == p.id && p.id != null) { // Specific test cases
+                if (call.id == p.id && p.id != null && p.id?.startsWith("$") == false) { // Specific test cases
                     if (isApplicable(p) && isApplicable(p, args))
                         pairs.add(p to call.arguments)
                 }
