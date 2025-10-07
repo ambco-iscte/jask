@@ -34,7 +34,7 @@ class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
         val literals = method.findAll(LiteralExpr::class.java).map { it.toString() }.toSet()
 
         val distractors = sampleSequentially(3, listOf(
-            literals to language["WhatVariables_DistractorLiterals"].format(),
+            // literals to language["WhatVariables_DistractorLiterals"].format(),
             variableNames.plus(literals) to language["WhatVariables_DistractorVarsAndLiterals"].format(method.nameAsString),
             variableTypes to language["WhatVariables_DistractorVarTypes"].format(method.nameAsString),
         ), (if (method.isMain) emptyList() else listOf(

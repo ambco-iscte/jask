@@ -59,8 +59,11 @@ class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
 
         val distractors = sampleSequentially(3, listOf(
             count + 1 to language["HowManyLoopIterations_DistractorOneMore"].format(guard.toString(), "false"),
+            count + 2 to null,
+            count + 3 to null,
             count - 1 to null,
-            count + 2 to null
+            count - 2 to null,
+            count - 3 to null,
         )) {
             it.first != count && it.first >= 0
         }.toSetBy { it.first }
@@ -69,12 +72,15 @@ class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(count)] = true
+
         if (options.size < 4)
-            options[SimpleTextOption(guard)] = false
+            options[SimpleTextOption(guard.toString())] = false
+
         if (options.size < 4)
             variablesInGuard.sample(4 - options.size).forEach {
                 options[SimpleTextOption(it.id)] = false
             }
+
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 

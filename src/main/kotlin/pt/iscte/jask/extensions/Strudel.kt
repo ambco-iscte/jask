@@ -14,10 +14,11 @@ import pt.iscte.strudel.vm.IReference
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import pt.iscte.strudel.vm.NULL
+import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 @Suppress("UNCHECKED_CAST")
 fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue {
-
     return when (this) {
         is Collection<*> -> {
             if (isEmpty()) vm.allocateArrayOf(ANY)
@@ -152,6 +153,40 @@ fun IProcedure.countArrayAccesses(): Int {
     })
     return count
 }
+
+fun <T : IProgramElement> IBlockHolder.deepFindAll(type: KClass<T>): List<T> {
+    val all = mutableListOf<T>()
+    val find  = object : IBlock.IVisitor {
+        override fun visitAny(element: IBlockElement) {
+            if (type.isInstance(element))
+                all.add(type.cast(element))
+        }
+
+        override fun visitAny(exp: IExpression) {
+            if (type.isInstance(exp))
+                all.add(type.cast(exp))
+        }
+    }
+    block.accept(find)
+    return all
+}
+
+inline fun <reified T : IProgramElement> IBlockHolder.deepFindAll(): List<T> =
+    this.deepFindAll(T::class)
+
+fun <T : IProgramElement> IExpression.findAll(type: KClass<T>): List<T> {
+    val found = mutableListOf<T>()
+    this.accept(object: IExpression.IVisitor {
+        override fun visitAny(exp: IExpression) {
+            if (type.isInstance(exp))
+                found.add(type.cast(exp))
+        }
+    })
+    return found
+}
+
+inline fun <reified T : IProgramElement> IExpression.findAll(): List<T> =
+    this.findAll(T::class)
 
 internal fun Collection<Any?>.toIValues(vm: IVirtualMachine, module: IModule): List<IValue> =
     map { it.toIValue(vm, module) }
