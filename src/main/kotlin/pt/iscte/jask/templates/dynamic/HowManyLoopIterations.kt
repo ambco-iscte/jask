@@ -88,7 +88,7 @@ class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, args)),
                 procedure
             ),
             options,

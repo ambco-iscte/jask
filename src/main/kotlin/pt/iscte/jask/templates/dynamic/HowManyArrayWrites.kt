@@ -20,60 +20,68 @@ import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.collections.firstOrNull
 import kotlin.collections.joinToString
+import kotlin.collections.plusAssign
+import kotlin.inc
 
 class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
 
-    var countWrites = 0
-    var countReads = 0
-    var len = 0
-    var allocated  = 0
-    val allocations = mutableListOf<Pair<IVariableDeclaration<*>, IArray>>()
-    val writes = mutableListOf<String>()
+    private class HowManyArrayWritesListener(val vm: IVirtualMachine): IVirtualMachine.IListener {
+        var countWrites = 0
+            private set
 
-    // There is at least one array access.
-    override fun isApplicable(element: IProcedure): Boolean =
-        element.countArrayAccesses() > 0
+        var countReads = 0
+            private set
 
-    fun setup(vm: IVirtualMachine) {
-        countWrites = 0
-        countReads = 0
-        len = 0
-        allocated = 0
-        vm.addListener(object : IVirtualMachine.IListener {
-            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                if (value.type.isArrayReference)
-                    allocations.add(a.target to (value as IReference<IArray>).target)
-                else if (value.type.isArray)
-                    allocations.add(a.target to value as IArray)
-            }
+        var len = 0
+            private set
 
-            override fun arrayAllocated(ref: IReference<IArray>) {
-                allocated++
-                len += ref.target.length
-                ref.target.addListener(object : IArray.IListener {
-                    override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
+        var allocated  = 0
+            private set
+
+        val allocations = mutableListOf<Pair<IVariableDeclaration<*>, IArray>>()
+        val writes = mutableListOf<String>()
+
+        override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+            if (value.type.isArrayReference)
+                allocations.add(a.target to (value as IReference<IArray>).target)
+            else if (value.type.isArray)
+                allocations.add(a.target to value as IArray)
+        }
+
+        override fun arrayAllocated(ref: IReference<IArray>) {
+            allocated++
+            len += ref.target.length
+            ref.target.addListener(object : IArray.IListener {
+                override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
+                    if (!vm.callStack.isEmpty) {
                         countWrites++
 
                         val arrayVar = allocations.firstOrNull { it.second == ref.target }?.first
                         if (arrayVar != null)
                             writes.add("${arrayVar.id}[$index] = $newValue")
                     }
+                }
 
-                    override fun elementRead(index: Int, value: IValue) {
+                override fun elementRead(index: Int, value: IValue) {
+                    if (!vm.callStack.isEmpty)
                         countReads++
-                    }
-                })
-            }
-        })
+                }
+            })
+        }
     }
+
+    // There is at least one array access.
+    override fun isApplicable(element: IProcedure): Boolean =
+        element.countArrayAccesses() > 0
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, module, procedure, args) = getRandomProcedure(sources)
 
         val vm = IVirtualMachine.create()
-        setup(vm)
-        val arguments = args.toIValues(vm, module)
+        val listener = HowManyArrayWritesListener(vm)
+        vm.addListener(listener)
 
+        val arguments = args.toIValues(vm, module)
         vm.execute(procedure, *arguments.toTypedArray())
 
         var arrayLengthAccess = 0
@@ -86,28 +94,28 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
 
         val distractors: Set<Pair<Int, String?>> = sampleSequentially(3,
             listOf(
-                allocated to language["HowManyArrayWrites_DistractorNumAllocated"].format(allocations.joinToString { it.first.id!! }),
-                countReads to language["HowManyArrayWrites_DistractorReads"].format("a[i] = x", "x", "a", "i"),
-                countReads + 1 to null,
-                countReads - 1 to null,
-                countWrites + 1 to null,
-                countWrites - 1 to null,
+                listener.allocated to language["HowManyArrayWrites_DistractorNumAllocated"].format(listener.allocations.joinToString { it.first.id!! }),
+                listener.countReads to language["HowManyArrayWrites_DistractorReads"].format("a[i] = x", "x", "a", "i"),
+                listener.countReads + 1 to null,
+                listener.countReads - 1 to null,
+                listener.countWrites + 1 to null,
+                listener.countWrites - 1 to null,
                 // countReads + countWrites
-                allocated + 1 to null,
-                allocated - 1 to null,
+                listener.allocated + 1 to null,
+                listener.allocated - 1 to null,
                 arrayLengthAccess to language["HowManyArrayWrites_DistractorLengthAccesses"].format("length")
             ),
-            listOf(len to language["HowManyArrayWrites_DistractorLengthOfAllocated"].format(), len + 1 to null, len - 1 to null)
+            listOf(listener.len to language["HowManyArrayWrites_DistractorLengthOfAllocated"].format(), listener.len + 1 to null, listener.len - 1 to null)
         ) {
-            it.first != countWrites && it.first >= 0
+            it.first != listener.countWrites && it.first >= 0
         }.toSetBy { it.first }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(
-            countWrites,
-            language["HowManyArrayWrites_Correct"].format("x", "a", "i", "a[i] = x", writes.joinToString())
+            listener.countWrites,
+            language["HowManyArrayWrites_Correct"].format("x", "a", "i", "a[i] = x", listener.writes.joinToString())
         )] = true
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
@@ -116,7 +124,7 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, args)),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             options,

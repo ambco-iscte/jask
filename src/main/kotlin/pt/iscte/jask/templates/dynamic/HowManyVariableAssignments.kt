@@ -71,7 +71,7 @@ class HowManyVariableAssignments : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(variable.id, procedureCallAsString(procedure, arguments)),
+                statement.format(variable.id, procedureCallAsString(procedure, args)),
                 procedure
             ),
             options,

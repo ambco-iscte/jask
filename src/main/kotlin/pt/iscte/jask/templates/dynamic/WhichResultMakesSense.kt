@@ -66,7 +66,7 @@ class WhichResultMakesSense : DynamicQuestionTemplate<IProcedure>() {
         options[SimpleTextOption(result)] = true
         if (options.size < 4) {
             returnExpressions.sample(4 - options.size).forEach {
-                if (it.toString() != result.toString())
+                if (it != result.toString())
                     options[SimpleTextOption(it)] = false
             }
         }
@@ -75,7 +75,7 @@ class WhichResultMakesSense : DynamicQuestionTemplate<IProcedure>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["WhichResultMakesSense"].format(procedureCallAsString(procedure, arguments)), procedure.longSignature()),
+            TextWithCodeStatement(language["WhichResultMakesSense"].format(procedureCallAsString(procedure, args)), procedure.longSignature()),
             options,
             language = language
         )

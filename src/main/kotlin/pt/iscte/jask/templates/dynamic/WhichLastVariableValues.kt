@@ -19,7 +19,7 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
             vm: IVirtualMachine,
             variableHistory: Map<IVariableDeclaration<*>, List<IValue>>,
             procedure: IProcedure,
-            arguments: List<IValue>,
+            arguments: List<Any?>,
             language: Language
         ): Map<Option, Boolean> {
 
@@ -94,10 +94,10 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, args)),
                 procedure
             ),
-            options(vm, valuesPerVariable, procedure, arguments, language),
+            options(vm, valuesPerVariable, procedure, args, language),
             language = language
         )
     }

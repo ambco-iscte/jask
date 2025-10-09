@@ -16,8 +16,25 @@ import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
-    val allocations = mutableListOf<Int>()
-    val allocated = mutableListOf<Pair<IVariableDeclaration<*>, IArray>>()
+
+    private data class HowManyArrayAllocationsListener(val vm: IVirtualMachine): IVirtualMachine.IListener {
+        val allocations = mutableListOf<Int>()
+        val allocated = mutableListOf<Pair<IVariableDeclaration<*>, IArray>>()
+
+        override fun arrayAllocated(ref: IReference<IArray>) {
+            // exclude args allocation
+            if (!vm.callStack.isEmpty)
+                allocations.add(ref.target.length)
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+            if (value.type.isArrayReference)
+                allocated.add(a.target to (value as IReference<IArray>).target)
+            else if (value.type.isArray)
+                allocated.add(a.target to value as IArray)
+        }
+    }
 
     override fun isApplicable(element: IProcedure): Boolean {
         var count = 0
@@ -31,30 +48,14 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
         return count > 0
     }
 
-    fun setup(vm: IVirtualMachine) {
-        vm.addListener(object : IVirtualMachine.IListener {
-            override fun arrayAllocated(ref: IReference<IArray>) {
-                // exclude args allocation
-                if(!vm.callStack.isEmpty)
-                    allocations.add(ref.target.length)
-            }
-
-            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                if (value.type.isArrayReference)
-                    allocated.add(a.target to (value as IReference<IArray>).target)
-                else if (value.type.isArray)
-                    allocated.add(a.target to value as IArray)
-            }
-        })
-    }
-
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, module, procedure, args) = getRandomProcedure(sources)
 
         val vm = IVirtualMachine.create()
-        setup(vm)
-        val arguments = args.toIValues(vm, module)
+        val listener = HowManyArrayAllocationsListener(vm)
+        vm.addListener(listener)
 
+        val arguments = args.toIValues(vm, module)
         vm.execute(procedure, *arguments.toTypedArray())
 
         var countAllocationInstructions = 0 // min: 2
@@ -71,11 +72,11 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
             procedure.parameters.count {
                 it.type.isArrayReference
             } to language["HowManyArrayAllocations_DistractorArrayParams"].format(procedure.id),
-            allocations.sum() to language["HowManyArrayAllocations_DistractorTotalLength"].format(),
+            listener.allocations.sum() to language["HowManyArrayAllocations_DistractorTotalLength"].format(),
             countAllocationInstructions to null,
-            allocations.size + 1 to null,
-            if (allocations.isNotEmpty())
-                allocations.size - 1 to null
+            listener.allocations.size + 1 to null,
+            if (listener.allocations.isNotEmpty())
+                listener.allocations.size - 1 to null
             else
                 0 to null,
             0 to null
@@ -88,11 +89,13 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, args)),
                 procedure
             ),
             correctAndRandomDistractors(
-                allocations.size to language["HowManyArrayAllocations_Correct"].format(allocated.joinToString { it.first.id!! }),
+                listener.allocations.size to language["HowManyArrayAllocations_Correct"].format(
+                    listener.allocated.joinToString { it.first.id!! }
+                ),
                 distractors.toMap()
             ),
             language = language

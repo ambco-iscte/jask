@@ -155,10 +155,10 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
  */
 abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T>() {
 
-    private fun DynamicQuestionTemplate<IProcedure>.getRandomApplicableProcedureAndArguments(
+    private fun DynamicQuestionTemplate<IProcedure>.getApplicableProcedureAndArguments(
         module: IModule,
         calls: List<ProcedureCall>
-    ): Pair<IProcedure, List<Any?>>? {
+    ): List<Pair<IProcedure, List<Any?>>> {
         val vm = IVirtualMachine.create()
         val pairs = mutableListOf<Pair<IProcedure, List<Any?>>>()
         module.procedures.filterIsInstance<IProcedure>().filter { !it.hasFlag(CONSTRUCTOR_FLAG) }.forEach { p ->
@@ -175,12 +175,29 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
                 }
             }
         }
-        return pairs.randomOrNull()
+        return pairs
     }
 
     protected fun DynamicQuestionTemplate<IProcedure>.getRandomProcedure(
         sources: List<SourceCode>
     ): Quadruple<SourceCode, IModule, IProcedure, List<Any?>> {
+        val applicable: Map<SourceCode, List<Pair<IProcedure, List<Any?>>>> = sources.associateWith { source ->
+            runCatching {
+                val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
+                getApplicableProcedureAndArguments(module, source.calls)
+            }.getOrDefault(emptyList())
+        }.filter { it.value.isNotEmpty() }
+
+        if (applicable.isEmpty())
+            throw QuestionGenerationException(this, null, "Could not find source with at least one applicable procedure.")
+
+        val source = applicable.keys.random()
+        val (procedure, args) = applicable[source]!!.random()
+        val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
+
+        return Quadruple(source, module, procedure, args)
+
+        /*
         val source: SourceCode? = sources.filter { s ->
             runCatching {
                 val module = Java2Strudel(checkJavaCompilation = false).load(s.code)
@@ -197,6 +214,7 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
         throw QuestionGenerationException(this, source, "Could not find applicable procedure within source.")
 
         return Quadruple(source, module, procedure, args)
+         */
     }
 
     /**
@@ -221,7 +239,7 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
     fun generate(unit: CompilationUnit, call: ProcedureCall, language: Language = Language.DEFAULT) =
         generate(listOf(SourceCode(unit, listOf(call))), language)
 
-    protected open fun isApplicable(element: T, args: List<IValue>): Boolean = isApplicable(element)
+    protected open fun isApplicable(element: T, args: List<IValue>): Boolean = true // isApplicable(element)
 
     protected abstract fun build(sources: List<SourceCode>, language: Language = Language.DEFAULT): Question
 

@@ -24,7 +24,7 @@ class WhichReturnExecuted : DynamicQuestionTemplate<IProcedure>() {
 
         val vm = IVirtualMachine.create()
         val arguments = args.toIValues(vm, module)
-        val callAsString = procedureCallAsString(procedure, arguments)
+        val callAsString = procedureCallAsString(procedure, args)
 
         val otherReturns = mutableListOf<IReturn>()
         var returnInst: IReturn? = null

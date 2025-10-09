@@ -27,7 +27,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
             correct: IVariableDeclaration<*>,
             values: List<IValue>,
             variableHistory: Map<IVariableDeclaration<*>, List<IValue>>,
-            arguments: List<IValue>,
+            arguments: List<Any?>,
             language: Language
         ): Map<Option, Boolean> {
             val otherValues = variableHistory.values.filter { it.size > 1 }
@@ -117,10 +117,10 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(variable.id, procedureCallAsString(procedure, arguments)),
+                statement.format(variable.id, procedureCallAsString(procedure, args)),
                 procedure
             ),
-            options(variable, values, valuesPerVariable, arguments, language),
+            options(variable, values, valuesPerVariable, args, language),
             language = language,
             relevantSourceCode = procedure.findAll(IVariableAssignment::class).filter {
                 it.target == variable

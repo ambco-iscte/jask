@@ -199,13 +199,19 @@ internal fun IValue.asString(): String = when (this@asString) {
     else -> toString()
 }
 
-internal fun Collection<IValue>.joinAsString(): String = joinToString { it.asString() }
+internal fun Any?.toStringPretty(): String = when (this@toStringPretty) {
+    is IValue -> asString()
+    is Collection<*> -> "[${joinToString { it.toStringPretty() }}]"
+    else -> toString()
+}
 
-fun procedureCallAsString(procedure: IProcedureDeclaration, arguments: List<IValue>): String =
+internal fun Collection<Any?>.joinToStringPretty(): String = joinToString { it.toStringPretty() }
+
+fun procedureCallAsString(procedure: IProcedureDeclaration, arguments: List<Any?>): String =
     if (procedure.hasThisParameter)
-        "${arguments.first().asString()}.${procedure.id}(${arguments.subList(1, arguments.size).joinAsString()})"
+        "${arguments.first().toStringPretty()}.${procedure.id}(${arguments.subList(1, arguments.size).joinToStringPretty()})"
     else
-        "${procedure.id}(${arguments.joinAsString()})"
+        "${procedure.id}(${arguments.joinToStringPretty()})"
 
 val IProcedureDeclaration.isMain: Boolean
     get() = parameters.isEmpty() && id == "main" && (parameters.isEmpty() || (parameters.size == 1 && parameters[0].type.isArrayReference && (((parameters[0].type as? IReferenceType)?.target as? IArrayType)?.componentType as? HostRecordType)?.type == String::class.java))

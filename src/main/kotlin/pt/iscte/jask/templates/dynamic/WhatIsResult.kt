@@ -103,7 +103,7 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                language["WhatIsResult"].format(procedureCallAsString(procedure, arguments)),
+                language["WhatIsResult"].format(procedureCallAsString(procedure, args)),
                 procedure
             ),
             options,

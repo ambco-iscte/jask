@@ -71,7 +71,7 @@ class HowManyFunctionCalls : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                language["HowManyFunctionCalls"].format(randomProcedure.id, procedureCallAsString(procedure, arguments)),
+                language["HowManyFunctionCalls"].format(randomProcedure.id, procedureCallAsString(procedure, args)),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             options,

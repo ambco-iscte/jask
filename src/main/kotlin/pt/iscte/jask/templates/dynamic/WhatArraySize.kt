@@ -36,28 +36,29 @@ inline fun <reified T: IExpression> IBlock.findAllExpression(): List<T> {
 }
 
 class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
-    var allocation: Int? = null
+
+    private data class WhatArraySizeListener(val vm: IVirtualMachine): IVirtualMachine.IListener {
+        var allocation: Int? = null
+            private set
+
+        override fun arrayAllocated(ref: IReference<IArray>) {
+            // exclude args allocation
+            if(!vm.callStack.isEmpty && allocation == null)
+                allocation = ref.target.length
+        }
+    }
 
     override fun isApplicable(element: IProcedure): Boolean =
         element.block.findExpression<IArrayAllocation>() != null
-
-    fun setup(vm: IVirtualMachine) {
-        vm.addListener(object : IVirtualMachine.IListener {
-            override fun arrayAllocated(ref: IReference<IArray>) {
-                // exclude args allocation
-                if(!vm.callStack.isEmpty && allocation == null)
-                    allocation = ref.target.length
-            }
-        })
-    }
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, module, procedure, args) = getRandomProcedure(sources)
 
         val vm = IVirtualMachine.create()
-        setup(vm)
-        val arguments = args.toIValues(vm, module)
+        val listener = WhatArraySizeListener(vm)
+        vm.addListener(listener)
 
+        val arguments = args.toIValues(vm, module)
         vm.execute(procedure, *arguments.toTypedArray())
 
         val arrayArgsLengths = arguments.filter { it is IReference<*> && it.target is IArray }.mapIndexed { i, value ->
@@ -66,23 +67,23 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
         }
 
         val distractors: Set<Pair<Any, String?>> = mutableSetOf(
-            (allocation?.minus(1) ?: 0) to null,
-            (allocation?.plus(1) ?: 0) to null,
+            (listener.allocation?.minus(1) ?: 0) to null,
+            (listener.allocation?.plus(1) ?: 0) to null,
         ) + arrayArgsLengths
 
         val statement = language[this::class.simpleName!!].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(procedureCallAsString(procedure, arguments)),
+                statement.format(procedureCallAsString(procedure, args)),
                 procedure
             ),
             correctAndRandomDistractors(
                 (
-                    if (allocation == null)
+                    if (listener.allocation == null)
                         language["NoneOfTheAbove"] to language["WhatArraySize_NoneOfTheAboveCorrect"].format()
                     else
-                        allocation!! to null
+                        listener.allocation!! to null
                 ),
                 distractors.toMap(),
             ),

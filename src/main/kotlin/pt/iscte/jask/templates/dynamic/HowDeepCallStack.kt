@@ -88,7 +88,7 @@ class HowDeepCallStack : DynamicQuestionTemplate<IProcedure>() {
         return Question(
             source,
             TextWithCodeStatement(
-                language["HowDeepCallStack"].format(procedureCallAsString(procedure, arguments)),
+                language["HowDeepCallStack"].format(procedureCallAsString(procedure, args)),
                 listOf(procedure) + procedure.getUsedProceduresWithinModule()
             ),
             options,
