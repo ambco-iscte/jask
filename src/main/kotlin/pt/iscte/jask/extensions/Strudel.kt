@@ -201,6 +201,8 @@ internal fun IValue.asString(): String = when (this@asString) {
 
 internal fun Any?.toStringPretty(): String = when (this@toStringPretty) {
     is IValue -> asString()
+    is String -> "\"$this\""
+    is Char -> "'$this'"
     is Collection<*> -> "[${joinToString { it.toStringPretty() }}]"
     else -> toString()
 }
