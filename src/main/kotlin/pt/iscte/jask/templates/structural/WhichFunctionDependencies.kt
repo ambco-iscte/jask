@@ -32,7 +32,8 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
     private fun getDependencies(method: MethodDeclaration, unit: CompilationUnit? = null): Set<MethodDeclaration> {
         val unit = unit ?: method.findCompilationUnit().getOrNull ?: return emptySet()
         return method.findAll(MethodCallExpr::class.java).mapNotNull { call ->
-            unit.findFirst(MethodDeclaration::class.java) {
+            if (call.nameAsString == method.nameAsString) null
+            else unit.findFirst(MethodDeclaration::class.java) {
                 it.nameAsString == call.nameAsString
             }.getOrNull
         }.toSet()

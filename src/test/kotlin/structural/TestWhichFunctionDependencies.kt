@@ -15,6 +15,10 @@ class TestWhichFunctionDependencies {
             class Test {
                 static void foo() { bar(); baz(); }
                 
+                static int bar() { return 42; }
+                
+                static int baz() { return 21; }
+                
                 static void hello() { }
                 
                 static void world() { }
@@ -28,6 +32,8 @@ class TestWhichFunctionDependencies {
         val src2 = """
             class Test {
                 static void foo() { bar(); }
+                
+                static int bar() { return 42; }
             }
         """.trimIndent()
         val qlc2 = assertDoesNotThrow { WhichFunctionDependencies().generate(src2) }
@@ -38,6 +44,8 @@ class TestWhichFunctionDependencies {
         val src3 = """
             class Test {
                 static void foo() { foo(); bar(); }
+                
+                static int bar() { return 42; }
             }
         """.trimIndent()
         val qlc3 = assertDoesNotThrow { WhichFunctionDependencies().generate(src3) }
