@@ -3,10 +3,13 @@ package dynamic
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import pt.iscte.jask.extensions.procedureCallAsString
+import pt.iscte.jask.templates.ProcedureCall
 import pt.iscte.jask.templates.QuestionGenerationException
-import pt.iscte.jask.templates.dynamic.HowManyArrayReads
+import pt.iscte.jask.templates.SourceCode
 import pt.iscte.jask.templates.dynamic.HowManyArrayWrites
 import pt.iscte.jask.templates.invoke
+import pt.iscte.strudel.parsing.java.Java2Strudel
 import kotlin.test.assertEquals
 
 class TestHowManyArrayWrites {
@@ -103,5 +106,43 @@ class TestHowManyArrayWrites {
         assertThrows<QuestionGenerationException> {
             HowManyArrayWrites().generate(src, "fill"(listOf(1, 2, 3, 4, 5), 42))
         }
+    }
+}
+
+fun main() {
+    val src = """
+            class Test {
+                static void replaceLast(char[] letters, char find, char replace) {
+                    for(int i = letters.length - 1 ; i >= 0; i--)
+                        if(letters[i] == find) {
+                            letters[i] = replace;
+                            return;
+                        }
+                }
+            }
+        """.trimIndent()
+
+    val module = Java2Strudel().load(src)
+    val replace = module.getProcedure("replaceLast")
+
+    val cases = listOf<ProcedureCall>(
+        "replaceLast"(listOf('j', 'a', 'v', 'a'), 'a', 'i'),
+        "replaceLast"(listOf<Char>(), 'a', 'i'),
+        "replaceLast"(listOf('j', 'a', 'v', 'a'), 'j', 'c')
+    )
+
+    val frequency = cases.associateWith { 0 }.toMutableMap()
+
+    repeat(10000) {
+        val qlc = assertDoesNotThrow {
+            HowManyArrayWrites().generate(SourceCode(src, cases))
+        }
+        cases.firstOrNull { procedureCallAsString(replace, it.arguments) in qlc.statement.statement }?.let {
+            frequency[it] = (frequency[it] ?: 0) + 1
+        }
+    }
+
+    frequency.entries.sortedBy { it.value }.forEach { (case, frequency) ->
+        println("Chosen $frequency time(s):\t $case")
     }
 }

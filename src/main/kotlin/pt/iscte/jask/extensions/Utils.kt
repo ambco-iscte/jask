@@ -40,11 +40,34 @@ fun <T> Collection<T>.sample(amount: Int?): List<T> =
 fun <K, V> Map<K, V>.sample(amount: Int): Map<K, V> =
     toList().shuffled().take(amount).toMap()
 
-fun <T> Collection<T>.permutations(): Set<List<T>> =
-    if (isEmpty()) setOf(emptyList())
-    else flatMap { head ->
-        minus(head).permutations().map { listOf(head).plus(it) }
-    }.toSet()
+fun <T> Collection<T>.permutations(): Set<List<T>> {
+    val permutations = mutableSetOf<List<T>>()
+
+    fun swap(list: MutableList<T>, i: Int, j: Int) {
+        val temp = list[i]
+        list[i] = list[j]
+        list[j] = temp
+    }
+
+    fun heap(k: Int, list: MutableList<T>) {
+        if (k == 1)
+            permutations.add(list.toList())
+        else {
+            heap(k - 1, list)
+            (0 until k - 1).forEach { i ->
+                if (k % 2 == 0)
+                    swap(list, i, k - 1)
+                else
+                    swap(list, 0, k - 1)
+                heap(k - 1, list)
+            }
+        }
+    }
+
+    heap(this.size, this.toMutableList())
+
+    return permutations
+}
 
 fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, predicate: (T) -> Boolean = { true }): Set<T> {
     require(collections.isNotEmpty())

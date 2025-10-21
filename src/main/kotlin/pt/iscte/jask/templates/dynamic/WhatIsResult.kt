@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import com.github.javaparser.ast.expr.EnclosedExpr
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -8,6 +9,7 @@ import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.strudel.model.BOOLEAN
 import pt.iscte.strudel.model.DOUBLE
 import pt.iscte.strudel.model.ILiteral
 import pt.iscte.strudel.model.IProcedure
@@ -17,7 +19,6 @@ import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
-import kotlin.math.absoluteValue
 
 class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
 
@@ -96,6 +97,9 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
             }
         }
          */
+
+        if (options.size < 4 && result.type == BOOLEAN)
+            options[SimpleTextOption(!result.toBoolean())] = false
 
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false

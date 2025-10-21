@@ -13,8 +13,6 @@ import com.github.javaparser.ast.stmt.WhileStmt
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getLoopControlStructures
-import pt.iscte.jask.extensions.permutations
-import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.parsing.java.SourceLocation
@@ -61,11 +59,11 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         val modifiers = method.modifiers.map { it.keyword.asString() }.toSet()
 
         val distractors = sampleSequentially(3, listOf(
-            dependencyNames.plus(method.nameAsString) to null
+            dependencyNames.plus(method.nameAsString) to null,
+            dependencyNames.plus(classes) to null,
+            dependencyNames.plus(otherFunctions) to null,
+            dependencyNames.plus(otherFunctions).plus(classes) to null
         ),
-            dependencyNames.plus(classes).permutations().map { it to null },
-            dependencyNames.plus(otherFunctions).permutations().map { it to null },
-            dependencyNames.plus(otherFunctions).plus(classes).permutations().map { it to null },
         listOf(
             otherFunctions.plus(method.nameAsString) to null,
             classes.plus(method.nameAsString) to null,

@@ -9,7 +9,7 @@ import pt.iscte.jask.extensions.Quadruple
 import pt.iscte.jask.extensions.accept
 import pt.iscte.jask.extensions.configureStaticJavaParser
 import pt.iscte.jask.extensions.randomByOrNull
-import pt.iscte.jask.extensions.toIValue
+import pt.iscte.jask.extensions.toIValues
 import pt.iscte.strudel.model.*
 import pt.iscte.strudel.parsing.java.CONSTRUCTOR_FLAG
 import pt.iscte.strudel.parsing.java.Java2Strudel
@@ -159,19 +159,19 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
         module: IModule,
         calls: List<ProcedureCall>
     ): List<Pair<IProcedure, List<Any?>>> {
-        val vm = IVirtualMachine.create()
         val pairs = mutableListOf<Pair<IProcedure, List<Any?>>>()
         module.procedures.filterIsInstance<IProcedure>().filter { !it.hasFlag(CONSTRUCTOR_FLAG) }.forEach { p ->
             calls.forEach { call ->
-                val args = call.arguments.map { it.toIValue(vm, module) }
-                if (call.id == p.id && p.id != null && p.id?.startsWith("$") == false) { // Specific test cases
-                    if (isApplicable(p) && isApplicable(p, args))
-                        pairs.add(p to call.arguments)
-                }
-                else if (call.id == null) { // Wildcard test cases
+                if (call.id == null) { // Wildcard test cases
+                    val vm = IVirtualMachine.create()
+                    val args = call.arguments.toIValues(vm, module)
                     runCatching { vm.execute(p, *args.toTypedArray()) }.onSuccess {
                         pairs.add(p to call.arguments)
                     }
+                } else if (call.id == p.id && p.id?.startsWith("$") == false) { // Specific test cases
+                    val args = call.arguments.toIValues(IVirtualMachine.create(), module)
+                    if (isApplicable(p) && isApplicable(p, args))
+                        pairs.add(p to call.arguments)
                 }
             }
         }
