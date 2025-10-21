@@ -47,6 +47,63 @@ class TestWhichFunctionDependencies {
     }
 
     @Test
+    fun testPaddleExample() {
+        val src = """
+            class ArrayOrder {
+                static void swap(int[] array, int i, int j) {
+                    assert i >= 0 && i < array.length;
+                    assert j >= 0 && j < array.length;
+                
+                    if(i != j) {
+                        int t = array[i];
+                        array[i] = array[j];
+                        array[j] = t;
+                    }
+                }
+                
+                static void invert(int[] array) {
+                    for(int i = 0; i < array.length / 2; i++)
+                        swap(array, i, array.length - 1 - i);
+                }
+            }
+
+            class RandomInts {
+                static int random() {
+                    return (int) (Math.random() * 1000000);
+                }
+
+                static int randomUntil(int max) {
+                    assert max > 0;
+                    return (int) (Math.random() * max);
+                }
+
+                static int randomWithin(int min, int max) {
+                    assert min <= max;
+                    return min + randomUntil(max - min + 1);
+                }
+            }
+
+            class ArrayShuffle {
+                static void randomSwap(int[] array) {
+                    int i = RandomInts.randomUntil(array.length);
+                    int j = RandomInts.randomUntil(array.length);
+                    ArrayOrder.swap(array, i, j);
+                }
+                
+                static void shuffle(int[] array) {
+                    for(int i = array.length - 1; i > 0; i--) {
+                        int r = RandomInts.randomWithin(0, i);
+                        ArrayOrder.swap(array, r, i);
+                    }
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow { WhichFunctionDependencies().generate(src) }
+        println(qlc)
+    }
+
+    @Test
     fun testNotApplicable() {
         val src2 = """
             class Test {

@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.structural
+import com.github.javaparser.ast.CompilationUnit
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -11,12 +12,14 @@ import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.WhileStmt
 import pt.iscte.jask.Language
+import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getLoopControlStructures
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
+import kotlin.collections.emptyList
 
 class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -26,14 +29,49 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             it.nameAsString != element.nameAsString
         }
 
+    private fun getDependencies(method: MethodDeclaration, unit: CompilationUnit? = null): Set<MethodDeclaration> {
+        val unit = unit ?: method.findCompilationUnit().getOrNull ?: return emptySet()
+        return method.findAll(MethodCallExpr::class.java).mapNotNull { call ->
+            unit.findFirst(MethodDeclaration::class.java) {
+                it.nameAsString == call.nameAsString
+            }.getOrNull
+        }.toSet()
+    }
+
+    private fun getDependenciesDeep(method: MethodDeclaration, unit: CompilationUnit? = null): Set<MethodDeclaration> {
+        val unit = unit ?: method.findCompilationUnit().getOrNull ?: return emptySet()
+
+        val dependencies = getDependencies(method, unit).toMutableSet()
+
+        val visited = mutableMapOf<MethodDeclaration, Boolean>()
+        val queue = dependencies.toMutableList()
+
+        while (queue.isNotEmpty()) {
+            val current = queue.removeFirst()
+            visited[current] = true
+            getDependencies(current, unit).forEach { dependency ->
+                dependencies.add(dependency)
+                if (dependency !in visited)
+                    queue.add(dependency)
+            }
+        }
+
+        return dependencies
+    }
+
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
-        val calls = method.findAll(MethodCallExpr::class.java)
-        val dependencyNames = calls.map { it.nameAsString }.toSet().minus(method.nameAsString)
-        val n = dependencyNames.size
+        val dependencyNames = getDependencies(method).map { it.nameAsString }.toSet()
+        val dependenciesDeep = getDependenciesDeep(method)
+        val dependencyNamesDeep = dependenciesDeep.map { it.nameAsString }.toSet()
 
-        val controlStructures = method.getLoopControlStructures().map { (control, condition) ->
+        val deepDependenciesClasses = dependenciesDeep.mapNotNull {
+            it.findAncestor<TypeDeclaration<*>>().getOrNull?.nameAsString
+        }
+        val thisClass = method.findAncestor<TypeDeclaration<*>>().getOrNull?.nameAsString?.let { listOf(it) } ?: emptyList()
+
+        val controlStructures = method.getLoopControlStructures().map { (control, _) ->
             when (control) {
                 is IfStmt -> "if"
                 is WhileStmt, is DoStmt -> "while"
@@ -60,6 +98,14 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
 
         val distractors = sampleSequentially(3, listOf(
             dependencyNames.plus(method.nameAsString) to null,
+            dependencyNames.plus(thisClass) to null,
+            dependencyNamesDeep to null,
+            dependencyNamesDeep.plus(method.nameAsString) to null,
+            dependencyNamesDeep.plus(deepDependenciesClasses) to null
+        ),
+        listOf(
+            dependencyNames.plus(thisClass).plus(method.nameAsString) to null,
+            dependencyNamesDeep.plus(deepDependenciesClasses).plus(method.nameAsString) to null,
             dependencyNames.plus(classes) to null,
             dependencyNames.plus(otherFunctions) to null,
             dependencyNames.plus(otherFunctions).plus(classes) to null
@@ -101,7 +147,7 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             TextWithCodeStatement(language["WhichFunctionDependencies"].format(method.nameAsString), method),
             options,
             language = language,
-            relevantSourceCode = calls.map { SourceLocation(it) }
+            relevantSourceCode = method.findAll<MethodCallExpr>().map { SourceLocation(it) }
         )
     }
 }
