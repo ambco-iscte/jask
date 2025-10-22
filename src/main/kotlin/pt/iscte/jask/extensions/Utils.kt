@@ -1,9 +1,27 @@
 package pt.iscte.jask.extensions
 
+import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.body.MethodDeclaration
+import pt.iscte.jask.Language
 import pt.iscte.jask.templates.Option
+import pt.iscte.jask.templates.Question
+import pt.iscte.jask.templates.QuestionTemplate
 import pt.iscte.jask.templates.SimpleTextOption
+import pt.iscte.jask.templates.StructuralQuestionTemplate
+import pt.iscte.jask.templates.quality.IFReturnCondition
+import pt.iscte.jask.templates.quality.LonelyVariable
+import pt.iscte.jask.templates.quality.RemoveEmptyIfAndElse
+import pt.iscte.jask.templates.quality.ReplacesIFsWithIfElse
+import pt.iscte.jask.templates.quality.UnnecessaryCodeAfterReturn
+import pt.iscte.jask.templates.quality.UnnecessaryEqualsTrueOrFalse
+import pt.iscte.jask.templates.quality.UnnecessaryIfNesting
+import pt.iscte.jask.templates.quality.UnnecessaryParameter
+import pt.iscte.jask.templates.quality.UselessDuplicationIfElse
+import pt.iscte.jask.templates.quality.UselessDuplicationInsideIfElse
+import pt.iscte.jask.templates.quality.UselessSelfAssign
+import pt.iscte.jask.templates.quality.UselessVariableDeclaration
 import java.lang.reflect.Method
+import kotlin.reflect.KClass
 
 val Class<*>.wrapper: Class<*>
     get() = this.kotlin.javaObjectType
@@ -135,4 +153,40 @@ fun <T, R> Collection<T>.toSetBy(map: (T) -> R): Set<T> {
     }
     return result
 }
+
+
+fun checkForApplicables(
+    templates: Set<StructuralQuestionTemplate<MethodDeclaration>>,
+    source: String
+): Set<StructuralQuestionTemplate<MethodDeclaration>> {
+    val cu = StaticJavaParser.parse(source)
+    val methodDecl = cu.findAll(MethodDeclaration::class.java).firstOrNull() ?: return emptySet()
+
+    return templates.filter { it.isApplicable(methodDecl) }.toSet()
+}
+
+fun applicableQualityTemplates(source: String): Set<StructuralQuestionTemplate<MethodDeclaration>> {
+    val all = setOf<StructuralQuestionTemplate<MethodDeclaration>>(
+        IFReturnCondition(),
+        LonelyVariable(),
+        RemoveEmptyIfAndElse(),
+        ReplacesIFsWithIfElse(),
+        UnnecessaryCodeAfterReturn(),
+        UnnecessaryEqualsTrueOrFalse(),
+        UnnecessaryIfNesting(),
+        UnnecessaryParameter(),
+        UselessDuplicationIfElse(),
+        UselessDuplicationInsideIfElse(),
+        UselessSelfAssign(),
+        UselessVariableDeclaration()
+    )
+    return checkForApplicables(all, source)
+}
+
+fun generateQuestions(
+    templates: Set<StructuralQuestionTemplate<MethodDeclaration>>,
+    source: String,
+    language: Language = Language.DEFAULT
+): List<Question> =
+    templates.map { it.generate(source, language) }
 

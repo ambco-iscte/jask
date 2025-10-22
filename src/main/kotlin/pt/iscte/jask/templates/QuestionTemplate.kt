@@ -84,7 +84,7 @@ sealed class QuestionTemplate<T : Any>(val range: IntRange = 1 .. Int.MAX_VALUE)
      * Is the question applicable to this [element]?
      * @param element An element of the question's target type.
      */
-    protected open fun isApplicable(element: T): Boolean = true
+    open fun isApplicable(element: T): Boolean = true
 
     protected abstract fun <R : T> getApplicableElements(source: SourceCode, type: KClass<R>): List<R>
 
