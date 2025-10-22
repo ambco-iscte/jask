@@ -61,6 +61,29 @@ class TestWhatVariables {
     }
 
     @Test
+    fun testPaddleExample() {
+        val src = """
+            class Test {
+                static int powerOfTwo(int e) {
+                    assert e >= 0;
+                    int p = 1;
+                    int n = e;
+                    while (n > 0) {
+                        p = p * 2;
+                        n = n - 1;
+                    }
+                    return p;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow { WhatVariables().generate(src) }
+        println(qlc)
+        assertEquals(1, qlc.solution.size)
+        assertEquals("p, n", qlc.solution[0].toString())
+    }
+
+    @Test
     fun testNotApplicable() {
         val src = """
             class Test {
