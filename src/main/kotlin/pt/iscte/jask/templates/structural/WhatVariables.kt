@@ -31,20 +31,21 @@ class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
         val params = method.parameters.map { it.nameAsString }.toSet()
         val name = method.nameAsString
 
-        val literals = method.findAll(LiteralExpr::class.java).map { it.toString() }.toSet()
-
         val distractors = sampleSequentially(3, listOf(
-            // literals to language["WhatVariables_DistractorLiterals"].format(),
-            variableNames.plus(literals) to language["WhatVariables_DistractorVarsAndLiterals"].format(method.nameAsString),
-            variableTypes to language["WhatVariables_DistractorVarTypes"].format(method.nameAsString),
-        ), (if (method.isMain) emptyList() else listOf(
-            inScope to language["WhatVariables_DistractorAllInScope"].format(method.nameAsString),
             params to language["WhatVariables_DistractorParams"].format(method.nameAsString),
+            params.plus(name) to null,
+            params.plus(variableNames) to null,
+            params.plus(variableNames).plus(name) to null,
+        ), listOf(
+            variableTypes to language["WhatVariables_DistractorVarTypes"].format(method.nameAsString),
+            variableNames.plus(variableTypes) to language["WhatVariables_DistractorVarsAndLiterals"].format(method.nameAsString)
+        ), if (method.isMain) emptyList() else listOf(
+            inScope to language["WhatVariables_DistractorAllInScope"].format(method.nameAsString),
             listOf(name) to language["WhatVariables_DistractorMethodName"].format(method.nameAsString),
             listOf(name).plus(params) to language["WhatVariables_DistractorMethodNameAndParams"].format(method.nameAsString),
             listOf(name).plus(inScope) to language["WhatVariables_DistractorNameAndAllInScope"].format(method.nameAsString),
             listOf(name).plus(variableNames) to language["WhatVariables_DistractorNameAndVars"].format()
-        ))) {
+        )) {
             it.first.toSet() != variableNames && it.first.isNotEmpty()
         }
 

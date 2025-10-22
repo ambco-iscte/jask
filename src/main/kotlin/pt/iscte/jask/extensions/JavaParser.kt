@@ -27,6 +27,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import java.util.Locale
 import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
 fun configureStaticJavaParser() {
@@ -72,12 +73,12 @@ fun MethodDeclaration.getUsedTypes(): Set<Type> =
     findAll(VariableDeclarationExpr::class.java).flatMap { it.variables.map { v -> v.type } }
 
 fun MethodDeclaration.getReturnVariables(): Map<ReturnStmt, List<NodeWithSimpleName<*>>> =
-    findAll(ReturnStmt::class.java).associateWith { ret ->
+    body.getOrNull()?.findAll(ReturnStmt::class.java)?.associateWith { ret ->
         ret.findAll(Node::class.java).filterIsInstance<NodeWithSimpleName<*>>()
-    }
+    } ?: emptyMap()
 
 fun MethodDeclaration.getLocalVariables(): List<VariableDeclarator> =
-    findAll(VariableDeclarationExpr::class.java).flatMap { it.variables }
+    body.getOrNull()?.findAll(VariableDeclarationExpr::class.java)?.flatMap { it.variables } ?: emptyList()
 
 fun MethodDeclaration.getUsableVariables(): List<VariableDeclarator> =
     getLocalVariables() + (findAncestor(TypeDeclaration::class.java).getOrNull?.findAll(FieldDeclaration::class.java)
