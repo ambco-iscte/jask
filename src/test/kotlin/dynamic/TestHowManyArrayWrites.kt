@@ -9,7 +9,12 @@ import pt.iscte.jask.templates.QuestionGenerationException
 import pt.iscte.jask.templates.SourceCode
 import pt.iscte.jask.templates.dynamic.HowManyArrayWrites
 import pt.iscte.jask.templates.invoke
+import pt.iscte.strudel.model.IArrayElementAssignment
 import pt.iscte.strudel.parsing.java.Java2Strudel
+import pt.iscte.strudel.vm.IArray
+import pt.iscte.strudel.vm.IReference
+import pt.iscte.strudel.vm.IValue
+import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.test.assertEquals
 
 class TestHowManyArrayWrites {
@@ -105,6 +110,43 @@ class TestHowManyArrayWrites {
 
         assertThrows<QuestionGenerationException> {
             HowManyArrayWrites().generate(src, "fill"(listOf(1, 2, 3, 4, 5), 42))
+        }
+    }
+
+    @Test
+    fun testMatrix() {
+        val src = """
+            class Test {
+                static void fillMatrix() {
+                    int[][] m = new int[2][3];
+                    int n = 1;
+                    for(int i = 0; i < m.length; i++)
+                    for(int j = 0; j < m[i].length; j++) {
+                        m[i][j] = n;
+                        n++;
+                    }
+                }
+            }
+        """.trimIndent()
+
+        val model = Java2Strudel().load(src)
+        val vm = IVirtualMachine.create()
+        vm.addListener(object : IVirtualMachine.IListener {
+            override fun arrayElementAssignment(
+                a: IArrayElementAssignment,
+                ref: IReference<IArray>,
+                index: Int,
+                value: IValue
+            ) {
+                println(a)
+            }
+        })
+        vm.execute(model.getProcedure("fillMatrix"))
+        assertDoesNotThrow {
+            val qlc = HowManyArrayWrites().generate(src, "fillMatrix"())
+            println(qlc)
+            assertEquals(1, qlc.solution.size)
+            assertEquals("6", qlc.solution[0].toString())
         }
     }
 }
