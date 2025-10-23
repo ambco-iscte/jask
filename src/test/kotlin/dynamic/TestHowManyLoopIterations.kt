@@ -55,6 +55,12 @@ class TestHowManyLoopIterations {
             ))
             assertEquals(1, qlc.solution.size)
             assertEquals("2", qlc.solution[0].toString())
+
+            val qlcEmptyArg = HowManyLoopIterations().generate(src, "totalElements"(
+                listOf(listOf<Int>(), listOf())
+            ))
+            assertEquals(1, qlcEmptyArg.solution.size)
+            assertEquals("2", qlcEmptyArg.solution[0].toString())
         }
     }
 

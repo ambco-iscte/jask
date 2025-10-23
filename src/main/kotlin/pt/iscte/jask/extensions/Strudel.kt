@@ -28,7 +28,9 @@ fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue {
             }
             else if (first() is List<*>) {
                 val innerArrays = this.map { (it as List<*>).toIValue(vm, module) }
-                vm.allocateArrayOf(innerArrays.first().type, *innerArrays.toTypedArray())
+                val innerTypes = innerArrays.map { it.type }.toSet()
+                val baseType = if(innerTypes.size == 1) innerTypes.first() else ANY
+                vm.allocateArrayOf(baseType, *innerArrays.toTypedArray())
             }
             else if (first() is String) {
                 vm.allocateStringArray(*(this as Collection<String>).toTypedArray())
