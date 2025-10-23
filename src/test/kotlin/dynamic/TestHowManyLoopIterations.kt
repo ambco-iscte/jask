@@ -7,6 +7,10 @@ import pt.iscte.jask.templates.QuestionGenerationException
 import pt.iscte.jask.templates.dynamic.HowManyFunctionCalls
 import pt.iscte.jask.templates.dynamic.HowManyLoopIterations
 import pt.iscte.jask.templates.invoke
+import pt.iscte.strudel.model.ILoop
+import pt.iscte.strudel.model.IProcedure
+import pt.iscte.strudel.model.util.findAll
+import pt.iscte.strudel.parsing.java.Java2Strudel
 import kotlin.test.assertEquals
 
 class TestHowManyLoopIterations {
@@ -29,6 +33,28 @@ class TestHowManyLoopIterations {
             val qlc = HowManyLoopIterations().generate(src, "foo"())
             assertEquals(1, qlc.solution.size)
             assertEquals("10", qlc.solution[0].toString())
+        }
+    }
+
+
+    @Test
+    fun testMatrix() {
+        val src = """
+            class totalMatrixElements {
+                static int totalElements(int[][] m) {
+                    int c = 0;
+                    for(int i = 0; i < m.length; i++)
+                        c += m[i].length;
+                    return c; 
+                }
+            }
+        """.trimIndent()
+        assertDoesNotThrow {
+            val qlc = HowManyLoopIterations().generate(src, "totalElements"(
+                listOf(listOf(1,2,3), listOf(4,5,6,7))
+            ))
+            assertEquals(1, qlc.solution.size)
+            assertEquals("2", qlc.solution[0].toString())
         }
     }
 
