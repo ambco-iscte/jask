@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "pt.iscte"
-version = "0.6.0"
+version = "0.6.1"
 
 repositories {
     mavenCentral()
@@ -16,7 +16,7 @@ dependencies {
     api(project(":strudel"))
 
     // https://mvnrepository.com/artifact/com.openai/openai-java
-    implementation("com.openai:openai-java:3.6.1")
+    // implementation("com.openai:openai-java:3.6.1")
 }
 
 tasks.test {

@@ -23,8 +23,8 @@ data class QuestionGenerationException(
     val template: QuestionTemplate<*>,
     val source: SourceCode?,
     override val message: String? = null,
-    override val cause: Throwable? = null
-) : Exception(message, cause) {
+    val causes: List<Throwable> = emptyList()
+) : Exception(message, causes.firstOrNull()) {
 
     override fun toString(): String =
         "Error generating question of type ${template::class.simpleName}: $message\n----------$source\n----------\nCause: $cause"
@@ -181,15 +181,16 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
     protected fun DynamicQuestionTemplate<IProcedure>.getRandomProcedure(
         sources: List<SourceCode>
     ): Quadruple<SourceCode, IModule, IProcedure, List<Any?>> {
+        val causes = mutableListOf<Throwable>()
         val applicable: Map<SourceCode, List<Pair<IProcedure, List<Any?>>>> = sources.associateWith { source ->
             runCatching {
                 val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
                 getApplicableProcedureAndArguments(module, source.calls)
-            }.getOrDefault(emptyList())
+            }.onFailure { causes.add(it) }.getOrDefault(emptyList())
         }.filter { it.value.isNotEmpty() }
 
         if (applicable.isEmpty())
-            throw QuestionGenerationException(this, null, "Could not find source with at least one applicable procedure.")
+            throw QuestionGenerationException(this, null, "Could not find source with at least one applicable procedure.", causes)
 
         val source = applicable.keys.random()
         val (procedure, args) = applicable[source]!!.random()

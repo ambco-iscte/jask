@@ -91,14 +91,7 @@ fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, p
     require(collections.isNotEmpty())
 
     val valid = collections.flatMap { it.filter(predicate) }.toSet()
-
     val solvable = valid.size >= targetSize
-
-    /*
-    require(solvable) {
-        "Sampling requires $targetSize elements, but only ${valid.size} satisfy the given predicate:\n${valid.joinToString("\n")}"
-    }
-     */
 
     val result = mutableSetOf<T>()
 
@@ -114,11 +107,7 @@ fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, p
         while (result.size < targetSize) {
             step()
         }
-    } else {
-        System.err.println("Sampling requires $targetSize elements, but only ${valid.size} satisfy the given " +
-                "predicate:\n${valid.joinToString("\n")}")
-        step()
-    }
+    } else step()
 
     return result.take(targetSize).toSet()
 }

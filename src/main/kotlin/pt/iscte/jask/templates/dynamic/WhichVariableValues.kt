@@ -30,6 +30,8 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
             arguments: List<Any?>,
             language: Language
         ): Map<Option, Boolean> {
+            require(values.size > 1) { "WhichVariableValues variable must take at least 2 values!" }
+
             val otherValues = variableHistory.values.filter { it.size > 1 }
             val distractors = sampleSequentially(3,
                 if (values.size > 1) listOf(
@@ -58,8 +60,14 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 it.first != values && it.first.isNotEmpty()
             }.toSetBy { it.first }
 
-            val options: MutableMap<Option, Boolean> = mutableMapOf(SimpleTextOption(values) to true)
-            distractors.forEach { options[SimpleTextOption(it.first, it.second)] = false }
+            val options: MutableMap<Option, Boolean> = mutableMapOf()
+
+            distractors.forEach {
+                options[SimpleTextOption(it.first, it.second)] = false
+            }
+
+            options[SimpleTextOption(values)] = true
+
             if (options.size < 4)
                 options[SimpleTextOption.none(language)] = false
 
@@ -110,7 +118,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 valuesPerVariable[it] = listOf(argument) + (valuesPerVariable[it] ?: emptyList())
             }
         }
-        val variable = valuesPerVariable.keys.random()
+        val variable = valuesPerVariable.filter { it.value.size > 1 }.keys.random()
         val values = valuesPerVariable[variable]!!
 
         val statement = language["WhichVariableValues"].orAnonymous(arguments, procedure)
