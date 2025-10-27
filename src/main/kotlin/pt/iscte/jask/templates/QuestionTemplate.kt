@@ -19,15 +19,37 @@ import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
-data class QuestionGenerationException(
-    val template: QuestionTemplate<*>,
-    val source: SourceCode?,
-    override val message: String? = null,
-    val causes: List<Throwable> = emptyList()
-) : Exception(message, causes.firstOrNull()) {
+abstract class QuestionGenerationException(
+    open val template: QuestionTemplate<*>
+) : Exception()
 
-    override fun toString(): String =
-        "Error generating question of type ${template::class.simpleName}: $message\n----------$source\n----------\nCause: $cause"
+class ApplicableSourceNotFoundException(
+    override val template: QuestionTemplate<*>,
+    val sources: List<SourceCode>
+): QuestionGenerationException(template) {
+
+    override val message: String =
+        "Could not find an applicable source for QLC of type ${template::class.simpleName}"
+}
+
+class ApplicableElementNotFoundException(
+    override val template: QuestionTemplate<*>,
+    val source: SourceCode,
+    val expectedType: KClass<*>
+): QuestionGenerationException(template) {
+
+    override val message: String =
+        "Could not find an applicable source element of type ${expectedType.simpleName} for QLC of type ${template::class.simpleName}"
+}
+
+class ApplicableProcedureCallNotFoundException(
+    override val template: QuestionTemplate<*>,
+    val runtimeErrors: Map<SourceCode, List<Throwable>>,
+    val loadingErrors: Map<SourceCode, List<Throwable>>
+): QuestionGenerationException(template) {
+
+    override val message: String =
+        "Could not find any applicable procedure calls for QLC of type ${template::class.simpleName}"
 }
 
 operator fun String.invoke(vararg arguments: Any?): ProcedureCall =
@@ -113,10 +135,10 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
 
     protected inline fun <reified R : T> List<SourceCode>.getRandom(): Pair<SourceCode, R> {
         val source = randomByOrNull { isApplicable<R>(it, R::class) } ?:
-        throw QuestionGenerationException(this@StructuralQuestionTemplate, null, "Could not find a valid source.")
+        throw ApplicableSourceNotFoundException(this@StructuralQuestionTemplate, this)
 
         val element = getApplicableElements<R>(source).randomOrNull() ?:
-        throw QuestionGenerationException(this@StructuralQuestionTemplate, source, "Could not find applicable element of type ${R::class.simpleName} within source.")
+        throw ApplicableElementNotFoundException(this@StructuralQuestionTemplate, source, R::class)
 
         return Pair(source, element)
     }
@@ -155,23 +177,31 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
  */
 abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T>() {
 
+    private data class ApplicableProcedureAndArguments(
+        val procedure: IProcedure,
+        val arguments: List<Any?>,
+        val exception: Throwable? = null
+    )
+
     private fun DynamicQuestionTemplate<IProcedure>.getApplicableProcedureAndArguments(
         module: IModule,
         calls: List<ProcedureCall>
-    ): List<Pair<IProcedure, List<Any?>>> {
-        val pairs = mutableListOf<Pair<IProcedure, List<Any?>>>()
+    ): List<ApplicableProcedureAndArguments> {
+        val pairs = mutableListOf<ApplicableProcedureAndArguments>()
         module.procedures.filterIsInstance<IProcedure>().filter { !it.hasFlag(CONSTRUCTOR_FLAG) }.forEach { p ->
             calls.forEach { call ->
                 if (call.id == null) { // Wildcard test cases
                     val vm = IVirtualMachine.create()
                     val args = call.arguments.toIValues(vm, module)
                     runCatching { vm.execute(p, *args.toTypedArray()) }.onSuccess {
-                        pairs.add(p to call.arguments)
+                        pairs.add(ApplicableProcedureAndArguments(p, call.arguments))
+                    }.onFailure {
+                        pairs.add(ApplicableProcedureAndArguments(p, call.arguments, it))
                     }
                 } else if (call.id == p.id && p.id?.startsWith("$") == false) { // Specific test cases
                     val args = call.arguments.toIValues(IVirtualMachine.create(), module)
                     if (isApplicable(p) && isApplicable(p, args))
-                        pairs.add(p to call.arguments)
+                        pairs.add(ApplicableProcedureAndArguments(p, call.arguments))
                 }
             }
         }
@@ -181,41 +211,28 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
     protected fun DynamicQuestionTemplate<IProcedure>.getRandomProcedure(
         sources: List<SourceCode>
     ): Quadruple<SourceCode, IModule, IProcedure, List<Any?>> {
-        val causes = mutableListOf<Throwable>()
-        val applicable: Map<SourceCode, List<Pair<IProcedure, List<Any?>>>> = sources.associateWith { source ->
+        val loadingErrors = mutableMapOf<SourceCode, List<Throwable>>()
+        val applicable: Map<SourceCode, List<ApplicableProcedureAndArguments>> = sources.associateWith { source ->
             runCatching {
                 val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
                 getApplicableProcedureAndArguments(module, source.calls)
-            }.onFailure { causes.add(it) }.getOrDefault(emptyList())
+            }.onFailure {
+                loadingErrors[source] = (loadingErrors[source] ?: emptyList()).plus(it)
+            }.getOrDefault(emptyList())
         }.filter { it.value.isNotEmpty() }
 
-        if (applicable.isEmpty())
-            throw QuestionGenerationException(this, null, "Could not find source with at least one applicable procedure.", causes)
+        if (applicable.isEmpty()) {
+            val runtimeErrors = applicable.mapValues { (source, applicable) ->
+                applicable.mapNotNull { it.exception }
+            }
+            throw ApplicableProcedureCallNotFoundException(this, runtimeErrors, loadingErrors)
+        }
 
         val source = applicable.keys.random()
-        val (procedure, args) = applicable[source]!!.random()
+        val (procedure, args, _) = applicable[source]!!.random()
         val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
 
         return Quadruple(source, module, procedure, args)
-
-        /*
-        val source: SourceCode? = sources.filter { s ->
-            runCatching {
-                val module = Java2Strudel(checkJavaCompilation = false).load(s.code)
-                getRandomApplicableProcedureAndArguments(module, s.calls) != null
-            }.getOrDefault(false)
-        }.randomOrNull()
-
-        if (source == null)
-            throw QuestionGenerationException(this, null, "Could not find source with at least one applicable procedure.")
-
-        val module = Java2Strudel(checkJavaCompilation = false).load(source.code)
-
-        val (procedure, args) = getRandomApplicableProcedureAndArguments(module, source.calls) ?:
-        throw QuestionGenerationException(this, source, "Could not find applicable procedure within source.")
-
-        return Quadruple(source, module, procedure, args)
-         */
     }
 
     /**

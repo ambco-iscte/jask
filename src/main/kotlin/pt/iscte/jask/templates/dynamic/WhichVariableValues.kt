@@ -82,28 +82,41 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
     override fun isApplicable(element: IProcedure, args: List<IValue>): Boolean {
         val vm = IVirtualMachine.create()
         val variableHistory = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
+
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
                 if (a.ownerProcedure == element)
                     variableHistory[a.target] = (variableHistory[a.target] ?: emptyList()).plus(value)
             }
         })
+
         vm.execute(element, *args.toTypedArray())
-        return variableHistory.values.any { it.size > 1 }
+
+        variableHistory.keys.forEach {
+            if (it in element.parameters) {
+                val argument = args[element.parameters.indexOf(it)]
+                variableHistory[it] = listOf(argument) + (variableHistory[it] ?: emptyList())
+            }
+        }
+
+        return variableHistory.any { it.value.size > 1 }
     }
 
     fun setup(vm: IVirtualMachine) {
         valuesPerVariable.clear()
         vm.addListener(object : IVirtualMachine.IListener {
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                if (a.ownerProcedure == procedure)
-                    valuesPerVariable[a.target] = (valuesPerVariable[a.target] ?: emptyList()) + listOf(value)
+                if (!vm.callStack.isEmpty) {
+                    if (a.ownerProcedure == procedure)
+                        valuesPerVariable[a.target] = (valuesPerVariable[a.target] ?: emptyList()).plus(value)
+                }
             }
         })
     }
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, module, procedure, args) = getRandomProcedure(sources)
+        val callAsString = procedureCallAsString(procedure, args)
         this.procedure = procedure
 
         val vm = IVirtualMachine.create()
@@ -118,14 +131,20 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 valuesPerVariable[it] = listOf(argument) + (valuesPerVariable[it] ?: emptyList())
             }
         }
-        val variable = valuesPerVariable.filter { it.value.size > 1 }.keys.random()
+        val variable = valuesPerVariable.filter { it.value.size > 1 }.keys.randomOrNull() ?:
+        throw ApplicableProcedureCallNotFoundException(
+            this,
+            mapOf(source to listOf(NoSuchElementException("No variable within $callAsString takes more than 1 value:\n$procedure\n$valuesPerVariable"))),
+            emptyMap()
+            )
+
         val values = valuesPerVariable[variable]!!
 
         val statement = language["WhichVariableValues"].orAnonymous(arguments, procedure)
         return Question(
             source,
             TextWithCodeStatement(
-                statement.format(variable.id, procedureCallAsString(procedure, args)),
+                statement.format(variable.id, callAsString),
                 procedure
             ),
             options(variable, values, valuesPerVariable, args, language),

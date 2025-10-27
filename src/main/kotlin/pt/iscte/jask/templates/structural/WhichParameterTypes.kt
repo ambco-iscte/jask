@@ -5,6 +5,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.extensions.toSetBy
 
 class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -31,7 +32,7 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
                 listOf(returnType, methodName) to null
             )) {
                 it.first.toSet() != paramTypes.toSet() && it.first.isNotEmpty()
-            }
+            }.toSetBy { it.first }
 
             val options: MutableMap<Option, Boolean> = distractors.associate {
                 SimpleTextOption(it.first, it.second) to false

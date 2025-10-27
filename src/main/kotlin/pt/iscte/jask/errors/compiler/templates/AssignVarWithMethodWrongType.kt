@@ -39,10 +39,10 @@ class AssignVarWithMethodWrongType(
 
         val initCall = error.variableInitialiser.asMethodCallExpr()
         val methodUsedToInitialise = initCall.findMethodDeclaration().orElseThrow {
-            QuestionGenerationException(
-                this,
-                source,
-                "Could not find method ${initCall.nameWithScope()} in: $initCall"
+            ApplicableProcedureCallNotFoundException(
+                this@AssignVarWithMethodWrongType,
+                emptyMap(),
+                mapOf(source to listOf(NoSuchMethodException("Could not find method ${initCall.nameWithScope()} in: $initCall")))
             )
         }
 
