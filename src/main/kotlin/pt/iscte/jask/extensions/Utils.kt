@@ -127,6 +127,18 @@ fun <T> Collection<T>.randomBy(predicate: (T) -> Boolean): T =
 fun <T> Collection<T>.randomByOrNull(predicate: (T) -> Boolean): T? =
     filter { predicate(it) }.randomOrNull()
 
+fun <K, V> Map<K, V>.randomKeyBy(predicate: (Map.Entry<K, V>) -> Boolean): K =
+    entries.filter(predicate).random().key
+
+fun <K, V> Map<K, V>.randomValueBy(predicate: (Map.Entry<K, V>) -> Boolean): V =
+    entries.filter(predicate).random().value
+
+fun <K, V> Map<K, V>.randomKeyByOrNull(predicate: (Map.Entry<K, V>) -> Boolean): K? =
+    entries.filter(predicate).randomOrNull()?.key
+
+fun <K, V> Map<K, V>.randomValueByOrNull(predicate: (Map.Entry<K, V>) -> Boolean): V? =
+    entries.filter(predicate).randomOrNull()?.value
+
 fun <T> success(body: () -> T): Boolean =
     runCatching(body).isSuccess
 

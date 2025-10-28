@@ -42,7 +42,7 @@ class AssignVarWithMethodWrongType(
             ApplicableProcedureCallNotFoundException(
                 this@AssignVarWithMethodWrongType,
                 emptyMap(),
-                mapOf(source to listOf(NoSuchMethodException("Could not find method ${initCall.nameWithScope()} in: $initCall")))
+                mapOf(source to NoSuchMethodException("Could not find method ${initCall.nameWithScope()} in: $initCall"))
             )
         }
 
