@@ -4,6 +4,7 @@ import pt.iscte.jask.templates.*
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getVariableAssignments
 import pt.iscte.jask.extensions.procedureCallAsString
+import pt.iscte.jask.extensions.randomKeyByOrNull
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.jask.extensions.toSetBy
@@ -15,12 +16,11 @@ import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
+import kotlin.collections.plus
 import kotlin.collections.set
+import kotlin.text.get
 
 class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
-
-    var procedure: IProcedure? = null
-    val valuesPerVariable = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
 
     companion object {
         fun options(
@@ -75,70 +75,64 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
-    // At least one variable was assigned at least 2 values.
+    private class WhichVariableValuesListener(
+        val vm: IVirtualMachine,
+        val procedure: IProcedure,
+        val arguments: List<IValue>
+    ): IVirtualMachine.IListener {
+        private val variableHistory = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
+
+        fun getVariableHistory(): Map<IVariableDeclaration<*>, List<IValue>> =
+            variableHistory.mapValues {
+                if (it.key in procedure.parameters) {
+                    val argument = arguments[procedure.parameters.indexOf(it.key)]
+                    listOf(argument) + it.value
+                } else it.value
+            }
+
+        override fun variableAssignment(a: IVariableAssignment, value: IValue) {
+            if (!vm.callStack.isEmpty && a.ownerProcedure == procedure) {
+                variableHistory[a.target] = (variableHistory[a.target] ?: emptyList()).plus(value)
+            }
+        }
+    }
+
     override fun isApplicable(element: IProcedure): Boolean =
-        element.getVariableAssignments().any { it.value.size > 1 }
+        element.getVariableAssignments().any { it.value.isNotEmpty() }
 
     override fun isApplicable(element: IProcedure, args: List<IValue>): Boolean {
         val vm = IVirtualMachine.create()
-        val variableHistory = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
-
-        vm.addListener(object : IVirtualMachine.IListener {
-            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                if (a.ownerProcedure == element)
-                    variableHistory[a.target] = (variableHistory[a.target] ?: emptyList()).plus(value)
-            }
-        })
+        val listener = WhichVariableValuesListener(vm, element, args)
+        vm.addListener(listener)
 
         vm.execute(element, *args.toTypedArray())
 
-        variableHistory.keys.forEach {
-            if (it in element.parameters) {
-                val argument = args[element.parameters.indexOf(it)]
-                variableHistory[it] = listOf(argument) + (variableHistory[it] ?: emptyList())
-            }
-        }
-
-        return variableHistory.any { it.value.size > 1 }
-    }
-
-    fun setup(vm: IVirtualMachine) {
-        valuesPerVariable.clear()
-        vm.addListener(object : IVirtualMachine.IListener {
-            override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                if (!vm.callStack.isEmpty) {
-                    if (a.ownerProcedure == procedure)
-                        valuesPerVariable[a.target] = (valuesPerVariable[a.target] ?: emptyList()).plus(value)
-                }
-            }
-        })
+        return listener.getVariableHistory().any { it.value.size > 1 }
     }
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, module, procedure, args) = getRandomProcedure(sources)
         val callAsString = procedureCallAsString(procedure, args)
-        this.procedure = procedure
 
         val vm = IVirtualMachine.create()
-        setup(vm)
         val arguments = args.toIValues(vm, module)
+        val listener = WhichVariableValuesListener(vm, procedure, arguments)
+        vm.addListener(listener)
 
         vm.execute(procedure, *arguments.toTypedArray())
 
-        valuesPerVariable.keys.forEach {
-            if (it in procedure.parameters) {
-                val argument = arguments[procedure.parameters.indexOf(it)]
-                valuesPerVariable[it] = listOf(argument) + (valuesPerVariable[it] ?: emptyList())
-            }
-        }
-        val variable = valuesPerVariable.filter { it.value.size > 1 }.keys.randomOrNull() ?:
-        throw ApplicableProcedureCallNotFoundException(
-            this,
-            mapOf(source to listOf(NoSuchElementException("No variable within $callAsString takes more than 1 value:\n$procedure\n$valuesPerVariable"))),
-            emptyMap()
-            )
+        val variableHistory = listener.getVariableHistory()
 
-        val values = valuesPerVariable[variable]!!
+        val variable = variableHistory.randomKeyByOrNull { it.value.size > 1 } ?:
+        throw ApplicableProcedureCallNotFoundException(
+            template = this,
+            runtimeErrors = mapOf(source to listOf(
+                NoSuchElementException("No variable within $callAsString takes more than 1 value:\n$procedure\n$variableHistory")
+            )),
+            loadingErrors = emptyMap()
+        )
+
+        val values = variableHistory[variable]!!
 
         val statement = language["WhichVariableValues"].orAnonymous(arguments, procedure)
         return Question(
@@ -147,7 +141,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(variable.id, callAsString),
                 procedure
             ),
-            options(variable, values, valuesPerVariable, args, language),
+            options(variable, values, variableHistory, args, language),
             language = language,
             relevantSourceCode = procedure.findAll(IVariableAssignment::class).filter {
                 it.target == variable

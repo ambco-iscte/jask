@@ -23,13 +23,15 @@ fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue {
         is Collection<*> -> {
             if (isEmpty()) vm.allocateArrayOf(ANY)
             else if (runCatching { vm.getValue(first()) }.isSuccess) {
-                val type = vm.getValue(first()).type
+                var type = vm.getValue(first()).type
+                if (type.isNumber && any { it is Double }) // Ugly hack for e.g. listOf(1, 0.5, 0.25)
+                    type = DOUBLE
                 vm.allocateArrayOf(type, *this.map { it.toIValue(vm, module) }.toTypedArray())
             }
             else if (first() is List<*>) {
                 val innerArrays = this.map { (it as List<*>).toIValue(vm, module) }
                 val innerTypes = innerArrays.map { it.type }.toSet()
-                val baseType = if(innerTypes.size == 1) innerTypes.first() else ANY
+                val baseType = if (innerTypes.size == 1) innerTypes.first() else ANY
                 vm.allocateArrayOf(baseType, *innerArrays.toTypedArray())
             }
             else if (first() is String) {
@@ -57,6 +59,10 @@ fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue {
             ref
         }
         null -> NULL
+        is Int -> vm.getValue(this)
+        is Double -> vm.getValue(this)
+        is Boolean -> vm.getValue(this)
+        is Char -> vm.getValue(this)
         else -> vm.getValue(this)
     }
 }

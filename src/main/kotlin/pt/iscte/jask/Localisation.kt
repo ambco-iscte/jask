@@ -16,6 +16,7 @@ import java.nio.file.Paths
 import java.util.Properties
 import kotlin.io.path.extension
 
+
 object Localisation {
     internal val languages = mutableMapOf<String, Language>()
 
@@ -42,8 +43,9 @@ object Localisation {
         return result
     }
 
-    val DefaultLanguage: Language =
-        languages["en"]!!
+    val DefaultLanguage: Language by lazy {
+        languages["en"] ?: loadLanguageFromResource("en")
+    }
 
     // Thank you, ChatGPT (I'm quite certain java.nio.file.FileSystems is dark magic)
     fun loadLanguageFromResource(code: String): Language {
@@ -87,7 +89,9 @@ object Localisation {
 data class Language(val code: String, val properties: Properties) {
 
     companion object {
-        val DEFAULT: Language = Localisation.DefaultLanguage
+        val DEFAULT: Language by lazy {
+            Localisation.DefaultLanguage
+        }
         internal const val POSTFIX_ANONYMOUS = "AnonCall"
     }
 

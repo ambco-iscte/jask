@@ -35,6 +35,7 @@ import compiler.*
     TestWhichParameterTypes::class,
     TestWhichReturnType::class,
     TestWhichVariableHoldsReturn::class,
+    TestWhichVariableRole::class,
 
     // Compiler Errors
     TestAssignVarWithMethodWrongType::class,

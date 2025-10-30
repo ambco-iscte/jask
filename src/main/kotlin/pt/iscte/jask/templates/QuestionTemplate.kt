@@ -54,7 +54,7 @@ class ApplicableProcedureCallNotFoundException(
         "Could not find any applicable procedure calls for QLC of type ${template::class.simpleName}"
 }
 
-operator fun String.invoke(vararg arguments: Any?): ProcedureCall =
+operator fun String?.invoke(vararg arguments: Any?): ProcedureCall =
     ProcedureCall(this, arguments.toList())
 
 data class ProcedureCall(val id: String?, val arguments: List<Any?> = emptyList()) {
@@ -195,7 +195,7 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
     private data class ApplicableProcedureAndArguments(
         val procedure: IProcedure,
         val arguments: List<Any?>,
-        val exception: Throwable? = null,
+        val exception: Throwable?,
         private val applicable: Boolean
     ) {
         val isApplicable: Boolean
@@ -212,26 +212,26 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
         val pairs = mutableListOf<ApplicableProcedureAndArguments>()
         module.procedures.filterIsInstance<IProcedure>().filter { !it.hasFlag(CONSTRUCTOR_FLAG) }.forEach { p ->
             calls.forEach { call ->
+                val vm = IVirtualMachine.create()
+                val args = call.arguments.toIValues(vm, module)
+                val applicable = runCatching { isApplicable(p) && isApplicable(p, args) }
+
                 if (call.id == null) {
                     // Wildcard test cases
-                    val vm = IVirtualMachine.create()
-                    val args = call.arguments.toIValues(vm, module)
                     val result = runCatching { vm.execute(p, *args.toTypedArray()) }
                     pairs.add(ApplicableProcedureAndArguments(
                         p,
                         call.arguments,
                         result.exceptionOrNull(),
-                        result.isSuccess
+                        result.isSuccess && applicable.getOrDefault(false)
                     ))
                 } else if (call.id == p.id && p.id?.startsWith("$") == false) {
                     // Specific test cases
-                    val args = call.arguments.toIValues(IVirtualMachine.create(), module)
-                    val result = runCatching { isApplicable(p) && isApplicable(p, args) }
                     pairs.add(ApplicableProcedureAndArguments(
                         p,
                         call.arguments,
-                        result.exceptionOrNull(),
-                        result.getOrNull() ?: false
+                        applicable.exceptionOrNull(),
+                        applicable.getOrDefault(false)
                     ))
                 }
             }

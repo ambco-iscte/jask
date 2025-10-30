@@ -43,7 +43,7 @@ class TestHowManyLoopIterations {
             class totalMatrixElements {
                 static int totalElements(int[][] m) {
                     int c = 0;
-                    for(int i = 0; i < m.length; i++)
+                    for (int i = 0; i < m.length; i++)
                         c += m[i].length;
                     return c; 
                 }

@@ -35,7 +35,7 @@ class TestWhichVariableValues {
     }
 
     @Test
-    fun testPaddleBugs() {
+    fun testPaddleBug1() {
         val src = """
         class Divisors {
           static int countDivisors(int n) {
@@ -113,6 +113,59 @@ class TestWhichVariableValues {
         ))
         assertEquals(1, qlc2.solution.size)
         assertEquals("32, 33, 34, 35, 36, 37", qlc2.solution[0].toString())
+    }
+
+    @Test
+    fun testPaddleBug2() {
+        val src = """
+            class Test {
+                static int firstDigit(int n) {
+                    int d = n;
+                    while(d >= 10) {
+                        d = d / 10;
+                    }
+                    return d;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            WhichVariableValues().generate(SourceCode(src,
+                calls = listOf(
+                    "firstDigit"(2024),
+                    "firstDigit"(5),
+                    "firstDigit"(123),
+                    "firstDigit"(300000),
+                )
+            ))
+        }
+        println(qlc)
+    }
+
+    @Test
+    fun testPaddleBug3() {
+        val src = """
+            class Test {
+                static void scaleArray(double[] array, double factor) {
+                    int i = 0;
+                    while(i < array.length) {
+                        array[i] = array[i] * factor;
+                        i = i + 1;
+                    }
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            WhichVariableValues().generate(SourceCode(src,
+                calls = listOf(
+                    null(listOf(1, 0.5, 0.25), 0.5),
+                    null(listOf(2.0, 4.0, 6.0), 2),
+                    null(listOf<Double>(), 2),
+                )
+            ))
+        }
+        println(qlc)
     }
 
     @Test
