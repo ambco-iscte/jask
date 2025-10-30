@@ -55,6 +55,24 @@ class TestWhichFunctionDependencies {
     }
 
     @Test
+    fun testPaddleBug() {
+        val src = """
+            class Test {
+                static boolean isPerfectSquare(int n) {
+                    double sqrt = Math.sqrt(n);
+                    return sqrt == Math.floor(sqrt);
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow { WhichFunctionDependencies().generate(src) }
+        println(qlc)
+
+        assertEquals(1, qlc.solution.size)
+        assertEquals("sqrt, floor", qlc.solution[0].toString())
+    }
+
+    @Test
     fun testPaddleExample() {
         val src = """
             class ArrayOrder {

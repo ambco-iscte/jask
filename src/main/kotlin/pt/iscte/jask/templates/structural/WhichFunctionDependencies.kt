@@ -1,5 +1,7 @@
 package pt.iscte.jask.templates.structural
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.Modifier
+import com.github.javaparser.ast.NodeList
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -11,6 +13,7 @@ import com.github.javaparser.ast.stmt.ForStmt
 import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.WhileStmt
+import com.github.javaparser.ast.type.VoidType
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.getLocalVariables
@@ -35,7 +38,8 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             if (call.nameAsString == method.nameAsString) null
             else unit.findFirst(MethodDeclaration::class.java) {
                 it.nameAsString == call.nameAsString
-            }.getOrNull
+            }.getOrNull ?:
+            MethodDeclaration(NodeList.nodeList(), VoidType(), call.nameAsString) // ugly
         }.toSet()
     }
 
@@ -128,7 +132,7 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             dependencyNames.plus(types) to null,
             dependencyNames.plus(modifiers) to null
         )) {
-            it.first.isNotEmpty() && it.first.toSet() != dependencyNames.toSet()
+            it.first.toSet().isNotEmpty() && it.first.toSet() != dependencyNames.toSet()
         }.toSetBy { it.first.toSet() }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {

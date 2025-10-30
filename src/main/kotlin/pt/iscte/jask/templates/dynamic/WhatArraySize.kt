@@ -4,6 +4,7 @@ import pt.iscte.jask.templates.*
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.correctAndRandomDistractors
 import pt.iscte.jask.extensions.procedureCallAsString
+import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.strudel.model.IArrayAllocation
 import pt.iscte.strudel.model.IBlock
@@ -11,6 +12,7 @@ import pt.iscte.strudel.model.IExpression
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.vm.IArray
 import pt.iscte.strudel.vm.IReference
+import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 
 inline fun <reified T: IExpression> IBlock.findExpression(): T? {
@@ -38,13 +40,30 @@ inline fun <reified T: IExpression> IBlock.findAllExpression(): List<T> {
 class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
 
     private data class WhatArraySizeListener(val vm: IVirtualMachine): IVirtualMachine.IListener {
-        var allocation: Int? = null
+        val allocations = mutableListOf<Int>()
+
+        var countReads = 0
+            private set
+
+        var countWrites = 0
             private set
 
         override fun arrayAllocated(ref: IReference<IArray>) {
             // exclude args allocation
-            if(!vm.callStack.isEmpty && allocation == null)
-                allocation = ref.target.length
+            if(!vm.callStack.isEmpty)
+                allocations.add(ref.target.length)
+
+            ref.target.addListener(object : IArray.IListener {
+                override fun elementRead(index: Int, value: IValue) {
+                    if (!vm.callStack.isEmpty)
+                        countReads++
+                }
+
+                override fun elementChanged(index: Int, oldValue: IValue, newValue: IValue) {
+                    if (!vm.callStack.isEmpty)
+                        countWrites++
+                }
+            })
         }
     }
 
@@ -66,10 +85,11 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
             language["WhatArraySize_DistractorParameter"].format("${procedure.parameters[i].id} = $value")
         }
 
-        val distractors: Set<Pair<Any, String?>> = mutableSetOf(
-            (listener.allocation?.minus(1) ?: 0) to null,
-            (listener.allocation?.plus(1) ?: 0) to null,
-        ) + arrayArgsLengths
+        val distractors: Set<Pair<Any, String?>> = (
+            setOf(listener.countReads to null, listener.countWrites to null) +
+            listener.allocations.flatMap { listOf(it + 1 to null, it - 1 to null) } +
+            arrayArgsLengths
+        )
 
         val statement = language[this::class.simpleName!!].orAnonymous(arguments, procedure)
         return Question(
@@ -80,10 +100,10 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
             ),
             correctAndRandomDistractors(
                 (
-                    if (listener.allocation == null)
+                    if (listener.allocations.isEmpty())
                         language["NoneOfTheAbove"] to language["WhatArraySize_NoneOfTheAboveCorrect"].format()
                     else
-                        listener.allocation!! to null
+                        listener.allocations.first() to null
                 ),
                 distractors.toMap(),
             ),
