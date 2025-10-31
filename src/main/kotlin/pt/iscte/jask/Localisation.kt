@@ -23,17 +23,20 @@ object Localisation {
     internal var argumentFormatter: (String) -> String = { "[$it]" }
         private set
 
+    private var previousArgumentFormatter: ((String) -> String)? = null
+
     init {
         loadLanguageFromResource("en")
         loadLanguageFromResource("pt")
     }
 
     fun setArgumentFormat(format: (String) -> String) {
+        previousArgumentFormatter = argumentFormatter
         argumentFormatter = format
     }
 
     fun resetArgumentFormat() {
-        argumentFormatter = { "[$it]" }
+        argumentFormatter = previousArgumentFormatter ?: { "[$it]" }
     }
 
     fun <T> withArgumentFormat(format: (String) -> String, block: () -> T): T {
