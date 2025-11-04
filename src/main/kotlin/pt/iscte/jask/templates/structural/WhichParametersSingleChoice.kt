@@ -25,10 +25,13 @@ class WhichParametersSingleChoice : StructuralQuestionTemplate<MethodDeclaration
         val localVarTypes = method.getLocalVariables().map { it.typeAsString }.toSet()
 
         val distractors = sampleSequentially(3, listOf(
-            parameters.plus(method.nameAsString) to language["WhichParametersSingleChoice_DistractorParamAndName"].format(),
-            paramTypes to language["WhichParametersSingleChoice_DistractorParamTypes"].format(),
             localVars to language["WhichParametersSingleChoice_DistractorLocalVars"].format(method.nameAsString),
+            localVars.plus(parameters) to null,
+        ), listOf(
+            parameters.plus(method.nameAsString) to language["WhichParametersSingleChoice_DistractorParamAndName"].format(),
             localVars.plus(method.nameAsString) to null,
+        ), listOf(
+            paramTypes to language["WhichParametersSingleChoice_DistractorParamTypes"].format(),
             localVarTypes to language["WhichParametersSingleChoice_DistractorLocalVarTypes"].format(method.nameAsString)
         )) {
             it.first != parameters && it.first.isNotEmpty()

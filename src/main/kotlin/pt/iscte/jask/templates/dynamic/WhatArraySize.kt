@@ -91,6 +91,16 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
             arrayArgsLengths
         )
 
+        val correct =
+            if (listener.allocations.isEmpty())
+                language["NoneOfTheAbove"] to language["WhatArraySize_NoneOfTheAboveCorrect"].format()
+            else
+                listener.allocations.first() to null
+        val options = correctAndRandomDistractors(correct, distractors.toMap()).toMutableMap()
+
+        if (options.size < 4)
+            options[SimpleTextOption.none(language)] = false
+
         val statement = language[this::class.simpleName!!].orAnonymous(arguments, procedure)
         return Question(
             source,
@@ -98,15 +108,7 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
                 statement.format(procedureCallAsString(procedure, args)),
                 procedure
             ),
-            correctAndRandomDistractors(
-                (
-                    if (listener.allocations.isEmpty())
-                        language["NoneOfTheAbove"] to language["WhatArraySize_NoneOfTheAboveCorrect"].format()
-                    else
-                        listener.allocations.first() to null
-                ),
-                distractors.toMap(),
-            ),
+            options,
             language = language
         )
     }

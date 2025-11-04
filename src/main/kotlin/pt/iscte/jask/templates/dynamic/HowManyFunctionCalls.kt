@@ -58,7 +58,9 @@ class HowManyFunctionCalls : DynamicQuestionTemplate<IProcedure>() {
                 count.values.sum() + 1 to null,
                 count.values.sum() - 1 to null,
                 correct + 1 to null,
-                correct - 1 to null
+                correct + 2 to null,
+                correct - 1 to null,
+                correct - 2 to null
             )
         ) { it.first != correct && it.first >= 0 }.toSetBy { it.first }
 

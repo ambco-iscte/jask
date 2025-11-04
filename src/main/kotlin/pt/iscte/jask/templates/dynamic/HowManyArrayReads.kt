@@ -85,7 +85,7 @@ class HowManyArrayReads : DynamicQuestionTemplate<IProcedure>() {
 
         val distractors: Set<Pair<Int, String?>> = sampleSequentially(3,
             listOf(
-                listener.allocated.size to language["HowManyArrayReads_DistractorNumAllocated"].format(listener.allocated.joinToString { it.first.id!! }),
+                listener.allocated.size to if (listener.allocated.isEmpty()) null else language["HowManyArrayReads_DistractorNumAllocated"].format(listener.allocated.joinToString { it.first.id!! }),
                 listener.countReads + 1 to null,
                 listener.countReads - 1 to null,
                 listener.countWrites to language["HowManyArrayReads_DistractorWrites"].format("a[i] = x", "x", "a", "i"),
@@ -96,7 +96,7 @@ class HowManyArrayReads : DynamicQuestionTemplate<IProcedure>() {
                 arrayLengthAccess to language["HowManyArrayReads_DistractorLengthAccesses"].format("length")
             ),
             listOf(
-                listener.len to language["HowManyArrayReads_DistractorLengthOfAllocated"].format(),
+                listener.len to (if (listener.len == 0) null else language["HowManyArrayReads_DistractorLengthOfAllocated"].format()),
                 listener.len + 1 to null,
                 listener.len - 1 to null
             )

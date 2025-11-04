@@ -1,4 +1,6 @@
 package pt.iscte.jask.templates.structural
+import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.ast.AccessSpecifier
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.NodeList
@@ -32,14 +34,37 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             it.nameAsString != element.nameAsString
         }
 
+    private fun MethodCallExpr.toMethodDeclaration(): MethodDeclaration {
+        fun AccessSpecifier.toModifier(): Modifier? = when (this) {
+            AccessSpecifier.PUBLIC -> Modifier.publicModifier()
+            AccessSpecifier.PRIVATE -> Modifier.privateModifier()
+            AccessSpecifier.PROTECTED -> Modifier.privateModifier()
+            AccessSpecifier.NONE -> null
+        }
+
+        return runCatching {
+            val resolved = this.resolve()
+
+            val returnType = StaticJavaParser.parseType(resolved.returnType.describe())
+
+            val modifiers = NodeList.nodeList<Modifier>()
+            resolved.accessSpecifier().toModifier()?.let { modifiers.add(it) }
+            if (resolved.isStatic) modifiers.add(Modifier.staticModifier())
+            if (resolved.isAbstract) modifiers.add(Modifier.abstractModifier())
+
+            return MethodDeclaration(modifiers, returnType, nameAsString)
+        }.getOrDefault(
+            defaultValue = MethodDeclaration(NodeList.nodeList(), VoidType(), nameAsString) // ugly
+        )
+    }
+
     private fun getDependencies(method: MethodDeclaration, unit: CompilationUnit? = null): Set<MethodDeclaration> {
         val unit = unit ?: method.findCompilationUnit().getOrNull ?: return emptySet()
         return method.findAll(MethodCallExpr::class.java).mapNotNull { call ->
             if (call.nameAsString == method.nameAsString) null
             else unit.findFirst(MethodDeclaration::class.java) {
                 it.nameAsString == call.nameAsString
-            }.getOrNull ?:
-            MethodDeclaration(NodeList.nodeList(), VoidType(), call.nameAsString) // ugly
+            }.getOrNull ?: call.toMethodDeclaration()
         }.toSet()
     }
 
@@ -68,6 +93,9 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
         val dependencyNames = getDependencies(method).map { it.nameAsString }.toSet()
+        val dependencyScopeNames = method.findAll(MethodCallExpr::class.java).mapNotNull {
+            it.scope.getOrNull?.toString()
+        }.toSet()
         val dependenciesDeep = getDependenciesDeep(method)
         val dependencyNamesDeep = dependenciesDeep.map { it.nameAsString }.toSet()
 
@@ -101,9 +129,13 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
 
         val modifiers = method.modifiers.map { it.keyword.asString() }.toSet()
 
+        // FIXME ás vezes bué distractors que o aluno não tem no código (métodos de outras classes)
         val distractors = sampleSequentially(3, listOf(
             dependencyNames.plus(method.nameAsString) to null,
             dependencyNames.plus(thisClass) to null,
+            dependencyNames.plus(dependencyScopeNames) to null
+        ),
+        listOf(
             dependencyNamesDeep to null,
             dependencyNamesDeep.plus(method.nameAsString) to null,
             dependencyNamesDeep.plus(deepDependenciesClasses) to null

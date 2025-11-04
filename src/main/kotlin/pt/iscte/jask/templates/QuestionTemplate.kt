@@ -171,6 +171,9 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
         }
     }
 
+    fun generate(source: SourceCode, language: Language = Language.DEFAULT): Question =
+        generate(listOf(source), language)
+
     fun generate(unit: CompilationUnit, language: Language = Language.DEFAULT) =
         generate(listOf(SourceCode(unit)), language)
 

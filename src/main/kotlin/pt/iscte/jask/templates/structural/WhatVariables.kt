@@ -35,8 +35,8 @@ class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
             params to language["WhatVariables_DistractorParams"].format(method.nameAsString),
             params.plus(name) to null,
             params.plus(variableNames) to null,
-            params.plus(variableNames).plus(name) to null,
         ), listOf(
+            params.plus(variableNames).plus(name) to null,
             variableTypes to language["WhatVariables_DistractorVarTypes"].format(method.nameAsString),
             variableNames.plus(variableTypes) to language["WhatVariables_DistractorVarsAndLiterals"].format(method.nameAsString)
         ), if (method.isMain) emptyList() else listOf(
