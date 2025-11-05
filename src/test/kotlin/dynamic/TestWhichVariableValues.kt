@@ -8,6 +8,7 @@ import pt.iscte.jask.templates.QuestionGenerationException
 import pt.iscte.jask.templates.SourceCode
 import pt.iscte.jask.templates.dynamic.WhichVariableValues
 import pt.iscte.jask.templates.invoke
+import pt.iscte.jask.templates.structural.WhichVariableRole
 
 class TestWhichVariableValues {
 
@@ -35,7 +36,7 @@ class TestWhichVariableValues {
     }
 
     @Test
-    fun testPaddleBug1() {
+    fun testPaddleDivisorsModule() {
         val src = """
         class Divisors {
           static int countDivisors(int n) {
@@ -116,7 +117,7 @@ class TestWhichVariableValues {
     }
 
     @Test
-    fun testPaddleBug2() {
+    fun testPaddleFirstDigit() {
         val src = """
             class Test {
                 static int firstDigit(int n) {
@@ -143,7 +144,7 @@ class TestWhichVariableValues {
     }
 
     @Test
-    fun testPaddleBug3() {
+    fun testPaddleScaleArray() {
         val src = """
             class Test {
                 static void scaleArray(double[] array, double factor) {
@@ -162,6 +163,41 @@ class TestWhichVariableValues {
                     null(listOf(1, 0.5, 0.25), 0.5),
                     null(listOf(2.0, 4.0, 6.0), 2),
                     null(listOf<Double>(), 2),
+                )
+            ))
+        }
+        println(qlc)
+    }
+
+    @Test
+    fun testPaddleSquareMatrixNaturals() {
+        val src = """
+            class SquareMatrix {
+                static int[][] squareMatrixNaturals(int n) {
+                    assert n >= 0;
+                    
+                    int[][] m = new int[n][n];
+                    int num = 1;
+                    
+                    for(int i = 0; i < n; i++) {
+                        for(int j = 0; j < n; j++) {
+                            m[i][j] = num;
+                            num++;
+                        }
+                    }
+                    
+                    return m;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            WhichVariableValues().generate(SourceCode(src,
+                calls = listOf(
+                    "squareMatrixNaturals"(0),
+                    "squareMatrixNaturals"(1),
+                    "squareMatrixNaturals"(2),
+                    "squareMatrixNaturals"(3)
                 )
             ))
         }

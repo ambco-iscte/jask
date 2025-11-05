@@ -11,17 +11,18 @@ import kotlin.test.assertEquals
 class TestWhichVariableRole {
 
     @Test
-    fun testPaddlePowerOfTwo() { // FIXME Strudel IVariableRole.match (stepper?)
+    fun testPaddlePowerOfTwoSolution() {
         val src = """
             class Test {
                 static int powerOfTwo(int e) {
                     assert e >= 0;
-                    int x = 1;
-                    while (e > 0) {
-                        x = x * 2;
-                        e = e - 1;
+                    int p = 1;
+                    int n = e;
+                    while (n > 0) {
+                        p = p * 2;
+                        n = n - 1;
                     }
-                    return x;
+                    return p;
                 }
             }
         """.trimIndent()
@@ -33,7 +34,7 @@ class TestWhichVariableRole {
             )))
         }
         assertEquals(1, qlc.solution.size)
-        assertEquals("Gatherer", qlc.solution.first().toString())
+        assertEquals("Stepper", qlc.solution.first().toString())
         println(qlc)
     }
 

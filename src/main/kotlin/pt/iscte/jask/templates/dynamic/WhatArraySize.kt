@@ -7,6 +7,7 @@ import pt.iscte.jask.extensions.correctAndRandomDistractors
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.extensions.toSetBy
 import pt.iscte.strudel.model.IArrayAllocation
 import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IExpression
@@ -91,7 +92,7 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
             setOf(listener.countReads to null, listener.countWrites to null) +
             listener.allocations.flatMap { listOf(it + 1 to null, it - 1 to null) } +
             arrayArgsLengths
-        )
+        ).toSetBy { it.first }
 
         val correct =
             if (listener.allocations.isEmpty())

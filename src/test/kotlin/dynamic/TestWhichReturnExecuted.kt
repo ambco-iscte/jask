@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestWhichReturnExecuted {
+
     @Test
     fun test() {
         val src = """

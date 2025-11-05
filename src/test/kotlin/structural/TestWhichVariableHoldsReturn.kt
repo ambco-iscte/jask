@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import pt.iscte.jask.templates.QuestionGenerationException
+import pt.iscte.jask.templates.SourceCode
+import pt.iscte.jask.templates.dynamic.WhichReturnExecuted
+import pt.iscte.jask.templates.invoke
 import pt.iscte.jask.templates.structural.WhichVariableHoldsReturn
 import kotlin.test.assertEquals
 
@@ -42,6 +45,33 @@ class TestWhichVariableHoldsReturn {
         println(qlc)
         assertEquals(1, qlc.solution.size)
         assertEquals("result", qlc.solution[0].toString())
+    }
+
+    @Test
+    fun testPaddleIntDivision() {
+        val src = """
+            class Test {
+                static int intDivision(int a, int b) {
+                    int n = a;
+                    int d = 0;
+                    while(n >= b) {
+                        n = n - b;
+                        d = d + 1;
+                    }
+                    return d;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            WhichVariableHoldsReturn().generate(SourceCode(src, listOf(
+                "intDivision"(25, 5),
+                "intDivision"(26, 5),
+                "intDivision"(10, 3),
+                "intDivision"(30, 7)
+            )))
+        }
+        println(qlc)
     }
 
     @Test
