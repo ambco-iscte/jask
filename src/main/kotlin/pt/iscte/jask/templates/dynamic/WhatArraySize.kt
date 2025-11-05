@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -67,6 +68,7 @@ class WhatArraySize : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
+    @Description("Procedure must contain at least 1 array allocation")
     override fun isApplicable(element: IProcedure): Boolean =
         element.block.findExpression<IArrayAllocation>() != null
 

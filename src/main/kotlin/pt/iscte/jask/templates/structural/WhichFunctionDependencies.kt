@@ -16,6 +16,7 @@ import com.github.javaparser.ast.stmt.IfStmt
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.WhileStmt
 import com.github.javaparser.ast.type.VoidType
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.getLocalVariables
@@ -28,7 +29,7 @@ import kotlin.collections.emptyList
 
 class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>() {
 
-    // Has at least one call statement to another function.
+    @Description("Method must contain at least 1 method call to another method")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.findAll(MethodCallExpr::class.java).any {
             it.nameAsString != element.nameAsString
@@ -129,13 +130,13 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
 
         val modifiers = method.modifiers.map { it.keyword.asString() }.toSet()
 
-        // FIXME ás vezes bué distractors que o aluno não tem no código (métodos de outras classes)
         val distractors = sampleSequentially(3, listOf(
             dependencyNames.plus(method.nameAsString) to null,
-            dependencyNames.plus(thisClass) to null,
-            dependencyNames.plus(dependencyScopeNames) to null
+            dependencyNames.plus(dependencyScopeNames) to null,
+            dependencyScopeNames to null
         ),
         listOf(
+            dependencyNames.plus(thisClass) to null,
             dependencyNamesDeep to null,
             dependencyNamesDeep.plus(method.nameAsString) to null,
             dependencyNamesDeep.plus(deepDependenciesClasses) to null

@@ -4,6 +4,7 @@ import pt.iscte.jask.templates.*
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.LiteralExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getReturnVariables
 import pt.iscte.jask.extensions.getUsableVariables
@@ -14,7 +15,7 @@ import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
 class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>() {
 
-    // Return value is given by a single variable.
+    @Description("Method must return exactly the same 1 variable by itself in all return statements")
     override fun isApplicable(element: MethodDeclaration): Boolean {
         val returns = element.findAll(ReturnStmt::class.java)
         return returns.isNotEmpty() && returns.all {

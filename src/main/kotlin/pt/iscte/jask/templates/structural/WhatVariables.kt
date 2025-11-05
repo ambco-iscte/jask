@@ -4,6 +4,7 @@ import pt.iscte.jask.templates.*
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.LiteralExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getUsableVariables
@@ -16,6 +17,7 @@ import kotlin.collections.toSet
 
 class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
 
+    @Description("Method must contain at least 1 local variable")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getLocalVariables().isNotEmpty() // There is at least 1 local variable
 

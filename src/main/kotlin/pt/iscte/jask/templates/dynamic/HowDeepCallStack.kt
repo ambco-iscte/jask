@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -23,6 +24,7 @@ class HowDeepCallStack : DynamicQuestionTemplate<IProcedure>() {
     val functionCalls: MutableList<ProcedureCall> = mutableListOf()
     var previousCallStackSize = 0
 
+    @Description("Procedure must contain at least 1 procedure call")
     override fun isApplicable(element: IProcedure): Boolean =
         element.getProcedureCalls().isNotEmpty()
 

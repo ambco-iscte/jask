@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -41,6 +42,7 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
         val allocations = mutableListOf<Pair<IVariableDeclaration<*>, IArray>>()
         val writes = mutableListOf<String>()
 
+        @Suppress("UNCHECKED_CAST")
         override fun variableAssignment(a: IVariableAssignment, value: IValue) {
             if (value.type.isArrayReference)
                 allocations.add(a.target to (value as IReference<IArray>).target)
@@ -70,7 +72,7 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
-    // There is at least one array access.
+    @Description("Procedure must contain at least 1 array access")
     override fun isApplicable(element: IProcedure): Boolean =
         element.countArrayAccesses() > 0
 
@@ -94,16 +96,18 @@ class HowManyArrayWrites : DynamicQuestionTemplate<IProcedure>() {
 
         val distractors: Set<Pair<Int, String?>> = sampleSequentially(3,
             listOf(
-                listener.allocated to if (listener.allocated == 0) null else language["HowManyArrayWrites_DistractorNumAllocated"].format(listener.allocations.joinToString { it.first.id!! }),
                 listener.countReads to language["HowManyArrayWrites_DistractorReads"].format("a[i] = x", "x", "a", "i"),
                 listener.countReads + 1 to null,
                 listener.countReads - 1 to null,
                 listener.countWrites + 1 to null,
                 listener.countWrites - 1 to null,
                 // countReads + countWrites
+                arrayLengthAccess to language["HowManyArrayWrites_DistractorLengthAccesses"].format("length")
+            ),
+            listOf(
+                listener.allocated to if (listener.allocated == 0) null else language["HowManyArrayWrites_DistractorNumAllocated"].format(listener.allocations.joinToString { it.first.id!! }),
                 listener.allocated + 1 to null,
                 listener.allocated - 1 to null,
-                arrayLengthAccess to language["HowManyArrayWrites_DistractorLengthAccesses"].format("length")
             ),
             listOf(
                 listener.len to if (listener.len == 0) null else language["HowManyArrayWrites_DistractorLengthOfAllocated"].format(),

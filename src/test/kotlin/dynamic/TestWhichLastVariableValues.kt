@@ -1,10 +1,13 @@
 package dynamic
 
+import org.junit.jupiter.api.assertDoesNotThrow
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.templates.ProcedureCall
 import pt.iscte.jask.templates.SimpleTextOption
+import pt.iscte.jask.templates.SourceCode
 import pt.iscte.jask.templates.structural.*
 import pt.iscte.jask.templates.dynamic.*
+import pt.iscte.jask.templates.invoke
 import pt.iscte.jask.templates.quality.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -50,5 +53,29 @@ class TestWhichLastVariableValues {
         val qlcNoHistory = WhichLastVariableValues().generate(src, ProcedureCall("factorial", listOf(0)), Localisation.getLanguage("pt"))
         assertEquals("f = indefinido, i = indefinido", (qlcNoHistory.solution.first() as SimpleTextOption).text)
         println(qlcNoHistory)
+    }
+
+    @Test
+    fun testPaddleFactorial() {
+        val src = """
+            class Test {
+                static int factorial (int n){
+                    int d = 1;
+                    while (n > 1){
+                        d = d * n;
+                        n = n - 1;
+                    }
+                    return d;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            WhichLastVariableValues().generate(SourceCode(src, listOf(
+                "factorial"(0),
+                "factorial"(4),
+            )))
+        }
+        println(qlc)
     }
 }

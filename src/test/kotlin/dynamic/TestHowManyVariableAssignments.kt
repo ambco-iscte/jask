@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import pt.iscte.jask.templates.QuestionGenerationException
+import pt.iscte.jask.templates.SourceCode
 import pt.iscte.jask.templates.dynamic.HowManyVariableAssignments
 import pt.iscte.jask.templates.invoke
 
@@ -50,6 +51,31 @@ class TestHowManyVariableAssignments {
             assertEquals(1, qlc.solution.size)
             // assertEquals("2", qlc.solution[0].toString()) -- Depends on which variable is chosen
         }
+    }
+
+    @Test
+    fun testPaddleSumNaturals() {
+        val src = """
+            class Test {
+                static int sumNaturals(int max){
+                    int s = 0;
+                    int n = 1;
+                    while (n <= max) {
+                        s = s + n;
+                        n = n + 1;
+                    }
+                    return s;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            HowManyVariableAssignments().generate(SourceCode(src, listOf(
+                "sumNaturals"(5),
+                "sumNaturals"(8),
+            )))
+        }
+        println(qlc)
     }
 
     @Test

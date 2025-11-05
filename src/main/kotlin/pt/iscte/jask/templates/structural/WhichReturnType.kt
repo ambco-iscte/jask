@@ -3,6 +3,7 @@ import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.Expression
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.jask.extensions.getUsedTypes
@@ -11,6 +12,7 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 
 class WhichReturnType : StructuralQuestionTemplate<MethodDeclaration>() {
 
+    @Description("Method must depend on at least 2 different types")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getUsedTypes().size >= 2
 

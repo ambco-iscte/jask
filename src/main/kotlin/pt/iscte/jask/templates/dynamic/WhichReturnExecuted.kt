@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -15,9 +16,9 @@ import pt.iscte.strudel.vm.IVirtualMachine
 
 class WhichReturnExecuted : DynamicQuestionTemplate<IProcedure>() {
 
-    override fun isApplicable(element: IProcedure): Boolean {
-        return element.findAll(IReturn::class).size >= 2
-    }
+    @Description("Procedure must contain at least 2 return statements")
+    override fun isApplicable(element: IProcedure): Boolean =
+        element.findAll(IReturn::class).size >= 2
 
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, module, procedure, args) = getRandomProcedure(sources)

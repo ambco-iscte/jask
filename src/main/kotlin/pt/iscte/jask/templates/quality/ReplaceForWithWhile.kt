@@ -1,4 +1,4 @@
-package pt.iscte.jask.templates.structural
+package pt.iscte.jask.templates.quality
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.NodeList

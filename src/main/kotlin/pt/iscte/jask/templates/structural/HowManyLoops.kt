@@ -4,6 +4,7 @@ import pt.iscte.jask.templates.*
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.stmt.Statement
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getBranches
 import pt.iscte.jask.extensions.getLoopControlStructures
@@ -16,6 +17,7 @@ import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
 class HowManyLoops : StructuralQuestionTemplate<MethodDeclaration>() {
 
+    @Description("Method must contain at least 1 loop structure")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasLoopControlStructures() == true
 

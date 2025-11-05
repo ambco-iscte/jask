@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -58,7 +59,7 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
-    // Has any array allocations, OR has any array writes, OR has any array reads.
+    @Description("Procedure must contain at least 1 array allocation, element assignment, or access")
     override fun isApplicable(element: IProcedure): Boolean {
         var applicable = false
         val v = object : IBlock.IVisitor {

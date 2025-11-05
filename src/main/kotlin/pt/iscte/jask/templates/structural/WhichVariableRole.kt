@@ -1,5 +1,6 @@
 package pt.iscte.jask.templates.structural
 
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.templates.DynamicQuestionTemplate
@@ -19,7 +20,7 @@ import kotlin.reflect.KClass
 
 class WhichVariableRole : DynamicQuestionTemplate<IProcedure>() {
 
-    // There is at least one variable whose role can be determined.
+    @Description("Procedure must contain at least 1 local variable whose role can be determined")
     override fun isApplicable(element: IProcedure): Boolean =
         element.localVariables.any { IVariableRole.match(it) != IVariableRole.NONE }
 

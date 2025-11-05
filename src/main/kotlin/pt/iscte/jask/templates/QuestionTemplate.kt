@@ -3,13 +3,13 @@ package pt.iscte.jask.templates
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.IModuleVisitor
 import pt.iscte.jask.extensions.Quadruple
 import pt.iscte.jask.extensions.accept
 import pt.iscte.jask.extensions.configureStaticJavaParser
 import pt.iscte.jask.extensions.randomBy
-import pt.iscte.jask.extensions.randomByOrNull
 import pt.iscte.jask.extensions.randomKeyBy
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.strudel.model.*
@@ -20,6 +20,8 @@ import pt.iscte.strudel.vm.IVirtualMachine
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 
 abstract class QuestionGenerationException(
     open val template: QuestionTemplate<*>
@@ -30,8 +32,14 @@ class ApplicableSourceNotFoundException(
     val errors: Map<SourceCode, Throwable?>
 ): QuestionGenerationException(template) {
 
-    override val message: String =
-        "Could not find any applicable sources for QLC of type ${template::class.simpleName}"
+    override val message: String
+        get() {
+            val messages = errors.mapNotNull { it.value?.message?.ifEmpty { null } }.toSet()
+            var message = "Could not find any applicable sources for QLC of type ${template::class.simpleName}."
+            if (messages.isNotEmpty())
+                message += " ${messages.joinToString("; ")}"
+            return message
+        }
 }
 
 class ApplicableElementNotFoundException(
@@ -40,18 +48,29 @@ class ApplicableElementNotFoundException(
     val elementType: KClass<*>
 ): QuestionGenerationException(template) {
 
-    override val message: String =
-        "Could not find any applicable elements of type ${elementType.simpleName} for QLC of type ${template::class.simpleName}"
+    override val message: String
+        get() {
+            val messages = errors.mapNotNull { it.value?.message?.ifEmpty { null } }.toSet()
+            var message = "Could not find any applicable elements of type ${elementType.simpleName} for QLC of type ${template::class.simpleName}."
+            if (messages.isNotEmpty())
+                message += " ${messages.joinToString("; ")}"
+            return message
+        }
 }
 
 class ApplicableProcedureCallNotFoundException(
     override val template: QuestionTemplate<*>,
-    val runtimeErrors: Map<SourceCode, List<Throwable>>,
-    val loadingErrors: Map<SourceCode, Throwable?>
+    val errors: Map<SourceCode, List<Throwable>>,
 ): QuestionGenerationException(template) {
 
-    override val message: String =
-        "Could not find any applicable procedure calls for QLC of type ${template::class.simpleName}"
+    override val message: String
+        get() {
+            val messages = errors.flatMap { it.value.mapNotNull { e -> e.message?.ifEmpty { null } } }.toSet()
+            var message = "Could not find any applicable procedure calls for QLC of type ${template::class.simpleName}."
+            if (messages.isNotEmpty())
+                message += " ${messages.joinToString("; ")}"
+            return message
+        }
 }
 
 operator fun String?.invoke(vararg arguments: Any?): ProcedureCall =
@@ -94,6 +113,11 @@ sealed class QuestionTemplate<T : Any>(val range: IntRange = 1 .. Int.MAX_VALUE)
             configureStaticJavaParser()
         }
     }
+
+    protected fun QuestionTemplate<*>.getFailedRequirementException(): AssertionError? =
+        this::class.members.firstOrNull {
+            it.isOpen && it.name == "isApplicable" && it.hasAnnotation<Description>()
+        }?.findAnnotation<Description>()?.value?.let { AssertionError("Failed requirement: $it") }
 
     /**
      * Given the [type] of targeted elements, is the question applicable to this [source] code?
@@ -141,9 +165,11 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
 
         val elements: Map<SourceCode, Pair<List<R>, Throwable?>> = this.associateWith { source ->
             val result = source.load()
-            Pair(result.getOrNull()?.findAll(R::class.java) {
+            val applicable = result.getOrNull()?.findAll(R::class.java) {
                 isApplicable(it)
-            } ?: emptyList(), result.exceptionOrNull())
+            } ?: emptyList()
+            val error = result.exceptionOrNull() ?: (if (applicable.isEmpty()) getFailedRequirementException() else null)
+            Pair(applicable, error)
         }
 
         val errors = elements.mapValues { it.value.second }
@@ -217,7 +243,12 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
             calls.forEach { call ->
                 val vm = IVirtualMachine.create()
                 val args = call.arguments.toIValues(vm, module)
-                val applicable = runCatching { isApplicable(p) && isApplicable(p, args) }
+                val applicableResult = runCatching { isApplicable(p) && isApplicable(p, args) }
+                val isApplicable = applicableResult.getOrDefault(false)
+
+                val failedRequirement =
+                    if (!isApplicable && applicableResult.isSuccess) this.getFailedRequirementException()
+                    else null
 
                 if (call.id == null) {
                     // Wildcard test cases
@@ -225,16 +256,16 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
                     pairs.add(ApplicableProcedureAndArguments(
                         p,
                         call.arguments,
-                        result.exceptionOrNull(),
-                        result.isSuccess && applicable.getOrDefault(false)
+                        result.exceptionOrNull() ?: failedRequirement,
+                        result.isSuccess && isApplicable
                     ))
                 } else if (call.id == p.id && p.id?.startsWith("$") == false) {
                     // Specific test cases
                     pairs.add(ApplicableProcedureAndArguments(
                         p,
                         call.arguments,
-                        applicable.exceptionOrNull(),
-                        applicable.getOrDefault(false)
+                        applicableResult.exceptionOrNull() ?: failedRequirement,
+                        isApplicable
                     ))
                 }
             }
@@ -263,10 +294,12 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
             throw ApplicableSourceNotFoundException(this, loadingErrors)
 
         if (calls.none { it.value.anyApplicable() }) {
-            val runtimeErrors = calls.mapValues { (_, applicable) ->
-                applicable.mapNotNull { it.exception }
-            }
-            throw ApplicableProcedureCallNotFoundException(this, runtimeErrors, loadingErrors)
+            val errors = calls.mapValues { (source, applicable) ->
+                applicable.mapNotNull { it.exception } + (
+                    if (loadingErrors[source] != null) listOf(loadingErrors[source]!!) else emptyList()
+                )
+            }.filterValues { it.isNotEmpty() }
+            throw ApplicableProcedureCallNotFoundException(this, errors)
         }
 
         val source = calls.randomKeyBy { loadingErrors[it.key] == null && it.value.anyApplicable() }

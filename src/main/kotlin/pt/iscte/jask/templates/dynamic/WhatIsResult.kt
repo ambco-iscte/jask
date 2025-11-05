@@ -1,5 +1,6 @@
 package pt.iscte.jask.templates.dynamic
 import com.github.javaparser.ast.expr.EnclosedExpr
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -33,7 +34,7 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
         })
     }
 
-    // Return type is a value.
+    @Description("Procedure return type must be a value type (int, double, char, boolean)")
     override fun isApplicable(element: IProcedure): Boolean =
         element.returnType.isValueType
 
@@ -82,7 +83,7 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
                 (it.first as IValue).value != result.value && (it.first as IValue).type == procedure.returnType
             else
                 it.first.toString() != result.toString()
-        }.toSetBy { it.first }
+        }.toSetBy { it.first.toString() }
 
         val options: MutableMap<Option, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false

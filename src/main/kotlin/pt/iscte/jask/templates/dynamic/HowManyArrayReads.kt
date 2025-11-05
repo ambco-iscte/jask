@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -61,7 +62,7 @@ class HowManyArrayReads : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
-    // There is at least one array access.
+    @Description("Procedure must contain at least 1 array access")
     override fun isApplicable(element: IProcedure): Boolean =
         element.countArrayAccesses() != 0
 
@@ -85,15 +86,17 @@ class HowManyArrayReads : DynamicQuestionTemplate<IProcedure>() {
 
         val distractors: Set<Pair<Int, String?>> = sampleSequentially(3,
             listOf(
-                listener.allocated.size to if (listener.allocated.isEmpty()) null else language["HowManyArrayReads_DistractorNumAllocated"].format(listener.allocated.joinToString { it.first.id!! }),
                 listener.countReads + 1 to null,
                 listener.countReads - 1 to null,
                 listener.countWrites to language["HowManyArrayReads_DistractorWrites"].format("a[i] = x", "x", "a", "i"),
                 listener.countWrites + 1 to null,
                 listener.countWrites - 1 to null,
+                arrayLengthAccess to language["HowManyArrayReads_DistractorLengthAccesses"].format("length")
+            ),
+            listOf(
+                listener.allocated.size to if (listener.allocated.isEmpty()) null else language["HowManyArrayReads_DistractorNumAllocated"].format(listener.allocated.joinToString { it.first.id!! }),
                 listener.allocated.size + 1 to null,
                 listener.allocated.size - 1 to null,
-                arrayLengthAccess to language["HowManyArrayReads_DistractorLengthAccesses"].format("length")
             ),
             listOf(
                 listener.len to (if (listener.len == 0) null else language["HowManyArrayReads_DistractorLengthOfAllocated"].format()),

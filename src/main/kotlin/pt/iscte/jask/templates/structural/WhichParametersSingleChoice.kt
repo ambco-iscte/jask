@@ -2,6 +2,7 @@ package pt.iscte.jask.templates.structural
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.sampleSequentially
@@ -11,7 +12,7 @@ import kotlin.collections.plus
 
 class WhichParametersSingleChoice : StructuralQuestionTemplate<MethodDeclaration>() {
 
-    // Method has at least one parameter or local variable.
+    @Description("Method must have at least 1 parameter or local variable")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()
 

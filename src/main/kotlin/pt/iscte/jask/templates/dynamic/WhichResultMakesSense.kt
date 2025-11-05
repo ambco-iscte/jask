@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -29,7 +30,7 @@ class WhichResultMakesSense : DynamicQuestionTemplate<IProcedure>() {
         })
     }
 
-    // Return type is a value.
+    @Description("Procedure return type must be a value type (int, double, char, boolean)")
     override fun isApplicable(element: IProcedure): Boolean =
         element.returnType.isValueType
 

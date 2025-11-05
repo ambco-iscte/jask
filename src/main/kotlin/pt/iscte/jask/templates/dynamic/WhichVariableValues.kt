@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -97,6 +98,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
+    @Description("Procedure must contain at least 1 variable which takes 2 or more values")
     override fun isApplicable(element: IProcedure): Boolean =
         element.getVariableAssignments().any { it.value.isNotEmpty() }
 
@@ -126,10 +128,9 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
         val variable = variableHistory.randomKeyByOrNull { it.value.size > 1 } ?:
         throw ApplicableProcedureCallNotFoundException(
             template = this,
-            runtimeErrors = mapOf(source to listOf(
+            errors = mapOf(source to listOf(
                 NoSuchElementException("No variable within $callAsString takes more than 1 value:\n$procedure\n$variableHistory")
-            )),
-            loadingErrors = emptyMap()
+            ))
         )
 
         val values = variableHistory[variable]!!

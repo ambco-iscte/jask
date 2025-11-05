@@ -3,16 +3,77 @@ package structural
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import pt.iscte.jask.templates.SourceCode
+import pt.iscte.jask.templates.dynamic.HowManyVariableAssignments
 import pt.iscte.jask.templates.invoke
 import pt.iscte.jask.templates.structural.WhichVariableRole
+import kotlin.test.assertEquals
 
 class TestWhichVariableRole {
+
+    @Test
+    fun testPaddlePowerOfTwo() { // FIXME Strudel IVariableRole.match (stepper?)
+        val src = """
+            class Test {
+                static int powerOfTwo(int e) {
+                    assert e >= 0;
+                    int x = 1;
+                    while (e > 0) {
+                        x = x * 2;
+                        e = e - 1;
+                    }
+                    return x;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            WhichVariableRole().generate(SourceCode(src, listOf(
+                "powerOfTwo"(4),
+                "powerOfTwo"(8),
+            )))
+        }
+        assertEquals(1, qlc.solution.size)
+        assertEquals("Gatherer", qlc.solution.first().toString())
+        println(qlc)
+    }
+
+    @Test
+    fun testPaddleSumEvenBetween() {
+        val src = """
+            class Test {
+                static int sumEvenBetween(int min, int max) {
+                    assert min <= max;
+                    int s = 0;
+                    int n = min;
+                    if(n % 2 != 0) {
+                        n = n + 1;
+                    }
+                    while(n <= max) {
+                        s = s + n;
+                        n = n + 2;
+                    }
+                    return s;
+                }
+            }
+        """.trimIndent()
+
+        val qlc = assertDoesNotThrow {
+            WhichVariableRole().generate(SourceCode(src, listOf(
+                "sumEvenBetween"(3, 3),
+                "sumEvenBetween"(3, 4),
+                "sumEvenBetween"(3, 8),
+                "sumEvenBetween"(4, 8),
+                "sumEvenBetween"(4, 9),
+            )))
+        }
+        println(qlc)
+    }
 
     @Test
     fun testPaddleSquareMatrixNaturals() {
         val src = """
             class SquareMatrix {
-                int[][] squareMatrixNaturals(int n) {
+                static int[][] squareMatrixNaturals(int n) {
                     assert n >= 0;
                     
                     int[][] m = new int[n][n];

@@ -8,6 +8,7 @@ import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.LiteralExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.UnaryExpr
+import jdk.jfr.Description
 import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getUsableVariables
@@ -37,7 +38,7 @@ class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
             noAssigns && noModifies
         }
 
-    // There are fixed value variables (local constants) being used.
+    @Description("Method must contain at least 1 fixed-value variable")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.getFixedVariables().isNotEmpty()
 

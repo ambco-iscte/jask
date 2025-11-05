@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -18,6 +19,7 @@ class HowManyFunctionCalls : DynamicQuestionTemplate<IProcedure>() {
     val proceduresToConsider: MutableList<IProcedureDeclaration> = mutableListOf()
     val count: MutableMap<String, Int> = mutableMapOf()
 
+    @Description("Procedure must contain at least 1 procedure call")
     override fun isApplicable(element: IProcedure): Boolean =
         element.getProcedureCalls().isNotEmpty()
 

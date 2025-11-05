@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -23,6 +24,7 @@ class HowManyLoopIterations : DynamicQuestionTemplate<IProcedure>() {
     var count: Int = 0
     val variableHistories = mutableMapOf<IVariableDeclaration<*>, List<IValue>>()
 
+    @Description("Procedure must contain exactly one loop")
     override fun isApplicable(element: IProcedure): Boolean =
         element.findAll(ILoop::class).size == 1
 

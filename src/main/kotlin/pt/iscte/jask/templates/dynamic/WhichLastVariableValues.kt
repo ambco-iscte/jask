@@ -1,4 +1,5 @@
 package pt.iscte.jask.templates.dynamic
+import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
@@ -70,8 +71,9 @@ class WhichLastVariableValues() : DynamicQuestionTemplate<IProcedure>() {
         }
     }
 
+    @Description("Procedure must contain at least 1 local variable assignment")
     override fun isApplicable(element: IProcedure): Boolean =
-        element.localVariables.size > 1 && element.getVariableAssignments().isNotEmpty()
+        element.localVariables.isNotEmpty() && element.getVariableAssignments().isNotEmpty()
 
     fun setup(vm: IVirtualMachine) {
         valuesPerVariable.clear()

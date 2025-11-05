@@ -3,6 +3,7 @@ import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
+import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.formatted
@@ -43,6 +44,7 @@ class IsRecursive : StructuralQuestionTemplate<MethodDeclaration>() {
         }
     }
 
+    @Description("Method must contain at least 1 method call")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.body.getOrNull?.hasMethodCalls() == true
 
