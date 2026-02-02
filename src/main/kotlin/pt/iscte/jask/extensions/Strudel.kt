@@ -1,8 +1,8 @@
 package pt.iscte.jask.extensions
 
 import pt.iscte.jask.Language
-import pt.iscte.jask.templates.Option
-import pt.iscte.jask.templates.RecordTypeData
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.RecordTypeData
 import pt.iscte.strudel.model.*
 import pt.iscte.strudel.model.IType
 import pt.iscte.strudel.parsing.java.allocateStringArray
@@ -67,7 +67,7 @@ fun Any?.toIValue(vm: IVirtualMachine, module: IModule): IValue {
     }
 }
 
-fun IValue.multipleChoice(language: Language): Map<Option, Boolean> = when (this.type) {
+fun IValue.multipleChoice(language: Language): Map<QuestionOption, Boolean> = when (this.type) {
     INT -> toInt().multipleChoice(language)
     DOUBLE -> toDouble().multipleChoice(language)
     CHAR -> toChar().multipleChoice(language)
@@ -229,4 +229,10 @@ fun procedureCallAsString(procedure: IProcedureDeclaration, arguments: List<Any?
         "${procedure.id}(${arguments.joinToStringPretty()})"
 
 val IProcedureDeclaration.isMain: Boolean
-    get() = parameters.isEmpty() && id == "main" && (parameters.isEmpty() || (parameters.size == 1 && parameters[0].type.isArrayReference && (((parameters[0].type as? IReferenceType)?.target as? IArrayType)?.componentType as? HostRecordType)?.type == String::class.java))
+    get() = parameters.isEmpty() &&
+            id == "main" &&
+            (parameters.isEmpty() || (
+                parameters.size == 1 &&
+                parameters[0].type.isArrayReference &&
+                (((parameters[0].type as? IReferenceType)?.target as? IArrayType)?.componentType as? HostRecordType)?.type == String::class.java
+            ))

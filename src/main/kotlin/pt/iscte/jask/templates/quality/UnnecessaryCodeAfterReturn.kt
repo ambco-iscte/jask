@@ -9,6 +9,10 @@ import com.github.javaparser.ast.stmt.ReturnStmt
 import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithMultipleCodeStatements
 
 class UnnecessaryCodeAfterReturn : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -67,8 +71,8 @@ class UnnecessaryCodeAfterReturn : StructuralQuestionTemplate<MethodDeclaration>
             ),
             mapOf(
                 SimpleTextOption(methodReplaced.toString()) to true,
-                SimpleTextOption(methodReplacedWrongAnswer.toString() ) to false,
-                SimpleTextOption(methodReplacedWrongAnswer2.toString() ) to false
+                SimpleTextOption(methodReplacedWrongAnswer.toString()) to false,
+                SimpleTextOption(methodReplacedWrongAnswer2.toString()) to false
             ),
             language = language
         )

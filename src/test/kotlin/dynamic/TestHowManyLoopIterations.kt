@@ -6,11 +6,7 @@ import org.junit.jupiter.api.assertThrows
 import pt.iscte.jask.templates.QuestionGenerationException
 import pt.iscte.jask.templates.dynamic.HowManyFunctionCalls
 import pt.iscte.jask.templates.dynamic.HowManyLoopIterations
-import pt.iscte.jask.templates.invoke
-import pt.iscte.strudel.model.ILoop
-import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.util.findAll
-import pt.iscte.strudel.parsing.java.Java2Strudel
+import pt.iscte.jask.common.invoke
 import kotlin.test.assertEquals
 
 class TestHowManyLoopIterations {

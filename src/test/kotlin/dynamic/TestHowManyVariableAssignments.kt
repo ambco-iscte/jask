@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import pt.iscte.jask.templates.QuestionGenerationException
-import pt.iscte.jask.templates.SourceCode
+import pt.iscte.jask.common.SourceCode
 import pt.iscte.jask.templates.dynamic.HowManyVariableAssignments
-import pt.iscte.jask.templates.invoke
+import pt.iscte.jask.common.invoke
 
 class TestHowManyVariableAssignments {
 

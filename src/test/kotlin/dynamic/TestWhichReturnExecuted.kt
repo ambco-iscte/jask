@@ -2,12 +2,10 @@ package dynamic
 
 import org.junit.jupiter.api.assertDoesNotThrow
 import pt.iscte.jask.Localisation
-import pt.iscte.jask.templates.ProcedureCall
-import pt.iscte.jask.templates.SourceCode
-import pt.iscte.jask.templates.structural.*
+import pt.iscte.jask.common.ProcedureCall
+import pt.iscte.jask.common.SourceCode
 import pt.iscte.jask.templates.dynamic.*
-import pt.iscte.jask.templates.invoke
-import pt.iscte.jask.templates.quality.*
+import pt.iscte.jask.common.invoke
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

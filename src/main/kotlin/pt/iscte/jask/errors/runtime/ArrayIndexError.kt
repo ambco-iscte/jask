@@ -6,14 +6,14 @@ import pt.iscte.jask.errors.QLCVirtualMachine
 import pt.iscte.jask.extensions.lineRelativeTo
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
-import pt.iscte.jask.templates.Option
-import pt.iscte.jask.templates.Question
-import pt.iscte.jask.templates.QuestionChoiceType
-import pt.iscte.jask.templates.QuestionSequenceWithContext
-import pt.iscte.jask.templates.SimpleTextOption
-import pt.iscte.jask.templates.SimpleTextStatement
-import pt.iscte.jask.templates.SourceCode
-import pt.iscte.jask.templates.TextWithCodeStatement
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionChoiceType
+import pt.iscte.jask.common.QuestionSequenceWithContext
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SimpleTextStatement
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.jask.templates.dynamic.WhichVariableValues
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
@@ -48,7 +48,7 @@ fun ArrayIndexError.toQLC(
             it != length
         }
 
-        val options: MutableMap<Option, Boolean> =
+        val options: MutableMap<QuestionOption, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(length)] = true
         if (options.size < 4)
@@ -77,7 +77,7 @@ fun ArrayIndexError.toQLC(
             it != validIndices
         }
 
-        val options: MutableMap<Option, Boolean> =
+        val options: MutableMap<QuestionOption, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(validIndices)] = true
         if (options.size < 4)
@@ -100,7 +100,7 @@ fun ArrayIndexError.toQLC(
             it != indexExpression.toString()
         }
 
-        val options: MutableMap<Option, Boolean> =
+        val options: MutableMap<QuestionOption, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
         options[SimpleTextOption(indexExpression)] = true
         if (options.size < 4)
@@ -151,7 +151,11 @@ fun ArrayIndexError.toQLC(
         seq.add(whichVariableValues())
     }
 
-    return QuestionSequenceWithContext(context, seq)
+    return QuestionSequenceWithContext(
+        context,
+        seq,
+        language["ArrayIndexErrorFeedback"].format("n", "0", "n - 1")
+    )
 }
 
 fun main() {

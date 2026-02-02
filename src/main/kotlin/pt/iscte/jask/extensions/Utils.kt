@@ -3,10 +3,9 @@ package pt.iscte.jask.extensions
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.jask.Language
-import pt.iscte.jask.templates.Option
-import pt.iscte.jask.templates.Question
-import pt.iscte.jask.templates.QuestionTemplate
-import pt.iscte.jask.templates.SimpleTextOption
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SimpleTextOption
 import pt.iscte.jask.templates.StructuralQuestionTemplate
 import pt.iscte.jask.templates.quality.IFReturnCondition
 import pt.iscte.jask.templates.quality.LonelyVariable
@@ -21,7 +20,6 @@ import pt.iscte.jask.templates.quality.UselessDuplicationInsideIfElse
 import pt.iscte.jask.templates.quality.UselessSelfAssign
 import pt.iscte.jask.templates.quality.UselessVariableDeclaration
 import java.lang.reflect.Method
-import kotlin.reflect.KClass
 
 val Class<*>.wrapper: Class<*>
     get() = this.kotlin.javaObjectType
@@ -112,13 +110,13 @@ fun <T> sampleSequentially(targetSize: Int, vararg collections: Collection<T>, p
     return result.take(targetSize).toSet()
 }
 
-fun correctAndRandomDistractors(correct: Pair<Any, String?>, distractors: Map<Any, String?>, maxDistractors: Int = 3): Map<Option, Boolean> =
+fun correctAndRandomDistractors(correct: Pair<Any, String?>, distractors: Map<Any, String?>, maxDistractors: Int = 3): Map<QuestionOption, Boolean> =
     mapOf(SimpleTextOption(correct.first, correct.second) to true) +
     distractors
     .filter { it.key != correct.first }
     .sample(maxDistractors).map { SimpleTextOption(it.key, it.value) to false }.toMap()
 
-fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<Option,Boolean> =
+fun correctAndRandomDistractors(correct: Any, distractors: Set<Any>, maxDistractors: Int = 3): Map<QuestionOption,Boolean> =
     correctAndRandomDistractors(correct to null, distractors.associateWith { null }, maxDistractors)
 
 fun <T> Collection<T>.randomBy(predicate: (T) -> Boolean): T =
@@ -154,6 +152,9 @@ fun <T, R> Collection<T>.toSetBy(map: (T) -> R): Set<T> {
     }
     return result
 }
+
+fun <T, R> Collection<T>.toSetOf(transform: (T) -> R): Set<R> =
+    map(transform).toSet()
 
 
 fun checkForApplicables(

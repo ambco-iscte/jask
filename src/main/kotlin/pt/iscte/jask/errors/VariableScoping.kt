@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.RecordDeclaration
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.ForEachStmt
 import com.github.javaparser.ast.stmt.ForStmt
@@ -21,7 +22,7 @@ object VariableScoping {
 
     data class Scope<T: Node>(
         val node: T,
-        val variables: Set<String>,
+        val variables: Set<NodeWithSimpleName<*>>,
         val enclosed: Set<Scope<*>>
     ) {
         var parent: Scope<*>? = null
@@ -52,10 +53,10 @@ object VariableScoping {
         }
 
         fun contains(identifier: String): Boolean =
-            identifier in variables
+            variables.any { it.nameAsString == identifier }
 
-        fun getUsableVariables(): Set<String> {
-            val usable = mutableSetOf<String>()
+        fun getUsableVariables(): Set<NodeWithSimpleName<*>> {
+            val usable = mutableSetOf<NodeWithSimpleName<*>>()
 
             var current: Scope<*>? = this
             while (current != null) {
@@ -115,19 +116,19 @@ object VariableScoping {
 
         is ClassOrInterfaceDeclaration -> Scope(
             node,
-            node.fields.flatMap { it.variables.map { v -> v.nameAsString } }.toSet(),
+            node.fields.flatMap { it.variables }.toSet(),
             node.methods.map { get(it) }.union(node.constructors.map { get(it) })
         )
 
         is RecordDeclaration -> Scope(
             node,
-            node.fields.flatMap { it.variables.map { v -> v.nameAsString } }.toSet(),
+            node.fields.flatMap { it.variables }.toSet(),
             node.methods.map { get(it) }.union(node.constructors.map { get(it) }).union(node.compactConstructors.map { get(it) })
         )
 
         is ConstructorDeclaration -> Scope(
             node,
-            node.parameters.map { it.nameAsString }.toSet(),
+            node.parameters.toSet(),
             setOf(get(node.body))
         )
 
@@ -139,25 +140,25 @@ object VariableScoping {
 
         is MethodDeclaration -> Scope(
             node,
-            node.parameters.map { it.nameAsString }.toSet(),
+            node.parameters.toSet(),
             if (node.body.isPresent) setOf(get(node.body.get())) else emptySet(),
         )
 
         is BlockStmt -> Scope(
             node,
-            node.childNodes.filterIsInstance<VariableDeclarationExpr>().flatMap { it.variables.map { v -> v.nameAsString } }.toSet(),
+            node.childNodes.filterIsInstance<VariableDeclarationExpr>().flatMap { it.variables }.toSet(),
             node.childNodes.map { get(it) }.toSet()
         )
 
         is ForStmt -> Scope(
             node,
-            node.initialization.filterIsInstance<VariableDeclarationExpr>().flatMap { it.variables.map { v -> v.nameAsString } }.toSet(),
+            node.initialization.filterIsInstance<VariableDeclarationExpr>().flatMap { it.variables }.toSet(),
             setOf(get(node.body))
         )
 
         is ForEachStmt -> Scope(
             node,
-            setOf(node.variableDeclarator.nameAsString),
+            setOf(node.variableDeclarator),
             setOf(get(node.body))
         )
 

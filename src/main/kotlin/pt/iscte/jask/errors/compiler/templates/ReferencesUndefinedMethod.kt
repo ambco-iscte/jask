@@ -6,11 +6,13 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.errors.CompilerErrorFinder
 import pt.iscte.jask.errors.compiler.UnknownMethod
 import pt.iscte.jask.extensions.randomBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionChoiceType
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.jask.templates.*
-import pt.iscte.jask.templates.structural.*
-import pt.iscte.jask.templates.dynamic.*
-import pt.iscte.jask.templates.quality.*
 
 class ReferencesUndefinedMethod(
     private val error: UnknownMethod? = null
@@ -38,7 +40,7 @@ class ReferencesUndefinedMethod(
         val (call, usable) = errors.randomBy { it.usable.size >= 2 }
 
         val unusable: Set<MethodDeclaration> =
-            call.findCompilationUnit().get().findAll(MethodDeclaration::class.java).minus(usable).toSet()
+            call.findCompilationUnit().get().findAll(MethodDeclaration::class.java).minus(usable.toSet()).toSet()
 
         return Question(
             source = source,
@@ -48,7 +50,7 @@ class ReferencesUndefinedMethod(
             ),
             options = // TODO better distractors
                 usable.associate { SimpleTextOption(it.nameAsString) to true } +
-                unusable.associate { SimpleTextOption(it.nameAsString) to false },
+                        unusable.associate { SimpleTextOption(it.nameAsString) to false },
             language = language,
             choice = QuestionChoiceType.MULTIPLE,
             relevantSourceCode = listOf(SourceLocation(call))

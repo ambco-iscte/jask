@@ -6,17 +6,20 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.findAll
-import pt.iscte.jask.extensions.formatted
 import pt.iscte.jask.extensions.hasMethodCalls
-import pt.iscte.jask.extensions.trueOrFalse
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
 class IsRecursive : StructuralQuestionTemplate<MethodDeclaration>() {
 
     companion object {
-        fun options(functionName: String, isRecursive: Boolean, recursiveCalls: String, language: Language): Map<Option, Boolean> {
-            val options = mutableMapOf<Option, Boolean>()
+        fun options(functionName: String, isRecursive: Boolean, recursiveCalls: String, language: Language): Map<QuestionOption, Boolean> {
+            val options = mutableMapOf<QuestionOption, Boolean>()
 
             if (isRecursive) {
                 options[SimpleTextOption.yes(

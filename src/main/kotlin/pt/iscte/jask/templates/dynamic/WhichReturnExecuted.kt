@@ -6,11 +6,13 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.correctAndRandomDistractors
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IReturn
 import pt.iscte.strudel.model.util.findAll
 import pt.iscte.strudel.parsing.java.JP
-import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 

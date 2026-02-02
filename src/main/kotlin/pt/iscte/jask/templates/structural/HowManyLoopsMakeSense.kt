@@ -9,6 +9,9 @@ import pt.iscte.jask.extensions.getLoopControlStructures
 import pt.iscte.jask.extensions.hasLoopControlStructures
 import pt.iscte.jask.extensions.multipleChoice
 import pt.iscte.jask.extensions.prettySignature
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
@@ -26,7 +29,10 @@ class HowManyLoopsMakeSense : StructuralQuestionTemplate<MethodDeclaration>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["HowManyLoopsMakeSense"].format(method.nameAsString), method.prettySignature),
+            TextWithCodeStatement(
+                language["HowManyLoopsMakeSense"].format(method.nameAsString),
+                method.prettySignature
+            ),
             howManyLoops.multipleChoice(language),
             language = language,
             relevantSourceCode = loops.map { SourceLocation(it.first as Statement) },

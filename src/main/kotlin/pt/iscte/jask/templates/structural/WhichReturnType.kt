@@ -8,6 +8,11 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.jask.extensions.getUsedTypes
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class WhichReturnType : StructuralQuestionTemplate<MethodDeclaration>() {
@@ -17,7 +22,7 @@ class WhichReturnType : StructuralQuestionTemplate<MethodDeclaration>() {
         element.getUsedTypes().size >= 2
 
     companion object {
-        fun options(method: MethodDeclaration, language: Language): MutableMap<Option, Boolean> {
+        fun options(method: MethodDeclaration, language: Language): MutableMap<QuestionOption, Boolean> {
             val otherTypes = method.getUsedTypes().map { it.asString() }
 
             val exprTypes = method.findAll(Expression::class.java).filter { expression ->
@@ -36,7 +41,7 @@ class WhichReturnType : StructuralQuestionTemplate<MethodDeclaration>() {
                 it.first != method.type.asString() && it.first != method.type.toString()
             }
 
-            val options: MutableMap<Option, Boolean> = distractors.associate {
+            val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
                 SimpleTextOption(it.first, it.second) to false
             }.toMutableMap()
 

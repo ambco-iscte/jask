@@ -1,15 +1,19 @@
 package pt.iscte.jask.templates.dynamic
-import com.github.javaparser.ast.expr.EnclosedExpr
 import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
+import pt.iscte.jask.common.ProcedureCall
 import pt.iscte.jask.extensions.getLiteralExpressions
 import pt.iscte.jask.extensions.procedureCallAsString
-import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.BOOLEAN
 import pt.iscte.strudel.model.DOUBLE
 import pt.iscte.strudel.model.ILiteral
@@ -85,7 +89,7 @@ class WhatIsResult: DynamicQuestionTemplate<IProcedure>() {
                 it.first.toString() != result.toString()
         }.toSetBy { it.first.toString() }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(result)] = true

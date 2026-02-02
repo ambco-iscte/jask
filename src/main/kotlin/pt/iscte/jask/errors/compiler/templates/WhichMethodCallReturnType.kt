@@ -1,19 +1,22 @@
 package pt.iscte.jask.errors.compiler.templates
 
 import com.github.javaparser.ast.NodeList
+import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import pt.iscte.jask.Language
 import pt.iscte.jask.errors.CompilerErrorFinder
 import pt.iscte.jask.errors.compiler.WrongTypeForVariableDeclaration
-import pt.iscte.jask.extensions.findMethodDeclaration
-import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.jask.extensions.randomBy
+import pt.iscte.jask.extensions.toMethodDeclaration
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.jask.templates.*
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.jask.templates.structural.*
 
-class AssignVarWithMethodWrongType(
+class WhichMethodCallReturnType(
     private val error: WrongTypeForVariableDeclaration? = null
 ): StructuralQuestionTemplate<TypeDeclaration<*>>() {
 
@@ -38,26 +41,24 @@ class AssignVarWithMethodWrongType(
         }
 
         val initCall = error.variableInitialiser.asMethodCallExpr()
-        val methodUsedToInitialise = initCall.findMethodDeclaration().orElseThrow {
-            ApplicableProcedureCallNotFoundException(
-                this@AssignVarWithMethodWrongType,
-                mapOf(source to listOf(NoSuchMethodException("Could not find method ${initCall.nameWithScope()} in: $initCall")))
-            )
-        }
+        val methodUsedToInitialise = initCall.toMethodDeclaration() ?:
+        throw ApplicableElementNotFoundException(
+            this,
+            mapOf(source to NoSuchElementException("Cannot resolve method declaration for method call: $initCall")),
+            MethodDeclaration::class
+        )
 
         return Question(
             source,
             TextWithCodeStatement(
-                language["AssignVarWithMethodWrongType"].format(
-                    error.variableInitialiser.toString(),
-                    error.variable.nameAsString,
+                language["WhichReturnType"].format(
                     methodUsedToInitialise.nameAsString,
                 ),
-                NodeList(VariableDeclarationExpr(error.variable), methodUsedToInitialise)
+                NodeList(VariableDeclarationExpr(error.variable), initCall)
             ),
             WhichReturnType.options(methodUsedToInitialise, language),
             language = language,
-            relevantSourceCode = listOf(SourceLocation(error.variable), SourceLocation(methodUsedToInitialise.type))
+            relevantSourceCode = listOf(SourceLocation(error.variable), SourceLocation(initCall))
         )
     }
 }

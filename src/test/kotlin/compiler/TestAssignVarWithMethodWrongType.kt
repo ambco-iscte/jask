@@ -1,7 +1,7 @@
 package compiler
 
 import pt.iscte.jask.Localisation
-import pt.iscte.jask.errors.compiler.templates.AssignVarWithMethodWrongType
+import pt.iscte.jask.errors.compiler.templates.WhichMethodCallReturnType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -19,7 +19,7 @@ class TestAssignVarWithMethodWrongType {
             }
         """.trimIndent()
 
-        val qlc = AssignVarWithMethodWrongType()
+        val qlc = WhichMethodCallReturnType()
         val data = qlc.generate(src, Localisation.getLanguage("en"))
 
         assertEquals(1, data.solution.size)

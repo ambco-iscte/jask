@@ -2,15 +2,18 @@ package pt.iscte.jask.templates.structural
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.expr.LiteralExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getUsableVariables
 import pt.iscte.jask.extensions.isMain
-import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 import kotlin.collections.plus
 import kotlin.collections.toSet
@@ -51,7 +54,7 @@ class WhatVariables: StructuralQuestionTemplate<MethodDeclaration>() {
             it.first.toSet() != variableNames && it.first.isNotEmpty()
         }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
         options[SimpleTextOption(

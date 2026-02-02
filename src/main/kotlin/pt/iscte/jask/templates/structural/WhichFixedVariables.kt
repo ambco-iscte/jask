@@ -11,9 +11,12 @@ import com.github.javaparser.ast.expr.UnaryExpr
 import jdk.jfr.Description
 import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.getLocalVariables
-import pt.iscte.jask.extensions.getUsableVariables
-import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
@@ -67,7 +70,7 @@ class WhichFixedVariables : StructuralQuestionTemplate<MethodDeclaration>() {
             it.first.toSet() != fixedVariables.toSet() && it.first.isNotEmpty()
         }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 

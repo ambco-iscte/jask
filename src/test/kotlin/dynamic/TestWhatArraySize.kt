@@ -2,7 +2,7 @@ package dynamic
 
 import org.junit.jupiter.api.Test
 import pt.iscte.jask.Localisation
-import pt.iscte.jask.templates.ProcedureCall
+import pt.iscte.jask.common.ProcedureCall
 import pt.iscte.jask.templates.dynamic.*
 import kotlin.test.assertEquals
 

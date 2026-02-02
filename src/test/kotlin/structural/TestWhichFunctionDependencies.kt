@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import pt.iscte.jask.templates.QuestionGenerationException
+import pt.iscte.jask.templates.structural.CallsOtherFunctions
 import pt.iscte.jask.templates.structural.WhichFunctionDependencies
 
 class TestWhichFunctionDependencies {
@@ -51,7 +52,24 @@ class TestWhichFunctionDependencies {
         val qlc3 = assertDoesNotThrow { WhichFunctionDependencies().generate(src3) }
         println(qlc3)
         assertEquals(1, qlc3.solution.size)
-        assertEquals("bar", qlc3.solution[0].toString())
+        assertEquals("foo, bar", qlc3.solution[0].toString())
+
+        val src4 = """
+            import java.lang.Math;
+            
+            class Test {
+                static int random() {
+                    return (int) (Math.random() * 1000000);
+                }
+            }
+        """.trimIndent()
+        assertDoesNotThrow {
+            val qlc = WhichFunctionDependencies().generate(src4)
+            println(qlc)
+
+            assertEquals(1, qlc.solution.size)
+            assertEquals("Math.random", qlc.solution[0].toString())
+        }
     }
 
     @Test
@@ -69,7 +87,7 @@ class TestWhichFunctionDependencies {
         println(qlc)
 
         assertEquals(1, qlc.solution.size)
-        assertEquals("sqrt, floor", qlc.solution[0].toString())
+        assertEquals("Math.sqrt, Math.floor", qlc.solution[0].toString())
     }
 
     @Test

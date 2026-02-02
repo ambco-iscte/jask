@@ -1,32 +1,48 @@
 package pt.iscte.jask.extensions
 
+import com.github.javaparser.JavaParser
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.Position
 import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.ast.AccessSpecifier
+import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.Node
-import com.github.javaparser.ast.body.FieldDeclaration
-import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.body.TypeDeclaration
-import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.NodeList
+import com.github.javaparser.ast.body.*
 import com.github.javaparser.ast.expr.*
-import com.github.javaparser.ast.stmt.IfStmt
-import com.github.javaparser.ast.expr.MethodCallExpr
-import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithBody
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
+import com.github.javaparser.ast.nodeTypes.NodeWithTypeArguments
+import com.github.javaparser.ast.nodeTypes.NodeWithTypeParameters
 import com.github.javaparser.ast.stmt.*
-import com.github.javaparser.ast.type.ArrayType
-import com.github.javaparser.ast.type.ClassOrInterfaceType
-import com.github.javaparser.ast.type.PrimitiveType
-import com.github.javaparser.ast.type.Type
-import com.github.javaparser.ast.type.VoidType
+import com.github.javaparser.ast.type.*
 import com.github.javaparser.ast.visitor.GenericListVisitorAdapter
+import com.github.javaparser.ast.visitor.GenericVisitor
+import com.github.javaparser.ast.visitor.VoidVisitor
+import com.github.javaparser.resolution.Context
+import com.github.javaparser.resolution.UnsolvedSymbolException
+import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedClassDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedEnumDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedInterfaceDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedRecordDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedTypeParametrizable
+import com.github.javaparser.resolution.model.typesystem.ReferenceTypeImpl
+import com.github.javaparser.resolution.types.ResolvedReferenceType
+import com.github.javaparser.resolution.types.ResolvedType
+import com.github.javaparser.resolution.types.ResolvedTypeVariable
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration
+import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
-import java.util.Locale
-import java.util.Optional
+import java.util.*
+import kotlin.collections.map
+import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
@@ -35,6 +51,139 @@ fun configureStaticJavaParser() {
     StaticJavaParser.getParserConfiguration().setSymbolResolver(
         JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
     )
+}
+
+fun AccessSpecifier.toModifier(): Modifier? = when (this) {
+    AccessSpecifier.PUBLIC -> Modifier.publicModifier()
+    AccessSpecifier.PRIVATE -> Modifier.privateModifier()
+    AccessSpecifier.PROTECTED -> Modifier.privateModifier()
+    AccessSpecifier.NONE -> null
+}
+
+val ReflectionMethodDeclaration.nameWithSimpleScope: String
+    get() = "${declaringType().name}.${name}"
+
+fun MethodCallExpr.toMethodDeclaration(): MethodDeclaration? =
+    runCatching {
+        return when (val resolved = this.resolve()) {
+            is JavaParserMethodDeclaration -> resolved.wrappedNode
+            else -> {
+                val returnType = StaticJavaParser.parseType(resolved.returnType.describe())
+
+                val modifiers = NodeList.nodeList<Modifier>()
+                resolved.accessSpecifier().toModifier()?.let { modifiers.add(it) }
+                if (resolved.isStatic) modifiers.add(Modifier.staticModifier())
+                if (resolved.isAbstract) modifiers.add(Modifier.abstractModifier())
+
+                val name = (resolved as? ReflectionMethodDeclaration)?.nameWithSimpleScope ?: nameAsString
+
+                MethodDeclaration(modifiers, returnType, name)
+            }
+        }
+    }.getOrNull()
+
+fun ResolvedTypeDeclaration.toResolvedType(): ResolvedType = object : ResolvedType {
+    override fun describe(): String? =
+        this@toResolvedType.qualifiedName
+
+    override fun isAssignableBy(other: ResolvedType?): Boolean {
+        val typeParameters = if (this@toResolvedType is ResolvedTypeParametrizable)
+            this@toResolvedType.typeParameters.map { it.toResolvedType() }
+        else
+            null
+
+        return when (this@toResolvedType) {
+            is ResolvedReferenceTypeDeclaration ->
+                ReferenceTypeImpl(this@toResolvedType, typeParameters).isAssignableBy(other)
+
+            is ResolvedTypeParameterDeclaration ->
+                ResolvedTypeVariable(this@toResolvedType.asTypeParameter()).isAssignableBy(other)
+
+            else -> error("Cannot check assignability of ${describe()}")
+        }
+    }
+}
+
+fun TypeDeclaration<*>.toType(): Type = object : Type(this.tokenRange.get(), this.annotations) {
+    override fun asString(): String? =
+        this@toType.fullyQualifiedName.getOrDefault(this@toType.nameAsString)
+
+    override fun resolve(): ResolvedType =
+        this@toType.resolve().toResolvedType()
+
+    override fun <R : Any?, A : Any?> accept(v: GenericVisitor<R?, A?>?, arg: A?): R? = null
+
+    override fun <A : Any?> accept(v: VoidVisitor<A?>?, arg: A?) { }
+
+    override fun convertToUsage(context: Context?): ResolvedType {
+        val name = this@toType.fullyQualifiedName.getOrDefault(this@toType.nameAsString)
+
+        val typeParameters = if (this@toType is NodeWithTypeArguments<*> && this@toType.typeArguments.isPresent) {
+            this@toType.typeArguments.get().map { it.convertToUsage(context) }
+        } else null
+
+        val ref = context?.solveType(name, typeParameters)
+
+        if (ref == null || !ref.isSolved)
+            throw UnsolvedSymbolException(name)
+
+        return when (val typeDeclaration = ref.correspondingDeclaration) {
+            is ResolvedReferenceTypeDeclaration ->
+                ReferenceTypeImpl(typeDeclaration, typeParameters)
+
+            is ResolvedTypeParameterDeclaration ->
+                ResolvedTypeVariable(typeDeclaration.asTypeParameter())
+
+            else -> error("Cannot convert declaration of ${asString()} to a Type instance")
+        }
+    }
+}
+
+fun Node.findAllTypes(): List<Pair<Node, Type>> {
+    val types = mutableListOf<Pair<Node, Type>>()
+
+    // Type Declarations
+    this.findAll(TypeDeclaration::class.java).forEach { declaration ->
+        types.add(declaration to declaration.toType())
+    }
+
+    // Variable Declarations
+    this.findAll(VariableDeclarationExpr::class.java).forEach { declaration ->
+        declaration.variables.forEach { variable ->
+            types.add(variable to variable.type)
+        }
+    }
+
+    // Field Declarations
+    this.findAll(FieldDeclaration::class.java).forEach { declaration ->
+        declaration.variables.forEach { variable ->
+            types.add(variable to variable.type)
+        }
+    }
+
+    // Method Declarations
+    this.findAll(MethodDeclaration::class.java).forEach { method ->
+        types.add(method to method.type)
+        method.parameters.forEach { parameter ->
+            types.add(parameter to parameter.type)
+        }
+    }
+
+    // Constructor Declarations
+    this.findAll(ConstructorDeclaration::class.java).forEach { constructor ->
+        constructor.parameters.forEach { parameter ->
+            types.add(parameter to parameter.type)
+        }
+    }
+
+    // Record Declarations
+    this.findAll(RecordDeclaration::class.java).forEach { record ->
+        record.parameters.forEach { parameter ->
+            types.add(parameter to parameter.type)
+        }
+    }
+
+    return types
 }
 
 inline fun <reified T : Node> find(source: String, condition: (T) -> Boolean = { true }): List<T> =
@@ -89,18 +238,59 @@ fun MethodDeclaration.getUsableVariables(): List<VariableDeclarator> =
 val MethodDeclaration.isMain: Boolean
     get() = isStatic && type is VoidType && nameAsString == "main" && (parameters.isEmpty() || (parameters.size == 1 && ((parameters[0].type as? ArrayType)?.componentType as? ClassOrInterfaceType)?.nameAsString == String::class.java.canonicalName))
 
-fun MethodCallExpr.nameWithScope(): String =
-    (if (scope.isPresent) "${scope.get()}." else "") + nameAsString
+fun MethodCallExpr.nameWithScope(): String {
+    runCatching { (resolve() as? ReflectionMethodDeclaration)?.qualifiedName }.getOrNull()?.let { return it }
+
+    if (scope.isPresent) {
+        if (findCompilationUnit().isPresent) {
+            val unit = findCompilationUnit().get()
+            if (unit.types.singleOrNull()?.nameAsString == scope.get().toString())
+                return nameAsString
+            return "${scope.get()}.$nameAsString"
+        }
+    }
+    return nameAsString
+}
 
 fun MethodDeclaration.nameWithScope(): String {
+    runCatching { (resolve() as? ReflectionMethodDeclaration)?.qualifiedName }.getOrNull()?.let { return it }
+
     val type = findAncestor(TypeDeclaration::class.java)
-    return if (type.isPresent)
+    if (type.isPresent) {
+        if (findCompilationUnit().isPresent) {
+            val unit = findCompilationUnit().get()
+            if (unit.types.singleOrNull() == type.get())
+                return nameAsString
+            return "${type.get().nameAsString}.$nameAsString"
+        }
         "${type.get().nameAsString}.${nameAsString}"
-    else
-        nameAsString
+    }
+    return nameAsString
 }
 
 fun MethodCallExpr.findMethodDeclaration(): Optional<MethodDeclaration> {
+    runCatching { (resolve() as? JavaParserMethodDeclaration)?.wrappedNode }.getOrNull()?.let {
+        return Optional.of(it)
+    }
+
+    val unit = findCompilationUnit()
+    if (unit.isEmpty)
+        return Optional.empty<MethodDeclaration>()
+
+    return Optional.ofNullable(unit.get().findAll(MethodDeclaration::class.java).firstOrNull {
+        (if (this.scope.isPresent)
+            it.nameWithScope() == this.nameWithScope()
+        else
+            it.nameAsString == this.nameAsString
+        ) && it.parameters.size == this.arguments.size
+    })
+}
+
+fun MethodCallExpr.findClosestMethodDeclaration(): Optional<MethodDeclaration> {
+    runCatching { (resolve() as? JavaParserMethodDeclaration)?.wrappedNode }.getOrNull()?.let {
+        return Optional.of(it)
+    }
+
     val unit = findCompilationUnit()
     if (unit.isEmpty)
         return Optional.empty<MethodDeclaration>()
@@ -126,6 +316,12 @@ fun MethodCallExpr.isValidFor(method: MethodDeclaration): Boolean {
     }
     return true
 }
+
+fun MethodCallExpr.isCallFor(method: MethodDeclaration): Boolean =
+    runCatching {
+        val resolved = this.resolve()
+        resolved == method.resolve() || (resolved as? JavaParserMethodDeclaration)?.wrappedNode == method
+    }.getOrDefault(false)
 
 fun Position.relativeTo(other: Position): Position =
     Position(line - other.line + 1, column - other.column + 1)

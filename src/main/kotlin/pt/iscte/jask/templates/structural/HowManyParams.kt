@@ -6,6 +6,11 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class HowManyParams : StructuralQuestionTemplate<MethodDeclaration>() {
@@ -29,7 +34,7 @@ class HowManyParams : StructuralQuestionTemplate<MethodDeclaration>() {
             it.first != parameters && it.first >= 0
         }.toSetBy { it.first }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 
@@ -38,7 +43,9 @@ class HowManyParams : StructuralQuestionTemplate<MethodDeclaration>() {
             if (parameters == 0)
                 language["HowManyParams_ZeroCorrect"].format(method.nameAsString)
             else
-                language["HowManyParams_Correct"].format(method.nameAsString, method.parameters.joinToString { it.nameAsString })
+                language["HowManyParams_Correct"].format(
+                    method.nameAsString,
+                    method.parameters.joinToString { it.nameAsString })
         )] = true
 
         if (options.size < 4)

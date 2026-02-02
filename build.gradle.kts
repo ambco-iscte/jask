@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "pt.iscte"
-version = "0.6.6"
+version = "0.7.2"
 
 repositories {
     mavenCentral()
@@ -15,9 +15,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     api(project(":strudel"))
     implementation(kotlin("reflect"))
-
-    // https://mvnrepository.com/artifact/com.openai/openai-java
-    // implementation("com.openai:openai-java:3.6.1")
+    //implementation("com.openai:openai-java:3.6.1")
 }
 
 tasks.test {

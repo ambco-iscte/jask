@@ -1,10 +1,10 @@
 package pt.iscte.jask.templates
 
-import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
 import jdk.jfr.Description
 import pt.iscte.jask.Language
+import pt.iscte.jask.common.ProcedureCall
 import pt.iscte.jask.extensions.IModuleVisitor
 import pt.iscte.jask.extensions.Quadruple
 import pt.iscte.jask.extensions.accept
@@ -12,97 +12,20 @@ import pt.iscte.jask.extensions.configureStaticJavaParser
 import pt.iscte.jask.extensions.randomBy
 import pt.iscte.jask.extensions.randomKeyBy
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
 import pt.iscte.strudel.model.*
 import pt.iscte.strudel.parsing.java.CONSTRUCTOR_FLAG
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
-import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
-abstract class QuestionGenerationException(
-    open val template: QuestionTemplate<*>
-) : Exception()
-
-class ApplicableSourceNotFoundException(
-    override val template: QuestionTemplate<*>,
-    val errors: Map<SourceCode, Throwable?>
-): QuestionGenerationException(template) {
-
-    override val message: String
-        get() {
-            val messages = errors.mapNotNull { it.value?.message?.ifEmpty { null } }.toSet()
-            var message = "Could not find any applicable sources for QLC of type ${template::class.simpleName}."
-            if (messages.isNotEmpty())
-                message += " ${messages.joinToString("; ")}"
-            return message
-        }
-}
-
-class ApplicableElementNotFoundException(
-    override val template: QuestionTemplate<*>,
-    val errors: Map<SourceCode, Throwable?>,
-    val elementType: KClass<*>
-): QuestionGenerationException(template) {
-
-    override val message: String
-        get() {
-            val messages = errors.mapNotNull { it.value?.message?.ifEmpty { null } }.toSet()
-            var message = "Could not find any applicable elements of type ${elementType.simpleName} for QLC of type ${template::class.simpleName}."
-            if (messages.isNotEmpty())
-                message += " ${messages.joinToString("; ")}"
-            return message
-        }
-}
-
-class ApplicableProcedureCallNotFoundException(
-    override val template: QuestionTemplate<*>,
-    val errors: Map<SourceCode, List<Throwable>>,
-): QuestionGenerationException(template) {
-
-    override val message: String
-        get() {
-            val messages = errors.flatMap { it.value.mapNotNull { e -> e.message?.ifEmpty { null } } }.toSet()
-            var message = "Could not find any applicable procedure calls for QLC of type ${template::class.simpleName}."
-            if (messages.isNotEmpty())
-                message += " ${messages.joinToString("; ")}"
-            return message
-        }
-}
-
-operator fun String?.invoke(vararg arguments: Any?): ProcedureCall =
-    ProcedureCall(this, arguments.toList())
-
-data class ProcedureCall(val id: String?, val arguments: List<Any?> = emptyList()) {
-    override fun toString(): String =
-        "$id(${arguments.joinToString()})"
-}
-
-data class SourceCode(val code: String, val calls: List<ProcedureCall> = emptyList()) {
-
-    private var unit: CompilationUnit? = null
-
-    constructor(file: File) : this(file.readText())
-
-    constructor(unit: CompilationUnit, calls: List<ProcedureCall> = emptyList()): this(unit.toString(), calls) {
-        this.unit = unit
-    }
-
-    fun load(): Result<CompilationUnit> =
-        this.unit?.let { Result.success(it) } ?: runCatching { StaticJavaParser.parse(code) }
-
-    override fun toString(): String = code
-}
-
-data class RecordTypeData(val name: String, val fields: List<Any?>) {
-    override fun toString(): String = "$name[${fields.joinToString()}]"
-}
-
 /**
- * This class provides a generic representation of a QLC.
+ * This class provides a generic representation of a QLC template.
  * @param T Type of targeted elements within student code.
  * @param range Number of source code(s) which are needed to produce this question.
  */
@@ -128,8 +51,8 @@ sealed class QuestionTemplate<T : Any>(val range: IntRange = 1 .. Int.MAX_VALUE)
         getApplicableElements(source, type).isNotEmpty()
 
     /**
-     * Is the question applicable to this [element]?
-     * @param element An element of the question's target type.
+     * Is the template applicable to this [element]?
+     * @param element An element of the template's target type.
      */
     open fun isApplicable(element: T): Boolean = true
 
@@ -148,8 +71,8 @@ sealed class QuestionTemplate<T : Any>(val range: IntRange = 1 .. Int.MAX_VALUE)
 }
 
 /**
- * This class provides a representation of a QLC targeting *static* code elements, i.e. static syntactic elements
- * which do not change during execution. This question type takes pure [SourceCode] as input.
+ * This class provides a representation of a QLC template targeting *static* code elements, i.e. static syntactic
+ * elements which do not change during execution. This question type takes pure [SourceCode] as input.
  *
  * @param T The type of JavaParser - [com.github.javaparser] - node the question targets, e.g.
  * [com.github.javaparser.ast.body.MethodDeclaration] if the question targets methods.
@@ -158,6 +81,10 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
 
     constructor() : this(1..Int.MAX_VALUE)
 
+    /**
+     * Returns a random [SourceCode] from a list of sources, and a random element from that source for which the
+     * template is applicable.
+     */
     protected inline fun <reified R : T> List<SourceCode>.getRandom(): Pair<SourceCode, R> {
         require(this.isNotEmpty()) {
             "List of sources passed to StructuralQuestionTemplate.getRandom must not be empty!"
@@ -185,7 +112,7 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
     }
 
     /**
-     * Generates the [Question] for this question using a list of [sources].
+     * Generates the [pt.iscte.jask.common.Question] for this template using a list of [sources].
      * @param sources A list of sources.
      * @param language The language to use for generating the question's textual elements.
      */
@@ -213,7 +140,7 @@ abstract class StructuralQuestionTemplate<T : Node>(range: IntRange) : QuestionT
 }
 
 /**
- * This class provides a representation of a QLC targeting *dynamic* code elements, i.e. elements which depend
+ * This class provides a representation of a QLC template targeting *dynamic* code elements, i.e. elements which depend
  * on the code's execution and depend on the methods' provided input.
  *
  * @param T The type of Strudel - [pt.iscte.strudel] - element that the question targets, e.g.
@@ -273,6 +200,14 @@ abstract class DynamicQuestionTemplate<T : IProgramElement> : QuestionTemplate<T
         return pairs
     }
 
+    /**
+     * Given a list of sources, returns:
+     *
+     * 1. A random [SourceCode] from the list;
+     * 2. The Strudel [IModule] loaded from that source code;
+     * 3. A random Strudel [IProcedure] from that module and a list of arguments for it, making up a function
+     * call for which this template is applicable.
+     */
     protected fun DynamicQuestionTemplate<IProcedure>.getRandomProcedure(
         sources: List<SourceCode>
     ): Quadruple<SourceCode, IModule, IProcedure, List<Any?>> {

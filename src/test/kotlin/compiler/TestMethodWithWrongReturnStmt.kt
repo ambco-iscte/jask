@@ -2,7 +2,7 @@ package compiler
 
 import org.junit.jupiter.api.Test
 import pt.iscte.jask.Localisation
-import pt.iscte.jask.errors.compiler.templates.MethodWithWrongReturnStmt
+import pt.iscte.jask.errors.compiler.templates.WhichWrongReturnStmtTypeMethodReturnType
 import kotlin.test.assertEquals
 
 class TestMethodWithWrongReturnStmt {
@@ -17,7 +17,7 @@ class TestMethodWithWrongReturnStmt {
             }
         """.trimIndent()
 
-        val qlc = MethodWithWrongReturnStmt()
+        val qlc = WhichWrongReturnStmtTypeMethodReturnType()
         val data = qlc.generate(src, Localisation.getLanguage("en"))
 
         assertEquals(1, data.solution.size)

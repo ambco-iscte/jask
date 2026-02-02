@@ -42,7 +42,7 @@ class TestFindUnknownVariable {
         assertEquals("k", e1.expr.nameAsString)
         assertEquals("m", e2.expr.nameAsString)
 
-        assertEquals(setOf("i", "j"), e1.scope.getUsableVariables())
-        assertEquals(setOf("i", "j", "n"), e2.scope.getUsableVariables())
+        assertEquals(setOf("i", "j"), e1.scope.getUsableVariables().map { it.nameAsString }.toSet())
+        assertEquals(setOf("i", "j", "n"), e2.scope.getUsableVariables().map { it.nameAsString }.toSet())
     }
 }

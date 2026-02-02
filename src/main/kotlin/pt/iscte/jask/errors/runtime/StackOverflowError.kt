@@ -6,15 +6,14 @@ import pt.iscte.jask.extensions.deepFindAll
 import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
-import pt.iscte.jask.templates.Option
-import pt.iscte.jask.templates.Question
-import pt.iscte.jask.templates.QuestionChoiceType
-import pt.iscte.jask.templates.QuestionSequenceWithContext
-import pt.iscte.jask.templates.SimpleTextOption
-import pt.iscte.jask.templates.SourceCode
-import pt.iscte.jask.templates.TextWithCodeStatement
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionChoiceType
+import pt.iscte.jask.common.QuestionSequenceWithContext
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.jask.templates.structural.IsRecursive
-import pt.iscte.strudel.model.IBlock
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IProcedureCall
 import pt.iscte.strudel.model.IReturn
@@ -78,7 +77,7 @@ fun StackOverflowError.toQLC(
             it !in baseCaseReturns
         }.toSet()
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.toString().trim(), null) to false
         }.toMutableMap()
 
@@ -102,7 +101,7 @@ fun StackOverflowError.toQLC(
 
     fun isBaseCaseReachable(): Question {
         require(hasBaseCases)
-        TODO("Not yet implemented - Are the function's base cases reachable?") // How (undecidable?)
+        TODO("Not yet implemented - Are the function's base cases reachable?") // CFG?
     }
 
     val context = TextWithCodeStatement(

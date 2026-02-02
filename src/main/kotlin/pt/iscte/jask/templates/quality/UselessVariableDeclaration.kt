@@ -5,6 +5,9 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithMultipleCodeStatements
 
 class UselessVariableDeclaration : StructuralQuestionTemplate<MethodDeclaration>() {
 

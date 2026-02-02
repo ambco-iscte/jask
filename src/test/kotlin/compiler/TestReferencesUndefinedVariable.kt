@@ -2,7 +2,7 @@ package compiler
 
 import org.junit.jupiter.api.Test
 import pt.iscte.jask.Localisation
-import pt.iscte.jask.errors.compiler.templates.ReferencesUndefinedVariable
+import pt.iscte.jask.errors.compiler.templates.WhichVariablesUsableAtLine
 import kotlin.test.assertEquals
 
 class TestReferencesUndefinedVariable {
@@ -17,7 +17,7 @@ class TestReferencesUndefinedVariable {
             }
         """.trimIndent()
 
-        val qlc = ReferencesUndefinedVariable()
+        val qlc = WhichVariablesUsableAtLine()
         val data = qlc.generate(src, Localisation.getLanguage("en"))
 
         assertEquals(3, data.solution.size)

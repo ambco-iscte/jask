@@ -4,11 +4,11 @@ import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.templates.DynamicQuestionTemplate
-import pt.iscte.jask.templates.Option
-import pt.iscte.jask.templates.Question
-import pt.iscte.jask.templates.SimpleTextOption
-import pt.iscte.jask.templates.SourceCode
-import pt.iscte.jask.templates.TextWithCodeStatement
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.roles.IVariableRole
 import pt.iscte.strudel.model.roles.impl.ArrayIndexIterator
@@ -48,7 +48,7 @@ class WhichVariableRole : DynamicQuestionTemplate<IProcedure>() {
         val roleName = varRoles[role::class]!!
 
         // Generate fancy options. :)
-        val options: MutableMap<Option, Boolean> = varRoles.keys.filter { varRoles[it]!! != roleName }.sample(4).associate {
+        val options: MutableMap<QuestionOption, Boolean> = varRoles.keys.filter { varRoles[it]!! != roleName }.sample(4).associate {
             SimpleTextOption(varRoles[it]!!) to false
         }.toMutableMap()
         options[SimpleTextOption(roleName)] = true

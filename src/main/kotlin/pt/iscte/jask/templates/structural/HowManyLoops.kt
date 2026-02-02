@@ -9,9 +9,13 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getBranches
 import pt.iscte.jask.extensions.getLoopControlStructures
 import pt.iscte.jask.extensions.hasLoopControlStructures
-import pt.iscte.jask.extensions.multipleChoice
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
@@ -57,7 +61,7 @@ class HowManyLoops : StructuralQuestionTemplate<MethodDeclaration>() {
             it.first != howManyLoops && (if (it.first is Int) (it.first as Int) > 0 else true)
         }.toSetBy { it.first }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 

@@ -1,31 +1,31 @@
 package pt.iscte.jask.extensions
 
 import pt.iscte.jask.Language
-import pt.iscte.jask.templates.Option
-import pt.iscte.jask.templates.SimpleTextOption
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
 
-fun Int.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
+fun Int.multipleChoice(language: Language): Map<QuestionOption, Boolean> = mapOf(
     SimpleTextOption(this) to true,
     SimpleTextOption(this + 1) to false,
     SimpleTextOption(if (this == 0) 2 else (this - 1)) to false,
     SimpleTextOption.none(language) to false
 )
 
-fun Double.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
+fun Double.multipleChoice(language: Language): Map<QuestionOption, Boolean> = mapOf(
     SimpleTextOption(this) to true,
     SimpleTextOption(this + 1) to false,
     SimpleTextOption(if (this == 0.0) 2 else (this - 1)) to false,
     SimpleTextOption.none(language) to false
 )
 
-fun Char.multipleChoice(language: Language): Map<Option, Boolean> = mapOf(
+fun Char.multipleChoice(language: Language): Map<QuestionOption, Boolean> = mapOf(
     SimpleTextOption(this) to true,
     SimpleTextOption(this + 1) to false,
     SimpleTextOption(this - 1) to false,
     SimpleTextOption.none(language) to false
 )
 
-fun Boolean.trueOrFalse(language: Language, literal: Boolean = false): Map<Option, Boolean> =
+fun Boolean.trueOrFalse(language: Language, literal: Boolean = false): Map<QuestionOption, Boolean> =
     if (!literal)
         mapOf(
             SimpleTextOption.yes(language) to this,

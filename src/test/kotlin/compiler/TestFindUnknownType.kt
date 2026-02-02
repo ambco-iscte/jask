@@ -31,7 +31,7 @@ class TestFindUnknownType {
         assertEquals(1, e1.types.size)
         assertEquals(1, e2.types.size)
 
-        assertEquals("HelloWorld", e1.types.first().nameAsString)
-        assertEquals("HelloWorld", e2.types.first().nameAsString)
+        assertEquals("HelloWorld", e1.types.first().asString())
+        assertEquals("HelloWorld", e2.types.first().asString())
     }
 }

@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import pt.iscte.jask.extensions.procedureCallAsString
-import pt.iscte.jask.templates.ProcedureCall
+import pt.iscte.jask.common.ProcedureCall
 import pt.iscte.jask.templates.QuestionGenerationException
-import pt.iscte.jask.templates.SourceCode
+import pt.iscte.jask.common.SourceCode
 import pt.iscte.jask.templates.dynamic.HowManyArrayWrites
-import pt.iscte.jask.templates.invoke
+import pt.iscte.jask.common.invoke
 import pt.iscte.strudel.model.IArrayElementAssignment
 import pt.iscte.strudel.parsing.java.Java2Strudel
 import pt.iscte.strudel.vm.IArray

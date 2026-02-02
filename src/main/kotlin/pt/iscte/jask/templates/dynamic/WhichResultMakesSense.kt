@@ -8,6 +8,11 @@ import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sample
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.ILiteral
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IReturn
@@ -61,7 +66,7 @@ class WhichResultMakesSense : DynamicQuestionTemplate<IProcedure>() {
             it.value != result.value && it.type == procedure.returnType
         }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it) to false
         }.toMutableMap()
         options[SimpleTextOption(result)] = true
@@ -76,7 +81,10 @@ class WhichResultMakesSense : DynamicQuestionTemplate<IProcedure>() {
 
         return Question(
             source,
-            TextWithCodeStatement(language["WhichResultMakesSense"].format(procedureCallAsString(procedure, args)), procedure.longSignature()),
+            TextWithCodeStatement(
+                language["WhichResultMakesSense"].format(procedureCallAsString(procedure, args)),
+                procedure.longSignature()
+            ),
             options,
             language = language
         )

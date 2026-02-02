@@ -3,8 +3,8 @@ package pt.iscte.jask.errors
 import pt.iscte.jask.Language
 import pt.iscte.jask.errors.runtime.toQLC
 import pt.iscte.jask.extensions.toIValue
-import pt.iscte.jask.templates.QuestionSequenceWithContext
-import pt.iscte.jask.templates.SourceCode
+import pt.iscte.jask.common.QuestionSequenceWithContext
+import pt.iscte.jask.common.SourceCode
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IVariableAssignment
@@ -17,11 +17,9 @@ import pt.iscte.strudel.vm.IVirtualMachine
 import pt.iscte.strudel.vm.LoopIterationLimitError
 import pt.iscte.strudel.vm.NegativeArraySizeError
 import pt.iscte.strudel.vm.NullReferenceError
-import pt.iscte.strudel.vm.OutOfMemoryError
 import pt.iscte.strudel.vm.RuntimeError
 import pt.iscte.strudel.vm.RuntimeErrorType
 import pt.iscte.strudel.vm.StackOverflowError
-import pt.iscte.strudel.vm.UninitializedVariableError
 
 data class QLCVirtualMachine(
     private val source: String,
@@ -59,43 +57,48 @@ data class QLCVirtualMachine(
             }
 
             override fun executionError(e: RuntimeError) {
-                val question: QuestionSequenceWithContext? = when (e.type) {
-                    // Infinite Loop
-                    RuntimeErrorType.LOOP_MAX ->
-                        (e as LoopIterationLimitError).toQLC()
+                val question: QuestionSequenceWithContext? = try {
+                    when (e.type) {
+                        // Infinite Loop
+                        RuntimeErrorType.LOOP_MAX ->
+                            (e as LoopIterationLimitError).toQLC(source, procedure, arguments, variableHistory, language)
 
-                    // Stack Overflow
-                    RuntimeErrorType.STACK_OVERFLOW ->
-                        (e as StackOverflowError).toQLC(source, procedure, arguments, language)
+                        // Stack Overflow
+                        RuntimeErrorType.STACK_OVERFLOW ->
+                            (e as StackOverflowError).toQLC(source, procedure, arguments, language)
 
-                    // Out of Memory
-                    RuntimeErrorType.OUT_OF_MEMORY ->
-                        (e as OutOfMemoryError).toQLC()
+                        // Out of Memory
+                        RuntimeErrorType.OUT_OF_MEMORY ->
+                            null // TODO (e as OutOfMemoryError).toQLC()
 
-                    // Division by Zero
-                    RuntimeErrorType.DIVBYZERO ->
-                        (e as DivisionByZeroError).toQLC()
+                        // Division by Zero
+                        RuntimeErrorType.DIVBYZERO ->
+                            (e as DivisionByZeroError).toQLC(source, procedure, arguments, variableHistory, language)
 
-                    // Non-initialised Variable
-                    RuntimeErrorType.NONINIT_VARIABLE ->
-                        (e as UninitializedVariableError).toQLC()
+                        // Non-initialised Variable
+                        RuntimeErrorType.NONINIT_VARIABLE ->
+                            null // TODO (e as UninitializedVariableError).toQLC()
 
-                    // Null Pointer Exception
-                    RuntimeErrorType.NULL_POINTER ->
-                        (e as NullReferenceError).toQLC()
+                        // Null Pointer Exception
+                        RuntimeErrorType.NULL_POINTER ->
+                            (e as NullReferenceError).toQLC(source, procedure, arguments, variableHistory, language)
 
-                    // Invalid Array Index
-                    RuntimeErrorType.ARRAY_INDEX_BOUNDS ->
-                        (e as ArrayIndexError).toQLC(source, procedure, arguments, variableHistory, language)
+                        // Invalid Array Index
+                        RuntimeErrorType.ARRAY_INDEX_BOUNDS ->
+                            (e as ArrayIndexError).toQLC(source, procedure, arguments, variableHistory, language)
 
-                    // Negative Array Size
-                    RuntimeErrorType.NEGATIVE_ARRAY_SIZE ->
-                        (e as NegativeArraySizeError).toQLC()
+                        // Negative Array Size
+                        RuntimeErrorType.NEGATIVE_ARRAY_SIZE ->
+                            (e as NegativeArraySizeError).toQLC(source, procedure, arguments, variableHistory, language)
 
-                    else -> {
-                        e.printStackTrace()
-                        null
+                        else -> {
+                            e.printStackTrace()
+                            null
+                        }
                     }
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                    null
                 }
 
                 if (question != null)

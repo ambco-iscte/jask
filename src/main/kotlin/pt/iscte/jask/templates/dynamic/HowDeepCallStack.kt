@@ -3,12 +3,18 @@ import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
+import pt.iscte.jask.common.ProcedureCall
 import pt.iscte.jask.extensions.getProcedureCalls
 import pt.iscte.jask.extensions.getUsedProceduresWithinModule
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.vm.IValue
@@ -78,7 +84,7 @@ class HowDeepCallStack : DynamicQuestionTemplate<IProcedure>() {
             it.first != depth && it.first >= 0
         }.toSetBy { it.first }
 
-        val options: MutableMap<Option, Boolean> =
+        val options: MutableMap<QuestionOption, Boolean> =
             distractors.associate { SimpleTextOption(it.first, it.second) to false }.toMutableMap()
         options[SimpleTextOption(
             depth,

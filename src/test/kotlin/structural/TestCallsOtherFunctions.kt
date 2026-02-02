@@ -38,6 +38,23 @@ class TestCallsOtherFunctions {
             assertEquals(1, qlc.solution.size)
             assertEquals("No.", qlc.solution[0].toString())
         }
+
+        val src3 = """
+            import java.lang.Math;
+            
+            class Test {
+                static int random() {
+                    return (int) (Math.random() * 1000000);
+                }
+            }
+        """.trimIndent()
+        assertDoesNotThrow {
+            val qlc = CallsOtherFunctions().generate(src3)
+            println(qlc)
+
+            assertEquals(1, qlc.solution.size)
+            assertEquals("Yes.", qlc.solution[0].toString())
+        }
     }
 
     @Test

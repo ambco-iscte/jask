@@ -10,6 +10,11 @@ import pt.iscte.jask.extensions.getReturnVariables
 import pt.iscte.jask.extensions.getUsableVariables
 import pt.iscte.jask.extensions.getUsedTypes
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
@@ -43,7 +48,7 @@ class WhichVariableHoldsReturn : StructuralQuestionTemplate<MethodDeclaration>()
             it != returnVariableName
         }
 
-        val options: MutableMap<Option, Boolean> =
+        val options: MutableMap<QuestionOption, Boolean> =
             distractors.associate { SimpleTextOption(it) to false }.toMutableMap()
 
         options[SimpleTextOption(returnVariableName)] = true

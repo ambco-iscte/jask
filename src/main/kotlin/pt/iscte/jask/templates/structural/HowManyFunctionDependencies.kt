@@ -6,6 +6,11 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.findAll
 import pt.iscte.jask.extensions.multipleChoice
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
+import pt.iscte.jask.extensions.isCallFor
+import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class HowManyFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>() {
@@ -15,8 +20,8 @@ class HowManyFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration
 
         val otherFunctions =  method.findAll<MethodCallExpr>()
         val otherFunctionsNames = otherFunctions
-            .filter { it.nameAsString != method.nameAsString }
-            .map { it.nameAsString }.toSet().size
+            .filter { !it.isCallFor(method) }
+            .map { it.nameWithScope() }.toSet().size
 
         return Question(
             source,

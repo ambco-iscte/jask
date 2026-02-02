@@ -5,7 +5,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import pt.iscte.jask.templates.QuestionGenerationException
 import pt.iscte.jask.templates.dynamic.HowManyFunctionCalls
-import pt.iscte.jask.templates.invoke
+import pt.iscte.jask.common.invoke
 import kotlin.test.assertEquals
 
 class TestHowManyFunctionCalls {

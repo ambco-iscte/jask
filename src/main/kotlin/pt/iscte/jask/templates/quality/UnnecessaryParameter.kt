@@ -5,6 +5,11 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.ReturnStmt
 import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithMultipleCodeStatements
 
 class UnnecessaryParameter : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -53,9 +58,9 @@ class UnnecessaryParameter : StructuralQuestionTemplate<MethodDeclaration>() {
         }
 
 
-        var options: MutableMap<Option, Boolean> = mutableMapOf(
+        var options: MutableMap<QuestionOption, Boolean> = mutableMapOf(
             SimpleTextOption(methodReplaced.toString()) to true,
-            SimpleTextOption(methodReplacedWA.toString() ) to false
+            SimpleTextOption(methodReplacedWA.toString()) to false
         )
 
         val bodyWA2 = methodReplacedWA2.body.get()
@@ -67,7 +72,7 @@ class UnnecessaryParameter : StructuralQuestionTemplate<MethodDeclaration>() {
         }
         if (necessaryParametersWA2.isNotEmpty()) {
             methodReplacedWA2.parameters.removeAll(necessaryParametersWA2.toSet())
-            options[SimpleTextOption(methodReplacedWA2.toString() )]=false
+            options[SimpleTextOption(methodReplacedWA2.toString())]=false
         }else{
             options[SimpleTextOption(language["NoneOfTheAbove"])]=false
         }

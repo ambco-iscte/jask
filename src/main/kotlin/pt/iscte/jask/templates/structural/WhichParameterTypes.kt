@@ -7,6 +7,11 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 
 class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -15,7 +20,7 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
         element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()
 
     companion object {
-        fun options(method: MethodDeclaration, language: Language): Map<Option, Boolean> {
+        fun options(method: MethodDeclaration, language: Language): Map<QuestionOption, Boolean> {
             val parameters = method.parameters.map { it.nameAsString }
             val paramTypes = method.parameters.map { it.typeAsString }
             val returnType = method.typeAsString
@@ -36,7 +41,7 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
                 it.first.toSet() != paramTypes.toSet() && it.first.isNotEmpty()
             }.toSetBy { it.first }
 
-            val options: MutableMap<Option, Boolean> = distractors.associate {
+            val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
                 SimpleTextOption(it.first, it.second) to false
             }.toMutableMap()
 

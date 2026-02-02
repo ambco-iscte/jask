@@ -7,14 +7,16 @@ import pt.iscte.jask.extensions.correctAndRandomDistractors
 import pt.iscte.jask.extensions.getVariableAssignments
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.toIValues
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.ILoop
 import pt.iscte.strudel.model.IProcedure
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
-import kotlin.collections.get
-import kotlin.inc
 
 class HowManyVariableAssignments : DynamicQuestionTemplate<IProcedure>() {
 

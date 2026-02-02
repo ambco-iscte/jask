@@ -8,6 +8,9 @@ import com.github.javaparser.ast.stmt.*
 import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithMultipleCodeStatements
 
 public class ReplaceForWithWhile  : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -56,13 +59,13 @@ public class ReplaceForWithWhile  : StructuralQuestionTemplate<MethodDeclaration
 
 
         return Question(
-                source,
-                TextWithMultipleCodeStatements(
-                        language["ReplaceForWithWhile"].format(method.nameAsString),
-                        listOf(method.toString(), methodReplaced.toString())
-                ),
-                true.trueOrFalse(language),
-                language = language
+            source,
+            TextWithMultipleCodeStatements(
+                language["ReplaceForWithWhile"].format(method.nameAsString),
+                listOf(method.toString(), methodReplaced.toString())
+            ),
+            true.trueOrFalse(language),
+            language = language
         )
     }
 }

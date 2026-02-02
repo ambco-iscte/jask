@@ -2,12 +2,15 @@ package pt.iscte.jask.templates.quality
 import pt.iscte.jask.templates.*
 
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.NullLiteralExpr
 import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.extensions.*
-import java.beans.Expression
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithMultipleCodeStatements
 
 class UselessSelfAssign : StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -32,9 +35,9 @@ class UselessSelfAssign : StructuralQuestionTemplate<MethodDeclaration>() {
 
 
 
-        var options: MutableMap<Option, Boolean> = mutableMapOf(
+        var options: MutableMap<QuestionOption, Boolean> = mutableMapOf(
             SimpleTextOption(methodReplaced0.toString()) to true,
-            SimpleTextOption(methodReplaced1.toString() ) to false,
+            SimpleTextOption(methodReplaced1.toString()) to false,
             SimpleTextOption(language["NoneOfTheAbove"]) to false
         )
 

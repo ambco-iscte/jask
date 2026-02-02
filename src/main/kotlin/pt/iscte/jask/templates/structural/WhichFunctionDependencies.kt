@@ -1,8 +1,4 @@
 package pt.iscte.jask.templates.structural
-import com.github.javaparser.StaticJavaParser
-import com.github.javaparser.ast.AccessSpecifier
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.NodeList
 import pt.iscte.jask.templates.*
 
@@ -19,10 +15,19 @@ import com.github.javaparser.ast.type.VoidType
 import jdk.jfr.Description
 import pt.iscte.jask.Language
 import pt.iscte.jask.extensions.findAll
+import pt.iscte.jask.extensions.findMethodDeclaration
 import pt.iscte.jask.extensions.getLocalVariables
 import pt.iscte.jask.extensions.getLoopControlStructures
+import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.jask.extensions.sampleSequentially
+import pt.iscte.jask.extensions.toMethodDeclaration
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
+import pt.iscte.jask.extensions.isCallFor
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import kotlin.collections.emptyList
@@ -32,47 +37,17 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
     @Description("Method must contain at least 1 method call to another method")
     override fun isApplicable(element: MethodDeclaration): Boolean =
         element.findAll(MethodCallExpr::class.java).any {
-            it.nameAsString != element.nameAsString
+            !it.isCallFor(element)
         }
 
-    private fun MethodCallExpr.toMethodDeclaration(): MethodDeclaration {
-        fun AccessSpecifier.toModifier(): Modifier? = when (this) {
-            AccessSpecifier.PUBLIC -> Modifier.publicModifier()
-            AccessSpecifier.PRIVATE -> Modifier.privateModifier()
-            AccessSpecifier.PROTECTED -> Modifier.privateModifier()
-            AccessSpecifier.NONE -> null
-        }
-
-        return runCatching {
-            val resolved = this.resolve()
-
-            val returnType = StaticJavaParser.parseType(resolved.returnType.describe())
-
-            val modifiers = NodeList.nodeList<Modifier>()
-            resolved.accessSpecifier().toModifier()?.let { modifiers.add(it) }
-            if (resolved.isStatic) modifiers.add(Modifier.staticModifier())
-            if (resolved.isAbstract) modifiers.add(Modifier.abstractModifier())
-
-            return MethodDeclaration(modifiers, returnType, nameAsString)
-        }.getOrDefault(
-            defaultValue = MethodDeclaration(NodeList.nodeList(), VoidType(), nameAsString) // ugly
-        )
-    }
-
-    private fun getDependencies(method: MethodDeclaration, unit: CompilationUnit? = null): Set<MethodDeclaration> {
-        val unit = unit ?: method.findCompilationUnit().getOrNull ?: return emptySet()
-        return method.findAll(MethodCallExpr::class.java).mapNotNull { call ->
-            if (call.nameAsString == method.nameAsString) null
-            else unit.findFirst(MethodDeclaration::class.java) {
-                it.nameAsString == call.nameAsString
-            }.getOrNull ?: call.toMethodDeclaration()
+    private fun getDependencies(method: MethodDeclaration): Set<MethodDeclaration> =
+        method.findAll(MethodCallExpr::class.java).mapNotNull { call ->
+            call.findMethodDeclaration().getOrNull ?: call.toMethodDeclaration() ?:
+            MethodDeclaration(NodeList.nodeList(), VoidType(), call.nameAsString)
         }.toSet()
-    }
 
-    private fun getDependenciesDeep(method: MethodDeclaration, unit: CompilationUnit? = null): Set<MethodDeclaration> {
-        val unit = unit ?: method.findCompilationUnit().getOrNull ?: return emptySet()
-
-        val dependencies = getDependencies(method, unit).toMutableSet()
+    private fun getDependenciesDeep(method: MethodDeclaration): Set<MethodDeclaration> {
+        val dependencies = getDependencies(method).toMutableSet()
 
         val visited = mutableMapOf<MethodDeclaration, Boolean>()
         val queue = dependencies.toMutableList()
@@ -80,7 +55,7 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
         while (queue.isNotEmpty()) {
             val current = queue.removeFirst()
             visited[current] = true
-            getDependencies(current, unit).forEach { dependency ->
+            getDependencies(current).forEach { dependency ->
                 dependencies.add(dependency)
                 if (dependency !in visited)
                     queue.add(dependency)
@@ -93,12 +68,12 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
     override fun build(sources: List<SourceCode>, language: Language): Question {
         val (source, method) = sources.getRandom<MethodDeclaration>()
 
-        val dependencyNames = getDependencies(method).map { it.nameAsString }.toSet()
+        val dependencyNames = getDependencies(method).map { it.nameWithScope() }.toSet()
         val dependencyScopeNames = method.findAll(MethodCallExpr::class.java).mapNotNull {
             it.scope.getOrNull?.toString()
         }.toSet()
         val dependenciesDeep = getDependenciesDeep(method)
-        val dependencyNamesDeep = dependenciesDeep.map { it.nameAsString }.toSet()
+        val dependencyNamesDeep = dependenciesDeep.map { it.nameWithScope() }.toSet()
 
         val deepDependenciesClasses = dependenciesDeep.mapNotNull {
             it.findAncestor<TypeDeclaration<*>>().getOrNull?.nameAsString
@@ -116,11 +91,11 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
 
         val classes = (
             method.findCompilationUnit().getOrNull?.findAll(TypeDeclaration::class.java) ?: emptyList()
-        ).map { it.nameAsString!! }.toSet()
+        ).mapNotNull { it.nameAsString }.toSet()
 
         val otherFunctions = (
             method.findCompilationUnit().getOrNull?.findAll(MethodDeclaration::class.java) ?: emptyList()
-        ).minus(method).map { it.nameAsString!! }.toSet()
+        ).minus(method).map { it.nameWithScope() }.toSet()
 
         val returns =
             if (method.findFirst(ReturnStmt::class.java).isPresent) setOf("return")
@@ -168,7 +143,7 @@ class WhichFunctionDependencies : StructuralQuestionTemplate<MethodDeclaration>(
             it.first.toSet().isNotEmpty() && it.first.toSet() != dependencyNames.toSet()
         }.toSetBy { it.first.toSet() }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 

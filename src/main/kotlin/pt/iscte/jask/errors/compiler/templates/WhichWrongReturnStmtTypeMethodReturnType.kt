@@ -5,11 +5,14 @@ import pt.iscte.jask.Language
 import pt.iscte.jask.errors.CompilerErrorFinder
 import pt.iscte.jask.errors.compiler.WrongReturnStmtType
 import pt.iscte.jask.extensions.nameWithScope
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.jask.templates.*
 import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.jask.templates.structural.*
 
-class MethodWithWrongReturnStmt(
+class WhichWrongReturnStmtTypeMethodReturnType(
     private val error: WrongReturnStmtType? = null
 ): StructuralQuestionTemplate<MethodDeclaration>() {
 
@@ -29,9 +32,8 @@ class MethodWithWrongReturnStmt(
 
         return Question(
             source,
-            TextWithCodeStatement(language["MethodWithWrongReturnStmt"].format(
-                error.returnStmt.toString(),
-                method.nameWithScope()),
+            TextWithCodeStatement(
+                language["WhichReturnType"].format(method.nameWithScope()),
                 method
             ),
             WhichReturnType.options(method, language),

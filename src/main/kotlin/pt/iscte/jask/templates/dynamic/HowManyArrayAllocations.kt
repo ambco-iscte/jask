@@ -3,11 +3,15 @@ import jdk.jfr.Description
 import pt.iscte.jask.templates.*
 
 import pt.iscte.jask.Language
-import pt.iscte.jask.extensions.correctAndRandomDistractors
 import pt.iscte.jask.extensions.procedureCallAsString
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.IArrayAccess
 import pt.iscte.strudel.model.IArrayAllocation
 import pt.iscte.strudel.model.IArrayElementAssignment
@@ -127,7 +131,7 @@ class HowManyArrayAllocations : DynamicQuestionTemplate<IProcedure>() {
             it.first != listener.allocations.size && it.first >= 0
         }.toSetBy { it.first }
 
-        val options: MutableMap<Option, Boolean> = distractors.associate {
+        val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
             SimpleTextOption(it.first, it.second) to false
         }.toMutableMap()
 

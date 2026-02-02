@@ -1,10 +1,8 @@
 package dynamic
 
 import pt.iscte.jask.Localisation
-import pt.iscte.jask.templates.ProcedureCall
-import pt.iscte.jask.templates.structural.*
+import pt.iscte.jask.common.ProcedureCall
 import pt.iscte.jask.templates.dynamic.*
-import pt.iscte.jask.templates.quality.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

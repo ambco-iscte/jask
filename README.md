@@ -216,6 +216,8 @@ can be loaded from any folder (containing the `.properties` files) located in th
 <br>
 
 ## 📝 Publications Using Jask
+- [Turning Programming Obstacles into Timely Learning Opportunities with Questions about Learners' Code](https://doi.org/10.1145/3769994.37700)
+
 - [Integrating Questions About Learners’ Code Into an Automated Assessment System](https://doi.org/10.4230/OASIcs.ICPEC.2025.5)
 
 - [Jask: Generation of Questions About Learners' Code in Java](https://dl.acm.org/doi/10.1145/3502718.3524761)

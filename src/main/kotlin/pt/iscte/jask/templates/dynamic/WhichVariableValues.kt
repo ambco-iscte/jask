@@ -9,8 +9,12 @@ import pt.iscte.jask.extensions.randomKeyByOrNull
 import pt.iscte.jask.extensions.sampleSequentially
 import pt.iscte.jask.extensions.toIValues
 import pt.iscte.jask.extensions.toSetBy
+import pt.iscte.jask.common.Question
+import pt.iscte.jask.common.QuestionOption
+import pt.iscte.jask.common.SimpleTextOption
+import pt.iscte.jask.common.SourceCode
+import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.strudel.model.IProcedure
-import pt.iscte.strudel.model.IProcedureDeclaration
 import pt.iscte.strudel.model.IVariableAssignment
 import pt.iscte.strudel.model.IVariableDeclaration
 import pt.iscte.strudel.model.util.findAll
@@ -19,18 +23,17 @@ import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.IVirtualMachine
 import kotlin.collections.plus
 import kotlin.collections.set
-import kotlin.text.get
 
 class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
 
     companion object {
         fun options(
-            correct: IVariableDeclaration<*>,
+            variable: IVariableDeclaration<*>,
             values: List<IValue>,
             variableHistory: Map<IVariableDeclaration<*>, List<IValue>>,
             arguments: List<Any?>,
             language: Language
-        ): Map<Option, Boolean> {
+        ): Map<QuestionOption, Boolean> {
             require(values.size > 1) { "WhichVariableValues variable must take at least 2 values!" }
 
             val otherValues = variableHistory.values.filter { it.size > 1 }
@@ -45,7 +48,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 // Other variables
                 variableHistory.map {
                     it.value to
-                    language["WhichVariableValues_DistractorWrongVariable"].format(it.key.id, correct.id)
+                    language["WhichVariableValues_DistractorWrongVariable"].format(it.key.id, variable.id)
                 },
 
                 otherValues.flatMap {
@@ -61,7 +64,7 @@ class WhichVariableValues : DynamicQuestionTemplate<IProcedure>() {
                 it.first != values && it.first.isNotEmpty()
             }.toSetBy { it.first }
 
-            val options: MutableMap<Option, Boolean> = mutableMapOf()
+            val options: MutableMap<QuestionOption, Boolean> = mutableMapOf()
 
             distractors.forEach {
                 options[SimpleTextOption(it.first, it.second)] = false
