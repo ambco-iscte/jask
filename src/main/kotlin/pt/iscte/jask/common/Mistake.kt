@@ -2,18 +2,6 @@ package pt.iscte.jask.common
 
 enum class Mistake(val description: String) {
 
-    NotCountInitialisationAsAssignment(
-        "Does not count variable initialisation as a value assignment"
-    ),
-
-    MissLastVariableValue(
-        "Misses the last value assigned to a variable"
-    ),
-
-    MissLastLoopIteratorAssignment(
-        "Misses last iterator variable increment which causes loop guard to fail"
-    ),
-
     ConfuseParameterNamesWithTypes(
         "Fails to differentiate between a method's parameter names and types"
     ),
@@ -30,7 +18,19 @@ enum class Mistake(val description: String) {
         "Considers instructions such as 'return' to be functions"
     ),
 
+    MissLastLoopIteratorAssignment(
+        "Misses last iterator variable increment which causes loop guard to fail"
+    ),
+
+    MissLastVariableValue(
+        "Misses the last value assigned to a variable"
+    ),
+
     NonSpecificOffByOne(
         "Is off-by-one (non-specific)"
+    ),
+
+    NotCountInitialisationAsAssignment(
+        "Does not count variable initialisation as a value assignment"
     );
 }

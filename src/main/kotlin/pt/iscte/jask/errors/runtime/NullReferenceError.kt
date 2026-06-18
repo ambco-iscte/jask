@@ -26,11 +26,11 @@ fun NullReferenceError.toQLC(
     variableHistory: Map<IVariableDeclaration<*>, List<IValue>>,
     language: Language
 ): QuestionSequenceWithContext {
-    require(target is IVariableExpression) {
+    require(targetReference is IVariableExpression) {
         "NullReferenceError QLC: target expression must be a variable expression!"
     }
 
-    val variable = target as IVariableExpression
+    val variable = targetReference as IVariableExpression
     require((variableHistory[variable.variable]?.count { !it.isNull  } ?: 0) >= 1) {
         "NullReferenceError QLC: target variable must take at least 1 non-null value!"
     }
@@ -40,24 +40,24 @@ fun NullReferenceError.toQLC(
     fun whichVariableValues(): Question = Question(
         type = "WhichVariableValues",
         source = source,
-        statement = SimpleTextStatement(language["WhichVariableValues"].format((target as IVariableExpression).variable.id, procedureCallString)),
+        statement = SimpleTextStatement(language["WhichVariableValues"].format((targetReference as IVariableExpression).variable.id, procedureCallString)),
         WhichVariableValues.options(
-            (target as IVariableExpression).variable,
-            variableHistory[(target as IVariableExpression).variable] ?: emptyList(),
+            (targetReference as IVariableExpression).variable,
+            variableHistory[(targetReference as IVariableExpression).variable] ?: emptyList(),
             variableHistory,
             arguments.toList(),
             language
         ),
         language = language,
         relevantSourceCode = procedure.findAll(IVariableAssignment::class).filter {
-            it.target == (target as IVariableExpression).variable
+            it.target == (targetReference as IVariableExpression).variable
         }.map { SourceLocation(it) }
     )
 
     return QuestionSequenceWithContext(
         SimpleTextStatement(language["NullReferenceError"].format(
             procedureCallString,
-            (target.getProperty(JP) as Node).lineRelativeTo(procedure.getProperty(JP) as Node),
+            (targetReference.getProperty(JP) as Node).lineRelativeTo(procedure.getProperty(JP) as Node),
             variable.variable.id,
             "null"
         )),

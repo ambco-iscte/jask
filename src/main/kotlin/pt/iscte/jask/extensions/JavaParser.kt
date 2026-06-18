@@ -359,6 +359,9 @@ fun MethodDeclaration.hasDuplicatedInsideIfElse(): IfStmt? =
 fun Node.lineRelativeTo(other: Node): Int =
     range.get().begin.relativeTo(other.range.get().begin).line
 
+val Node.line: Int?
+    get() = this.range.getOrNull?.begin?.line
+
 fun negateExpression(expression: Expression): Expression {
     return when (expression) {
         is BinaryExpr -> {

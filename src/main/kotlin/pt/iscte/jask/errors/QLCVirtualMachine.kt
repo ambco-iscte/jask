@@ -44,11 +44,18 @@ data class QLCVirtualMachine(
 
         val questions = mutableListOf<QuestionSequenceWithContext>()
 
+        var currentProcedure: IProcedure = procedure
+        var currentArguments: List<IValue> = arguments
+
         val listener = object : IVirtualMachine.IListener {
             override fun procedureCall(procedure: IProcedureDeclaration, args: List<IValue>, caller: IProcedure?) {
                 procedure.parameters.forEachIndexed { index, parameter ->
                     if (parameter !in variableHistory)
                         variableHistory[parameter] = listOf(args[index])
+                }
+                if (procedure is IProcedure) {
+                    currentProcedure = procedure
+                    currentArguments = args
                 }
             }
 
@@ -61,11 +68,11 @@ data class QLCVirtualMachine(
                     when (e.type) {
                         // Infinite Loop
                         RuntimeErrorType.LOOP_MAX ->
-                            (e as LoopIterationLimitError).toQLC(source, procedure, arguments, variableHistory, language)
+                            (e as LoopIterationLimitError).toQLC(source, currentProcedure, currentArguments, variableHistory, language)
 
                         // Stack Overflow
                         RuntimeErrorType.STACK_OVERFLOW ->
-                            (e as StackOverflowError).toQLC(source, procedure, arguments, language)
+                            (e as StackOverflowError).toQLC(source, currentProcedure, currentArguments, language)
 
                         // Out of Memory
                         RuntimeErrorType.OUT_OF_MEMORY ->
@@ -73,7 +80,7 @@ data class QLCVirtualMachine(
 
                         // Division by Zero
                         RuntimeErrorType.DIVBYZERO ->
-                            (e as DivisionByZeroError).toQLC(source, procedure, arguments, variableHistory, language)
+                            (e as DivisionByZeroError).toQLC(source, currentProcedure, currentArguments, variableHistory, language)
 
                         // Non-initialised Variable
                         RuntimeErrorType.NONINIT_VARIABLE ->
@@ -81,15 +88,15 @@ data class QLCVirtualMachine(
 
                         // Null Pointer Exception
                         RuntimeErrorType.NULL_POINTER ->
-                            (e as NullReferenceError).toQLC(source, procedure, arguments, variableHistory, language)
+                            (e as NullReferenceError).toQLC(source, currentProcedure, currentArguments, variableHistory, language)
 
                         // Invalid Array Index
                         RuntimeErrorType.ARRAY_INDEX_BOUNDS ->
-                            (e as ArrayIndexError).toQLC(source, procedure, arguments, variableHistory, language)
+                            (e as ArrayIndexError).toQLC(source, currentProcedure, currentArguments, variableHistory, language)
 
                         // Negative Array Size
                         RuntimeErrorType.NEGATIVE_ARRAY_SIZE ->
-                            (e as NegativeArraySizeError).toQLC(source, procedure, arguments, variableHistory, language)
+                            (e as NegativeArraySizeError).toQLC(source, currentProcedure, currentArguments, variableHistory, language)
 
                         else -> {
                             e.printStackTrace()
