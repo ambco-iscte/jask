@@ -47,6 +47,6 @@ data class WrongMethodCallParameters(val method: MethodDeclaration, val call: Me
             if (parameterNumberMismatch)
                 "Takes <${expected.size}> arguments, but <${actual.size}> ${if (actual.size == 1) "was" else "were"} given."
             else
-                "Takes arguments of type(s) <${expected.joinToString(", ")}>, but was given <${actual.joinToString(", ")}>."
+                "Takes arguments of type(s) <${expected.joinToString(", ")}>, but <${actual.joinToString(", ")}> ${if (actual.size == 1) "was" else "were"} given."
         )
 }

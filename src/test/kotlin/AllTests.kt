@@ -46,6 +46,7 @@ import compiler.*
     TestFindUnknownType::class,
     TestFindUnknownVariable::class,
     TestWrongReturnStmtType::class,
-    TestWrongTypeForVariableDeclaration::class
+    TestWrongTypeForVariableDeclaration::class,
+    TestMissingReturnInBranch::class
 )
 class AllTests

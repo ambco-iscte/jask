@@ -1,5 +1,6 @@
 package pt.iscte.jask.errors
 
+import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -9,6 +10,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.type.Type
+import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import pt.iscte.jask.Language
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.errors.compiler.MissingReturnInBranch
@@ -49,7 +51,7 @@ class CompilerErrorFinder<T : Node>(
 ) {
 
     init {
-        configureStaticJavaParser()
+        configureStaticJavaParser(target.findCompilationUnit().getOrNull)
     }
 
     private val unit: CompilationUnit =

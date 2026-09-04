@@ -1,7 +1,9 @@
 package compiler
 
+import com.github.javaparser.StaticJavaParser
 import org.junit.jupiter.api.Test
 import pt.iscte.jask.Localisation
+import pt.iscte.jask.errors.CompilerErrorFinder
 import pt.iscte.jask.errors.compiler.templates.WhichVariablesUsableAtLine
 import kotlin.test.assertEquals
 
@@ -16,6 +18,17 @@ class TestReferencesUndefinedVariable {
                 int c = d;
             }
         """.trimIndent()
+
+        val errors = CompilerErrorFinder(StaticJavaParser.parse(src)).findUnknownVariables()
+        assertEquals(1, errors.size)
+
+        val error = errors.single()
+        println(error)
+
+        assertEquals("d", error.expr.nameAsString)
+        // assertEquals(setOf("a", "b"), error.scope.variables.map { it.nameAsString }.toSet())
+
+        // ---
 
         val qlc = WhichVariablesUsableAtLine()
         val data = qlc.generate(src, Localisation.getLanguage("en"))

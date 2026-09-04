@@ -11,13 +11,6 @@ import kotlin.test.assertEquals
 
 class TestWrongTypeForVariableDeclaration {
 
-    init {
-        StaticJavaParser.getParserConfiguration().languageLevel = ParserConfiguration.LanguageLevel.JAVA_20
-        StaticJavaParser.getParserConfiguration().setSymbolResolver(
-            JavaSymbolSolver(CombinedTypeSolver().apply { add(ReflectionTypeSolver()) })
-        )
-    }
-
     @Test
     fun test() {
         val src = """

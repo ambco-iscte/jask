@@ -9,10 +9,6 @@
 
 **A Library for Generating Questions about Learners' Code in Java**
 
-[![ACM ITiCSE '22 - Check out Jask's original paper!](https://img.shields.io/badge/ACM_ITiCSE_'22-Check_out_Jask's_original_paper!-0068a7?logo=acm)](https://doi.org/10.1145/3502718.3524761)
-
-[![ICPEC 2025 - Check out a small study using Jask!](https://img.shields.io/static/v1?label=ICPEC+2025&message=Check+out+a+small+study+using+Jask!&color=ebc034&logo=doi&logoColor=white)](https://doi.org/10.4230/OASIcs.ICPEC.2025.5)
-
 **Jask** is a library for generating
 [Questions about Learners' Code](http://urn.fi/URN:ISBN:978-952-64-1768-4) (QLCs) targeting Java
 code. Jask aims to reframe [previous work on QLCs](https://doi.org/10.1145/3502718.3524761) as
@@ -41,7 +37,7 @@ the project root in `/build/libs`. This file should be copied to your own projec
 and then added as a dependency in your build automation tool of choice. For example (in Kotlin Gradle):
 ```kotlin
 dependencies {
-    implementation(files("libs/jask-0.5.5.jar"))
+    implementation(files("libs/jask-0.7.4.jar"))
 }
 ```
 The file name can change depending on the version of Jask, and should be changed
@@ -216,6 +212,8 @@ can be loaded from any folder (containing the `.properties` files) located in th
 <br>
 
 ## 📝 Publications Using Jask
+- [Summative Assessment of Program Comprehension in CS1 with Questions About Learners' Code](https://doi.org/10.4230/OASIcs.ICPEC.2026.1)
+
 - [Turning Programming Obstacles into Timely Learning Opportunities with Questions about Learners' Code](https://doi.org/10.1145/3769994.37700)
 
 - [Integrating Questions About Learners’ Code Into an Automated Assessment System](https://doi.org/10.4230/OASIcs.ICPEC.2025.5)
