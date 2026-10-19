@@ -225,5 +225,17 @@ can be loaded from any folder (containing the `.properties` files) located in th
 ## © Credit
 
 - **Supervision:** [André L. Santos](https://ciencia.iscte-iul.pt/authors/andre-leal-santos/cv)
-- **Structural, Dynamic, and Error QLCs:** [Afonso B. Caniço](https://ciencia.iscte-iul.pt/authors/afonso-canico/cv)
+- **Structural, Dynamic, and Error QLCs:** [Afonso B. Caniço](https://ciencia.iscte-iul.pt/authors/afonso-canico/cv) (Primary Author)
 - **Code Quality QLCs:** [Gonçalo Serrano](https://www.linkedin.com/in/gon%C3%A7alo-serrano-207574232/)
+
+<br><br>
+
+---
+
+<p style="text-align: center;">
+<picture style="height:10rem">
+  <source style="height:10rem" media="(prefers-color-scheme: dark)" srcset="resources/No-AI Label Light (For Dark Mode).png">
+  <source style="height:10rem" media="(prefers-color-scheme: light)" srcset="resources/No-AI Label Dark (For Light Mode).png">
+  <img style="height:10rem" alt="AEDEval" src="resources/No-AI%20Label%20Light%20(For%20Dark%20Mode).png">
+</picture>
+</p>

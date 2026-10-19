@@ -48,9 +48,9 @@ class UnnecessaryParameter : StructuralQuestionTemplate<MethodDeclaration>() {
             .toSet()
 
 
-        methodReplacedWA.setType(methodReplacedWA.parameters.first.get().type)
+        methodReplacedWA.setType(methodReplacedWA.parameters.first().type)
         val returnStatements = methodReplacedWA.findAll(com.github.javaparser.ast.stmt.ReturnStmt::class.java)
-        val newReturn = ReturnStmt(methodReplacedWA.parameters.first.get().nameAsString)
+        val newReturn = ReturnStmt(methodReplacedWA.parameters.first().nameAsString)
         if (returnStatements.isEmpty()) {
             methodReplacedWA.body.get().addStatement(newReturn)
         }else{

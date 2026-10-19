@@ -209,7 +209,18 @@ fun Node.getBranches(): List<IfStmt> =
     findAll(IfStmt::class.java)
 
 val JAVA_PRIMITIVE_TYPES: Set<String> =
-    PrimitiveType.Primitive.values().map { it.name.lowercase(Locale.getDefault()) }.toSet()
+    PrimitiveType.Primitive.entries.map { it.name.lowercase(Locale.getDefault()) }.toSet()
+
+val JAVA_PRIMITIVES: Set<Type> = setOf(
+    PrimitiveType.intType(),
+    PrimitiveType.longType(),
+    PrimitiveType.floatType(),
+    PrimitiveType.doubleType(),
+    PrimitiveType.intType(),
+    PrimitiveType.shortType(),
+    PrimitiveType.byteType(),
+    PrimitiveType.booleanType()
+)
 
 fun MethodDeclaration.returnsPrimitiveOrArrayOrString(): Boolean =
     type.isPrimitiveType || type.isArrayType || type.toString() == String::class.simpleName

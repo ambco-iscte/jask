@@ -12,6 +12,7 @@ import pt.iscte.jask.common.SimpleTextOption
 import pt.iscte.jask.common.SourceCode
 import pt.iscte.jask.templates.StructuralQuestionTemplate
 import pt.iscte.jask.common.TextWithCodeStatement
+import pt.iscte.jask.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 class WhichVariableType(
@@ -38,13 +39,13 @@ class WhichVariableType(
         val error = this.error ?: CompilerErrorFinder(unit).findVariablesAssignedWithWrongType().random()
 
         val distractors = sampleSequentially(3, unit.findAllTypes().map {
-            it.second to null
-        }) {
-            it.first != error.expected
+            it.first.toString()
+        }, JAVA_PRIMITIVE_TYPES) {
+            it != error.actual.describe()
         }
 
         val options: MutableMap<QuestionOption, Boolean> = distractors.associate {
-            SimpleTextOption(it.first, it.second) to false
+            SimpleTextOption(it, null) to false
         }.toMutableMap()
         options[SimpleTextOption(error.variable.typeAsString)] = true
 
@@ -54,7 +55,7 @@ class WhichVariableType(
         return Question(
             source,
             TextWithCodeStatement(
-                language["WhichReturnType"].format(error.variable, error.variable.range.get().begin.line),
+                language["WhichVariableType"].format(error.variable, error.variable.range.get().begin.line),
                 source.code
             ),
             options,

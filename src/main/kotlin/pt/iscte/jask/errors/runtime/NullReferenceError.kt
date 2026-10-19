@@ -19,6 +19,7 @@ import pt.iscte.strudel.parsing.java.SourceLocation
 import pt.iscte.strudel.vm.IValue
 import pt.iscte.strudel.vm.NullReferenceError
 
+
 fun NullReferenceError.toQLC(
     source: SourceCode,
     procedure: IProcedure,

@@ -37,6 +37,10 @@ import pt.iscte.jask.extensions.success
 import pt.iscte.jask.extensions.toType
 import pt.iscte.jask.common.QuestionSequenceWithContext
 import pt.iscte.jask.common.SimpleTextStatement
+import pt.iscte.jask.errors.compiler.templates.HowManyReturnStatements
+import pt.iscte.jask.errors.compiler.templates.WhichReturnExecutesOnCondition
+import pt.iscte.jask.extensions.ControlFlowGraph
+import pt.iscte.jask.extensions.toStringPretty
 import pt.iscte.jask.templates.structural.WhatVariables
 import pt.iscte.jask.templates.structural.WhichParametersSingleChoice
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
@@ -82,9 +86,9 @@ class CompilerErrorFinder<T : Node>(
                 )
             )
 
-            is UnknownMethod -> null // TODO
+            is UnknownMethod -> null // TODO what about Java built-ins?
 
-            is UnknownType -> null // TODO
+            is UnknownType -> null // TODO what about Java built-ins?
 
             is WrongTypeForVariableDeclaration ->
                 if (error.initialiserIsMethodCall)
@@ -112,6 +116,16 @@ class CompilerErrorFinder<T : Node>(
                 )
             )
 
+            is MissingReturnInBranch -> QuestionSequenceWithContext(
+                SimpleTextStatement(language["MissingReturn"].format(
+                    error.method.nameWithScope(),
+                    "return"
+                )), listOf(
+                    HowManyReturnStatements(error).generate(unit, language),
+                    WhichReturnExecutesOnCondition(error).generate(unit, language)
+                )
+            )
+
             is WrongMethodCallParameters ->
                 if (error.parameterNumberMismatch) QuestionSequenceWithContext(
                     SimpleTextStatement(language["CallMethodWithWrongParameterNumber"].format(
@@ -129,15 +143,37 @@ class CompilerErrorFinder<T : Node>(
                 )
                 else null
 
-            is MissingReturnInBranch ->
-                TODO("Not yet implemented: MissingReturnInBranch QLC")
-
             else -> null
         }
+    }.onFailure {
+        it.printStackTrace()
     }.getOrNull() }
 
     fun findMissingReturnInBranch(): List<MissingReturnInBranch> {
-        return emptyList() // TODO (cfg?)
+        val t = when (target) {
+            is MethodDeclaration ->
+                target
+
+            is CompilationUnit if target.types.singleOrNull()?.methods?.size == 1 ->
+                target.types.single().methods.single()
+
+            else ->
+                return emptyList()
+                /*
+                throw UnsupportedOperationException(
+                    ("Compiler error finder target AST element for MissingReturnInBranch errors must be of" +
+                            " type <%s> or a <%s> with only one type containing a single method, but a <%s> was provided").format(
+                        MethodDeclaration::class.java.canonicalName,
+                        CompilationUnit::class.java.canonicalName,
+                        target::class.java.canonicalName)
+                )
+                 */
+        }
+
+        val flow = ControlFlowGraph(t)
+        return flow.findBranchesWithMissingReturn().map { branch ->
+            MissingReturnInBranch(t, flow, branch)
+        }
     }
 
     fun findUnknownVariables(): List<UnknownVariable> {
@@ -200,4 +236,34 @@ class CompilerErrorFinder<T : Node>(
             val dec = it.findClosestMethodDeclaration()
             dec.isPresent && !it.isValidFor(dec.get())
         }.map { WrongMethodCallParameters(it.findClosestMethodDeclaration().get(), it) }
+}
+
+fun main() {
+    val src = """
+        class Test {
+            static boolean largestIsEven(int[] a) {
+                if (a.length == 0) {
+                    return false;
+                }
+                
+                int i = 1;
+                int largest = a[0];
+                
+                while (i < a.length) {
+                    if (a[i] > largest) {
+                        largest = a[i];
+                    }
+                    i = i + 1;
+                }
+                
+                if (largest % 2 == 0) {
+                    return true;
+                }
+            }
+        }
+    """.trimIndent()
+    val unit = StaticJavaParser.parse(src);
+    CompilerErrorFinder(unit).findAllAndGenerateQLCs().forEach {
+        println(it)
+    }
 }

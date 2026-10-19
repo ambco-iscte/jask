@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "2.4.20"
 }
 
 group = "pt.iscte"
-version = "0.7.4"
+version = "0.8.0"
 
 repositories {
     mavenCentral()

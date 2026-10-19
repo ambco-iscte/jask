@@ -7,5 +7,7 @@ import pt.iscte.jask.errors.ICompilerError
 
 data class UnknownType(val type: Type, val location: Node, val types: List<Type>): ICompilerError {
 
+    // TODO what if student meant to use a Java built-in type instead of a type they implemented
+
     override fun message(): String = "Unknown type ${type.asString()} in: $location"
 }

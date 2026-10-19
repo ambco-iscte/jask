@@ -2,6 +2,9 @@ package pt.iscte.jask.extensions
 
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.BinaryExpr
+import com.github.javaparser.ast.expr.Expression
+import com.github.javaparser.ast.expr.UnaryExpr
 import pt.iscte.jask.Language
 import pt.iscte.jask.common.QuestionOption
 import pt.iscte.jask.common.Question
@@ -20,6 +23,37 @@ import pt.iscte.jask.templates.quality.UselessDuplicationInsideIfElse
 import pt.iscte.jask.templates.quality.UselessSelfAssign
 import pt.iscte.jask.templates.quality.UselessVariableDeclaration
 import java.lang.reflect.Method
+
+fun Expression.equalsBoolean(value: Boolean): Expression =
+    this.simplify(!value)
+
+private val BINARY_OPERATOR_OPPOSITE: Map<BinaryExpr.Operator, BinaryExpr.Operator> = mapOf(
+    BinaryExpr.Operator.GREATER to BinaryExpr.Operator.LESS_EQUALS,
+    BinaryExpr.Operator.GREATER_EQUALS to BinaryExpr.Operator.LESS,
+    BinaryExpr.Operator.LESS to BinaryExpr.Operator.GREATER_EQUALS,
+    BinaryExpr.Operator.LESS_EQUALS to BinaryExpr.Operator.GREATER,
+    BinaryExpr.Operator.EQUALS to BinaryExpr.Operator.NOT_EQUALS,
+    BinaryExpr.Operator.NOT_EQUALS to BinaryExpr.Operator.EQUALS,
+)
+
+fun Expression.simplify(negated: Boolean): Expression {
+    if (this is UnaryExpr)
+        return this.expression.simplify(this.operator == UnaryExpr.Operator.LOGICAL_COMPLEMENT)
+
+    if (this is BinaryExpr)
+        return BinaryExpr(
+            this.left.simplify(false),
+            this.right.simplify(false),
+            if (negated)
+                BINARY_OPERATOR_OPPOSITE.getOrDefault(this.operator, this.operator)
+            else this.operator
+        )
+
+    return this
+}
+
+fun <T> List<T>.fromIndex(start: Int): List<T> =
+    if (size <= start) emptyList() else subList(start, size)
 
 val Class<*>.wrapper: Class<*>
     get() = this.kotlin.javaObjectType
@@ -143,19 +177,11 @@ fun <T> success(body: () -> T): Boolean =
 fun <T> failure(body: () -> T): Boolean =
     runCatching(body).isFailure
 
-fun <T, R> Collection<T>.toSetBy(map: (T) -> R): Set<T> {
-    val result = mutableSetOf<T>()
-    val setBy = mutableSetOf<R>()
-    toList().forEach { element ->
-        if (setBy.add(map(element)))
-            result.add(element)
-    }
-    return result
-}
+fun <T, R> Collection<T>.toSetBy(map: (T) -> R): Set<T> =
+    distinctBy(map).toSet()
 
 fun <T, R> Collection<T>.toSetOf(transform: (T) -> R): Set<R> =
     map(transform).toSet()
-
 
 fun checkForApplicables(
     templates: Set<StructuralQuestionTemplate<MethodDeclaration>>,

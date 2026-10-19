@@ -21,7 +21,9 @@ class WhichVariablesUsableAtLine(
 
     init {
         if (error != null)
-            require(error.scope.getUsableVariables().size >= 2)
+            require(error.scope.getUsableVariables().size >= 2) {
+                "Variable scope must have at least 2 usable variables!"
+            }
     }
 
     override fun isApplicable(element: TypeDeclaration<*>): Boolean =

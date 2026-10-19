@@ -43,8 +43,8 @@ fun DivisionByZeroError.toQLC(
         return Question(
             source,
             TextWithCodeStatement(
-                language["WhichVariablesInExpression"].orAnonymous(arguments, procedure).format(
-                    this.exp.rightOperand.toString(),
+                language["WhichVariablesInExpressionDenominator"].orAnonymous(arguments, procedure).format(
+                    this.exp.toString(),
                 ),
                 procedure
             ),

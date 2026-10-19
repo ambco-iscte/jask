@@ -22,10 +22,10 @@ class IFReturnCondition : StructuralQuestionTemplate<MethodDeclaration>() {
                             || it.thenStmt.asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                     ) ||
                     (it.thenStmt.isBlockStmt  &&
-                            it.thenStmt.asBlockStmt().statements.first.get().isReturnStmt
-                            && (it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().isBooleanLiteralExpr
-                            && (it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
-                            ||it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false)))
+                            it.thenStmt.asBlockStmt().statements.first().isReturnStmt
+                            && (it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().isBooleanLiteralExpr
+                            && (it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
+                            ||it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false)))
                             ))
                     &&
                     ((it.elseStmt.isPresent && it.elseStmt.get().isReturnStmt
@@ -34,10 +34,10 @@ class IFReturnCondition : StructuralQuestionTemplate<MethodDeclaration>() {
                             || it.elseStmt.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                             ) ||
                             (it.elseStmt.get().isBlockStmt &&
-                                    it.elseStmt.get().asBlockStmt().statements.first.get().isReturnStmt
-                                    && it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().isBooleanLiteralExpr
-                                    &&(it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
-                                    || it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
+                                    it.elseStmt.get().asBlockStmt().statements.first().isReturnStmt
+                                    && it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().isBooleanLiteralExpr
+                                    &&(it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
+                                    || it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                                     ))
         }
         return ifStmt != null
@@ -56,10 +56,10 @@ class IFReturnCondition : StructuralQuestionTemplate<MethodDeclaration>() {
                             || it.thenStmt.asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                     ) ||
                     (it.thenStmt.isBlockStmt  &&
-                            it.thenStmt.asBlockStmt().statements.first.get().isReturnStmt
-                            && (it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().isBooleanLiteralExpr
-                            && (it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
-                            ||it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false)))
+                            it.thenStmt.asBlockStmt().statements.first().isReturnStmt
+                            && (it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().isBooleanLiteralExpr
+                            && (it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
+                            ||it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false)))
                             ))
                     &&
                     ((it.elseStmt.isPresent && it.elseStmt.get().isReturnStmt
@@ -68,10 +68,10 @@ class IFReturnCondition : StructuralQuestionTemplate<MethodDeclaration>() {
                             || it.elseStmt.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                             ) ||
                             (it.elseStmt.get().isBlockStmt &&
-                                    it.elseStmt.get().asBlockStmt().statements.first.get().isReturnStmt
-                                    && it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().isBooleanLiteralExpr
-                                    &&(it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
-                                    || it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
+                                    it.elseStmt.get().asBlockStmt().statements.first().isReturnStmt
+                                    && it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().isBooleanLiteralExpr
+                                    &&(it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
+                                    || it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                                     ))
         }
         val ifStmtWA = methodReplacedWrongAnswer.findAll(IfStmt::class.java).first {
@@ -81,10 +81,10 @@ class IFReturnCondition : StructuralQuestionTemplate<MethodDeclaration>() {
                             || it.thenStmt.asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                     ) ||
                     (it.thenStmt.isBlockStmt  &&
-                            it.thenStmt.asBlockStmt().statements.first.get().isReturnStmt
-                            && (it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().isBooleanLiteralExpr
-                            && (it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
-                            ||it.thenStmt.asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false)))
+                            it.thenStmt.asBlockStmt().statements.first().isReturnStmt
+                            && (it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().isBooleanLiteralExpr
+                            && (it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
+                            ||it.thenStmt.asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false)))
                             ))
                     &&
                     ((it.elseStmt.isPresent && it.elseStmt.get().isReturnStmt
@@ -93,10 +93,10 @@ class IFReturnCondition : StructuralQuestionTemplate<MethodDeclaration>() {
                             || it.elseStmt.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                             ) ||
                             (it.elseStmt.get().isBlockStmt &&
-                                    it.elseStmt.get().asBlockStmt().statements.first.get().isReturnStmt
-                                    && it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().isBooleanLiteralExpr
-                                    &&(it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
-                                    || it.elseStmt.get().asBlockStmt().statements.first.get().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
+                                    it.elseStmt.get().asBlockStmt().statements.first().isReturnStmt
+                                    && it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().isBooleanLiteralExpr
+                                    &&(it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(true)
+                                    || it.elseStmt.get().asBlockStmt().statements.first().asReturnStmt().expression.get().asBooleanLiteralExpr().value.equals(false))
                                     ))
         }
 

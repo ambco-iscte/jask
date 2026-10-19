@@ -15,7 +15,7 @@ class TestHowManyArrayAllocations {
         val src = """
             class Test {
                 static double[] drop(double[] array, int n) {
-	                int diff = Math.abs(n); 
+	                int diff = (int) Math.abs(n); 
                     if(diff > array.length)
                         return new double[0];
                 

@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.RecordDeclaration
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
 import com.github.javaparser.ast.stmt.BlockStmt
+import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.stmt.ForEachStmt
 import com.github.javaparser.ast.stmt.ForStmt
 import java.util.Optional
@@ -146,8 +147,10 @@ object VariableScoping {
 
         is BlockStmt -> Scope(
             node,
-            node.childNodes.filterIsInstance<VariableDeclarationExpr>().flatMap { it.variables }.toSet(),
-            node.childNodes.map { get(it) }.toSet()
+            node.statements.filterIsInstance<ExpressionStmt>().filter {
+                it.expression is VariableDeclarationExpr
+            }.flatMap { (it.expression as VariableDeclarationExpr).variables }.toSet(),
+            node.statements.map { get(it) }.toSet()
         )
 
         is ForStmt -> Scope(

@@ -85,6 +85,8 @@ fun StackOverflowError.toQLC(
             options[SimpleTextOption(it.toString().trim(), null)] = true
         }
 
+        // options[SimpleTextOption.none(language, null)] = !procedure.isRecursive || baseCaseReturns.isEmpty()
+
         return Question(
             type = "WhichRecursionBaseCases",
             source = source,
@@ -101,7 +103,7 @@ fun StackOverflowError.toQLC(
 
     fun isBaseCaseReachable(): Question {
         require(hasBaseCases)
-        TODO("Not yet implemented - Are the function's base cases reachable?") // CFG?
+        TODO("Not yet implemented - Are the function's base cases reachable?") // CFG? Undecidable?
     }
 
     val context = TextWithCodeStatement(
@@ -110,8 +112,9 @@ fun StackOverflowError.toQLC(
     )
 
     val sequence = mutableListOf(isProcedureRecursive())
+    sequence.add(whichAreTheBaseCases())
     if (hasBaseCases) {
-        sequence.add(whichAreTheBaseCases())
+        // sequence.add(whichAreTheBaseCases())
         // sequence.add(isBaseCaseReachable())
     } else {
         sequence.add(doesRecursionHaveBaseCases())

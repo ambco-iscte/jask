@@ -26,16 +26,17 @@ data class QLCVirtualMachine(
     private val callStackMaximum: Int = 512,
     private val loopIterationMaximum: Int = 10000,
     private val availableMemory: Int = 1024,
+    private val className: String = "",
     private val language: Language = Language.DEFAULT
 ) {
     fun execute(
         procedureID: String,
         vararg args: Any?
     ): Pair<IValue?, List<QuestionSequenceWithContext>> {
-        val module = Java2Strudel().load(source)
+        val module = Java2Strudel().load(source, className)
         val procedure = module.getProcedure(procedureID) as IProcedure
 
-        val vm = IVirtualMachine.create(callStackMaximum, loopIterationMaximum, availableMemory)
+        val vm = IVirtualMachine.create(callStackMaximum, loopIterationMaximum, availableMemory, throwExceptions = true)
         val arguments = args.map { it.toIValue(vm, module) }
 
         val source = SourceCode(module.toString())
@@ -118,5 +119,47 @@ data class QLCVirtualMachine(
         vm.removeListener(listener)
 
         return Pair(result, questions)
+    }
+}
+
+fun main() {
+    val src = """
+        public class Test {
+            static int countAndRemove(String[] a) {
+                if (a.length == 0) {
+                    return 0;
+                }
+            
+                int count = 0;
+                int i = 1;
+                
+                String previous;
+                String current;
+                
+                while (i < a.length) {
+                    previous = a[i - 1];
+                    current = a[i];
+                    
+                    if (previous.length() > current.length()) {
+                        count = count + (previous.length() + current.length());
+                        a[i - 1] = null;
+                        a[i] = null;
+                    }
+                    
+                    i = i + 1;
+                }
+                
+                return count;
+            }
+        }
+    """.trimIndent()
+
+    val (result, questions) = QLCVirtualMachine(src, className = "Test").execute(
+        "countAndRemove",
+        listOf("to", "be", "or", "not", "to", "be")
+    )
+    println(result)
+    questions.forEach {
+        println(it)
     }
 }
