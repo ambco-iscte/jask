@@ -5,6 +5,8 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.UnaryExpr
+import com.github.javaparser.resolution.types.ResolvedReferenceType
+import com.github.javaparser.resolution.types.ResolvedType
 import pt.iscte.jask.Language
 import pt.iscte.jask.common.QuestionOption
 import pt.iscte.jask.common.Question
@@ -22,6 +24,7 @@ import pt.iscte.jask.templates.quality.UselessDuplicationIfElse
 import pt.iscte.jask.templates.quality.UselessDuplicationInsideIfElse
 import pt.iscte.jask.templates.quality.UselessSelfAssign
 import pt.iscte.jask.templates.quality.UselessVariableDeclaration
+import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import java.lang.reflect.Method
 
 fun Expression.equalsBoolean(value: Boolean): Expression =

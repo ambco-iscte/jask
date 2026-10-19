@@ -232,10 +232,10 @@ can be loaded from any folder (containing the `.properties` files) located in th
 
 ---
 
-<p style="text-align: center;">
+<div align="center">
 <picture style="height:10rem">
   <source style="height:10rem" media="(prefers-color-scheme: dark)" srcset="resources/No-AI Label Light (For Dark Mode).png">
   <source style="height:10rem" media="(prefers-color-scheme: light)" srcset="resources/No-AI Label Dark (For Light Mode).png">
   <img style="height:10rem" alt="AEDEval" src="resources/No-AI%20Label%20Light%20(For%20Dark%20Mode).png">
 </picture>
-</p>
+</div>

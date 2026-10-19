@@ -224,9 +224,10 @@ class CompilerErrorFinder<T : Node>(
         target.findAll(ReturnStmt::class.java).filter {
             val method = it.findAncestor(MethodDeclaration::class.java)
             method.isPresent &&
+            success { method.get().type.resolve() } &&
             it.expression.isPresent &&
             success { it.expression.get().calculateResolvedType() } &&
-            it.expression.get().calculateResolvedType().describe() != method.get().typeAsString
+            it.expression.get().calculateResolvedType().describe() != method.get().type.resolve().describe()
         }.map {
             WrongReturnStmtType(it.findAncestor(MethodDeclaration::class.java).get(), it)
         }
@@ -241,23 +242,13 @@ class CompilerErrorFinder<T : Node>(
 fun main() {
     val src = """
         class Test {
-            static boolean largestIsEven(int[] a) {
-                if (a.length == 0) {
-                    return false;
-                }
-                
-                int i = 1;
-                int largest = a[0];
-                
-                while (i < a.length) {
-                    if (a[i] > largest) {
-                        largest = a[i];
-                    }
-                    i = i + 1;
-                }
-                
-                if (largest % 2 == 0) {
-                    return true;
+            static String getGrade(int score) {
+                if (score >= 90) {
+                    return "Muito Bom";
+                } else if (score >= 80) {
+                    return "Bom";
+                } else if (score >= 70) {
+                    return "Suficiente";
                 }
             }
         }
