@@ -7,6 +7,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import org.junit.jupiter.api.Test
 import pt.iscte.jask.errors.CompilerErrorFinder
+import pt.iscte.jask.extensions.simpleName
 import kotlin.test.assertEquals
 
 class TestWrongReturnStmtType {
@@ -31,10 +32,10 @@ class TestWrongReturnStmtType {
 
         val (e1, e2) = errors
 
-        assertEquals("int", e1.expected.asString())
-        assertEquals("double", e1.actual.describe())
+        assertEquals("int", e1.expected.simpleName)
+        assertEquals("double", e1.actual.simpleName)
 
-        assertEquals("double", e2.expected.asString())
-        assertEquals("java.lang.String", e2.actual.describe())
+        assertEquals("double", e2.expected.simpleName)
+        assertEquals("String", e2.actual.simpleName)
     }
 }

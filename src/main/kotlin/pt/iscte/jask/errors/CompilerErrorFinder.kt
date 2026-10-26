@@ -37,7 +37,9 @@ import pt.iscte.jask.extensions.success
 import pt.iscte.jask.extensions.toType
 import pt.iscte.jask.common.QuestionSequenceWithContext
 import pt.iscte.jask.common.SimpleTextStatement
+import pt.iscte.jask.errors.compiler.templates.HowManyMethodCallArguments
 import pt.iscte.jask.errors.compiler.templates.HowManyReturnStatements
+import pt.iscte.jask.errors.compiler.templates.WhichMethodCallArgumentTypes
 import pt.iscte.jask.errors.compiler.templates.WhichReturnExecutesOnCondition
 import pt.iscte.jask.extensions.ControlFlowGraph
 import pt.iscte.jask.extensions.toStringPretty
@@ -132,14 +134,20 @@ class CompilerErrorFinder<T : Node>(
                         error.call.toString(),
                         error.call.range.get().begin.line
                     )),
-                    CallMethodWithWrongParameterNumber(error).generate(unit, language)
+                    listOf(
+                        CallMethodWithWrongParameterNumber(error).generate(unit, language),
+                        HowManyMethodCallArguments(error).generate(unit, language)
+                    )
                 )
                 else if (error.parameterTypeMismatch) QuestionSequenceWithContext(
                     SimpleTextStatement(language["CallMethodWithWrongParameterTypes"].format(
                         error.call.toString(),
                         error.call.range.get().begin.line
                     )),
-                    CallMethodWithWrongParameterTypes(error).generate(unit, language)
+                    listOf(
+                        CallMethodWithWrongParameterTypes(error).generate(unit, language),
+                        WhichMethodCallArgumentTypes(error).generate(unit, language)
+                    )
                 )
                 else null
 
@@ -242,14 +250,22 @@ class CompilerErrorFinder<T : Node>(
 fun main() {
     val src = """
         class Test {
-            static String getGrade(int score) {
-                if (score >= 90) {
-                    return "Muito Bom";
-                } else if (score >= 80) {
-                    return "Bom";
-                } else if (score >= 70) {
-                    return "Suficiente";
+            static char smallest(char a, char b, char c) {
+                if ((a < b && b < c) || (a < c && c < b)) {
+                    return a;
+                } else if ((b < a && a < c) || (b < c && c < a)) {
+                    return b;
+                } else {
+                    return c;
                 }
+            }
+        
+            static void main() {
+                String first = "q";
+                String second = "e";
+                String third = "d";
+        
+                System.out.println(smallest(first, second, third));
             }
         }
     """.trimIndent()

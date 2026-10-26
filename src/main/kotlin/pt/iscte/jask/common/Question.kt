@@ -1,6 +1,7 @@
 package pt.iscte.jask.common
 
 import pt.iscte.jask.Language
+import pt.iscte.jask.extensions.shuffled
 import pt.iscte.strudel.parsing.java.SourceLocation
 
 data class QuestionSequenceWithContext(
@@ -53,22 +54,21 @@ data class Question (
         if (!shuffle)
             return options
 
-        val lastUnshuffled = listOf(
-            SimpleTextOption.none(language),
-            SimpleTextOption.all(language),
-            SimpleTextOption.yes(language),
-            SimpleTextOption.no(language)
+        val keepLast = listOf(
+            language["NoneOfTheAbove"].toString(),
+            language["AllOfTheAbove"].toString(),
+            language["Yes"].toString(),
+            language["No"].toString()
         )
 
-        val shuffled = options.keys.filter {
-            option -> !lastUnshuffled.contains(option)
-        }.shuffled().associateWith {
-            option -> options[option]!!
-        }.toMutableMap()
+        val shuffled = options.filter {
+            it.key.toString() !in keepLast
+        }.shuffled().toMutableMap()
 
-        lastUnshuffled.forEach { lastOption ->
-            if (options.containsKey(lastOption))
-                shuffled[lastOption] = options[lastOption]!!
+        keepLast.forEach { last ->
+            val match = options.keys.firstOrNull { it.toString() == last }
+            if (match != null)
+                shuffled[match] = options[match]!!
         }
 
         return shuffled

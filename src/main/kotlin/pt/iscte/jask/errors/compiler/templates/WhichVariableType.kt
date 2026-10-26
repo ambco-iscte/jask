@@ -55,7 +55,7 @@ class WhichVariableType(
         return Question(
             source,
             TextWithCodeStatement(
-                language["WhichVariableType"].format(error.variable, error.variable.range.get().begin.line),
+                language["WhichVariableType"].format(error.variable.nameAsString, error.variable.range.get().begin.line.toString()),
                 source.code
             ),
             options,

@@ -15,6 +15,7 @@ import pt.iscte.jask.common.TextWithCodeStatement
 import pt.iscte.jask.extensions.JAVA_PRIMITIVES
 import pt.iscte.jask.extensions.JAVA_PRIMITIVE_TYPES
 import pt.iscte.strudel.parsing.java.SourceLocation
+import kotlin.jvm.optionals.getOrNull
 
 class WhichReturnStmtType(
     private val error: WrongReturnStmtType? = null
@@ -45,10 +46,16 @@ class WhichReturnStmtType(
         if (options.size < 4)
             options[SimpleTextOption.none(language)] = false
 
+        val localisationKey =
+            if (error.returnStmt.expression.getOrNull()?.isNameExpr == true)
+                "WhichReturnStmtVariableType"
+            else
+                "WhichReturnStmtType"
+
         return Question(
             source,
             TextWithCodeStatement(
-                language["WhichReturnStmtType"].format(error.returnStmt.toString(), error.returnStmt.range.get().begin.line),
+                language[localisationKey].format(error.returnStmt.expression.getOrNull().toString(), error.returnStmt.toString()),
                 source.code
             ),
             options,

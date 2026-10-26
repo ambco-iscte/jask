@@ -30,7 +30,7 @@ class WhichVariablesUsableAtLine(
         if (error == null)
             CompilerErrorFinder(element).findUnknownVariables().any { it.scope.getUsableVariables().size >= 2 }
         else
-            element.isAncestorOf(error.expr)
+            element == error.expr || element.isAncestorOf(error.expr)
 
     override fun build(
         sources: List<SourceCode>,

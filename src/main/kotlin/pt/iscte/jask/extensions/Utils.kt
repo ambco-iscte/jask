@@ -5,6 +5,9 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.UnaryExpr
+import com.github.javaparser.resolution.model.typesystem.LazyType
+import com.github.javaparser.resolution.model.typesystem.NullType
+import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.resolution.types.ResolvedReferenceType
 import com.github.javaparser.resolution.types.ResolvedType
 import pt.iscte.jask.Language
@@ -26,6 +29,19 @@ import pt.iscte.jask.templates.quality.UselessSelfAssign
 import pt.iscte.jask.templates.quality.UselessVariableDeclaration
 import pt.iscte.strudel.parsing.java.extensions.getOrNull
 import java.lang.reflect.Method
+import kotlin.jvm.optionals.getOrNull
+
+internal val ResolvedType.simpleName: String
+    get() = when (this) {
+        is ResolvedPrimitiveType -> this.name.lowercase()
+        is ResolvedReferenceType -> this.typeDeclaration.getOrNull()?.className ?: this.qualifiedName
+        is LazyType -> this.type.simpleName
+        is NullType -> "null"
+        else -> describe()
+    }
+
+fun <T, R> Map<T, R>.shuffled(): Map<T, R> =
+    entries.shuffled().associate { it.key to it.value }
 
 fun Expression.equalsBoolean(value: Boolean): Expression =
     this.simplify(!value)

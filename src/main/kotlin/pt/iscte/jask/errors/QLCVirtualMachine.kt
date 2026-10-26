@@ -46,22 +46,22 @@ data class QLCVirtualMachine(
         val questions = mutableListOf<QuestionSequenceWithContext>()
 
         var currentProcedure: IProcedure = procedure
-        var currentArguments: List<IValue> = arguments
+        var currentArguments: List<IValue> = arguments.map { it.deepCopy() }
 
         val listener = object : IVirtualMachine.IListener {
             override fun procedureCall(procedure: IProcedureDeclaration, args: List<IValue>, caller: IProcedure?) {
                 procedure.parameters.forEachIndexed { index, parameter ->
                     if (parameter !in variableHistory)
-                        variableHistory[parameter] = listOf(args[index])
+                        variableHistory[parameter] = listOf(args[index].deepCopy())
                 }
                 if (procedure is IProcedure) {
                     currentProcedure = procedure
-                    currentArguments = args
+                    currentArguments = args.map { it.deepCopy() }
                 }
             }
 
             override fun variableAssignment(a: IVariableAssignment, value: IValue) {
-                variableHistory[a.target] = (variableHistory[a.target] ?: emptyList()) + listOf(value)
+                variableHistory[a.target] = (variableHistory[a.target] ?: emptyList()) + listOf(value.deepCopy())
             }
 
             override fun executionError(e: RuntimeError) {
@@ -132,23 +132,23 @@ fun main() {
             
                 int count = 0;
                 int i = 1;
-                
+            
                 String previous;
                 String current;
-                
+            
                 while (i < a.length) {
                     previous = a[i - 1];
                     current = a[i];
-                    
+            
                     if (previous.length() > current.length()) {
                         count = count + (previous.length() + current.length());
                         a[i - 1] = null;
                         a[i] = null;
                     }
-                    
+            
                     i = i + 1;
                 }
-                
+            
                 return count;
             }
         }

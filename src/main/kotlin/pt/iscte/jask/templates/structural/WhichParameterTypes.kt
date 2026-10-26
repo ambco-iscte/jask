@@ -20,9 +20,13 @@ class WhichParameterTypes : StructuralQuestionTemplate<MethodDeclaration>() {
         element.parameters.isNotEmpty() || element.getLocalVariables().isNotEmpty()
 
     companion object {
-        fun options(method: MethodDeclaration, language: Language): Map<QuestionOption, Boolean> {
+        fun options(
+            method: MethodDeclaration,
+            language: Language,
+            paramTypes: List<String> = method.parameters.map { it.typeAsString }
+        ): Map<QuestionOption, Boolean> {
             val parameters = method.parameters.map { it.nameAsString }
-            val paramTypes = method.parameters.map { it.typeAsString }
+            // val paramTypes = method.parameters.map { it.typeAsString }
             val returnType = method.typeAsString
 
             val localVars = method.getLocalVariables().map { it.nameAsString }

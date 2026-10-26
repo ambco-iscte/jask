@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import pt.iscte.jask.Localisation
 import pt.iscte.jask.errors.CompilerErrorFinder
 import pt.iscte.jask.errors.compiler.templates.WhichWrongReturnStmtTypeMethodReturnType
+import pt.iscte.jask.extensions.simpleName
 import kotlin.test.assertEquals
 
 class TestMethodWithWrongReturnStmt {
@@ -26,7 +27,7 @@ class TestMethodWithWrongReturnStmt {
         println(error)
 
         assertEquals("foo", error.method.nameAsString)
-        assertEquals("int", error.expected.asString())
+        assertEquals("int", error.expected.simpleName)
         assertEquals("java.lang.String", error.actual.describe())
 
         // ---
