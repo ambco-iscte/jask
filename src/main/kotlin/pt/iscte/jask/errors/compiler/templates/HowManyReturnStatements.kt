@@ -33,7 +33,7 @@ class HowManyReturnStatements(
         val error = this.error ?: CompilerErrorFinder(unit).findMissingReturnInBranch().random()
 
         val returns = error.method.findAll(ReturnStmt::class.java)
-        val num = returns.toSet().size
+        val num = returns.size
 
         return Question(
             source,
