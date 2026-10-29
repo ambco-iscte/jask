@@ -49,6 +49,7 @@ import pt.iscte.strudel.parsing.java.extensions.getOrNull
 
 interface ICompilerError {
     fun message(): String
+    fun toQLC(unit: CompilationUnit, language: Language): QuestionSequenceWithContext?
 }
 
 class CompilerErrorFinder<T : Node>(
@@ -57,11 +58,14 @@ class CompilerErrorFinder<T : Node>(
 ) {
 
     init {
+        require(target.findCompilationUnit().isPresent) {
+            "No compilation unit found for ${target::class.simpleName}: $target"
+        }
         configureStaticJavaParser(target.findCompilationUnit().getOrNull)
     }
 
     private val unit: CompilationUnit =
-        target.findCompilationUnit().get()
+        (target as? CompilationUnit) ?: target.findCompilationUnit().get()
 
     // TODO: prettify
     fun findAll(): List<ICompilerError> =
@@ -73,89 +77,13 @@ class CompilerErrorFinder<T : Node>(
         findMethodCallsWithWrongArguments() +
         findMissingReturnInBranch()
 
-    // TODO: prettify
-    fun findAllAndGenerateQLCs(): List<QuestionSequenceWithContext> = findAll().mapNotNull { error -> runCatching {
-        when (error) {
-            is UnknownVariable -> QuestionSequenceWithContext(
-                SimpleTextStatement(language["ReferencesUndefinedVariable"].format(
-                    error.expr.nameAsString,
-                    error.expr.range.get().begin.line
-                )),
-                listOf(
-                    WhatVariables().generate(unit, language),
-                    WhichParametersSingleChoice().generate(unit, language),
-                    WhichVariablesUsableAtLine(error).generate(unit, language)
-                )
-            )
-
-            is UnknownMethod -> null // TODO what about Java built-ins?
-
-            is UnknownType -> null // TODO what about Java built-ins?
-
-            is WrongTypeForVariableDeclaration ->
-                if (error.initialiserIsMethodCall)
-                    QuestionSequenceWithContext(
-                        SimpleTextStatement(language["AssignVarWithMethodWrongType"].format(
-                            error.variableInitialiser.toString(),
-                            error.variable.nameAsString,
-                            error.variableInitialiser.asMethodCallExpr().nameAsString
-                        )),
-                        listOf(
-                            WhichVariableType(error).generate(unit, language),
-                            WhichMethodCallReturnType(error).generate(unit, language)
-                        )
-                    )
-                else null
-
-            is WrongReturnStmtType -> QuestionSequenceWithContext(
-                SimpleTextStatement(language["MethodWithWrongReturnStmt"].format(
-                    error.returnStmt.toString(),
-                    error.method.nameWithScope()
-                )),
-                listOf(
-                    WhichWrongReturnStmtTypeMethodReturnType(error).generate(unit, language),
-                    WhichReturnStmtType(error).generate(unit, language)
-                )
-            )
-
-            is MissingReturnInBranch -> QuestionSequenceWithContext(
-                SimpleTextStatement(language["MissingReturn"].format(
-                    error.method.nameWithScope(),
-                    "return"
-                )), listOf(
-                    HowManyReturnStatements(error).generate(unit, language),
-                    WhichReturnExecutesOnCondition(error).generate(unit, language)
-                )
-            )
-
-            is WrongMethodCallParameters ->
-                if (error.parameterNumberMismatch) QuestionSequenceWithContext(
-                    SimpleTextStatement(language["CallMethodWithWrongParameterNumber"].format(
-                        error.call.toString(),
-                        error.call.range.get().begin.line
-                    )),
-                    listOf(
-                        CallMethodWithWrongParameterNumber(error).generate(unit, language),
-                        HowManyMethodCallArguments(error).generate(unit, language)
-                    )
-                )
-                else if (error.parameterTypeMismatch) QuestionSequenceWithContext(
-                    SimpleTextStatement(language["CallMethodWithWrongParameterTypes"].format(
-                        error.call.toString(),
-                        error.call.range.get().begin.line
-                    )),
-                    listOf(
-                        CallMethodWithWrongParameterTypes(error).generate(unit, language),
-                        WhichMethodCallArgumentTypes(error).generate(unit, language)
-                    )
-                )
-                else null
-
-            else -> null
-        }
-    }.onFailure {
-        it.printStackTrace()
-    }.getOrNull() }
+    fun findAllAndGenerateQLCs(): List<QuestionSequenceWithContext> = findAll().mapNotNull { error ->
+        runCatching {
+            error.toQLC(unit, language)
+        }.onFailure {
+            it.printStackTrace()
+        }.getOrNull()
+    }
 
     fun findMissingReturnInBranch(): List<MissingReturnInBranch> {
         val t = when (target) {
@@ -235,7 +163,8 @@ class CompilerErrorFinder<T : Node>(
             success { method.get().type.resolve() } &&
             it.expression.isPresent &&
             success { it.expression.get().calculateResolvedType() } &&
-            it.expression.get().calculateResolvedType().describe() != method.get().type.resolve().describe()
+            // it.expression.get().calculateResolvedType().describe() != method.get().type.resolve().describe() &&
+            !method.get().type.resolve().isAssignableBy(it.expression.get().calculateResolvedType())
         }.map {
             WrongReturnStmtType(it.findAncestor(MethodDeclaration::class.java).get(), it)
         }
@@ -249,27 +178,29 @@ class CompilerErrorFinder<T : Node>(
 
 fun main() {
     val src = """
-        class Test {
-            static char smallest(char a, char b, char c) {
-                if ((a < b && b < c) || (a < c && c < b)) {
-                    return a;
-                } else if ((b < a && a < c) || (b < c && c < a)) {
-                    return b;
-                } else {
-                    return c;
+        class test {
+            static int[] merge(int[] a, int[] b) {
+                if (a.length != b.length) {
+                    return null;
                 }
-            }
-        
-            static void main() {
-                String first = "q";
-                String second = "e";
-                String third = "d";
-        
-                System.out.println(smallest(first, second, third));
+            
+                int n = a.length;
+                int[] c = new int[n];
+            
+                for (int i = 0; i < n; i++) {
+                    if (a[i] < 0) {
+                        int inverse = -a[i];
+                        c[i] = inverse + b[i];
+                    } else {
+                        c[i] = inverse - b[i];
+                    }
+                }
+            
+                return c;
             }
         }
     """.trimIndent()
-    val unit = StaticJavaParser.parse(src);
+    val unit = StaticJavaParser.parse(src)
     CompilerErrorFinder(unit).findAllAndGenerateQLCs().forEach {
         println(it)
     }

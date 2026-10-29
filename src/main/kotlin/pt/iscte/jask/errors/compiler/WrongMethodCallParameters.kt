@@ -1,13 +1,22 @@
 package pt.iscte.jask.errors.compiler
 
+import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.types.ResolvedType
+import pt.iscte.jask.Language
+import pt.iscte.jask.common.QuestionSequenceWithContext
+import pt.iscte.jask.common.SimpleTextStatement
 import pt.iscte.jask.errors.ICompilerError
+import pt.iscte.jask.errors.compiler.templates.CallMethodWithWrongParameterNumber
+import pt.iscte.jask.errors.compiler.templates.CallMethodWithWrongParameterTypes
+import pt.iscte.jask.errors.compiler.templates.HowManyMethodCallArguments
+import pt.iscte.jask.errors.compiler.templates.WhichMethodCallArgumentTypes
 import pt.iscte.jask.extensions.isValidFor
 import pt.iscte.jask.extensions.nameWithScope
 import pt.iscte.jask.extensions.success
+import java.util.Optional
 
 data class WrongMethodCallParameters(val method: MethodDeclaration, val call: MethodCallExpr): ICompilerError {
 
@@ -41,6 +50,29 @@ data class WrongMethodCallParameters(val method: MethodDeclaration, val call: Me
         }
         require(!call.isValidFor(method)) { "Method call $call must be invalid for method ${method.nameWithScope()}!" }
     }
+
+    override fun toQLC(unit: CompilationUnit, language: Language): QuestionSequenceWithContext? =
+        if (parameterNumberMismatch) QuestionSequenceWithContext(
+            SimpleTextStatement(language["CallMethodWithWrongParameterNumber"].format(
+                call.toString(),
+                call.range.get().begin.line
+            )),
+            listOf(
+                CallMethodWithWrongParameterNumber(this).generate(unit, language),
+                HowManyMethodCallArguments(this).generate(unit, language)
+            )
+        )
+        else if (parameterTypeMismatch) QuestionSequenceWithContext(
+            SimpleTextStatement(language["CallMethodWithWrongParameterTypes"].format(
+                call.toString(),
+                call.range.get().begin.line
+            )),
+            listOf(
+                CallMethodWithWrongParameterTypes(this).generate(unit, language),
+                WhichMethodCallArgumentTypes(this).generate(unit, language)
+            )
+        )
+        else null
 
     override fun message(): String =
         "Wrong method call for ${method.nameWithScope()} at $call: " + (

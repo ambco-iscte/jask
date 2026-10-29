@@ -1,13 +1,20 @@
 package pt.iscte.jask.errors.compiler
 
+import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.type.Type
+import pt.iscte.jask.Language
+import pt.iscte.jask.common.QuestionSequenceWithContext
 import pt.iscte.jask.errors.ICompilerError
 
 data class UnknownType(val type: Type, val location: Node, val types: List<Type>): ICompilerError {
 
     // TODO what if student meant to use a Java built-in type instead of a type they implemented
+
+    override fun toQLC(unit: CompilationUnit, language: Language): QuestionSequenceWithContext? {
+        TODO("Not yet implemented")
+    }
 
     override fun message(): String = "Unknown type ${type.asString()} in: $location"
 }

@@ -1,10 +1,16 @@
 package pt.iscte.jask.errors.compiler
 
+import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.types.ResolvedType
+import pt.iscte.jask.Language
+import pt.iscte.jask.common.QuestionSequenceWithContext
+import pt.iscte.jask.common.SimpleTextStatement
 import pt.iscte.jask.errors.ICompilerError
+import pt.iscte.jask.errors.compiler.templates.WhichMethodCallReturnType
+import pt.iscte.jask.errors.compiler.templates.WhichVariableType
 import pt.iscte.jask.extensions.success
 
 class WrongTypeForVariableDeclaration(val variable: VariableDeclarator): ICompilerError {
@@ -27,6 +33,21 @@ class WrongTypeForVariableDeclaration(val variable: VariableDeclarator): ICompil
 
     val variableInitialiser: Expression
         get() = variable.initializer.get()
+
+    override fun toQLC(unit: CompilationUnit, language: Language): QuestionSequenceWithContext? =
+        if (initialiserIsMethodCall)
+            QuestionSequenceWithContext(
+                SimpleTextStatement(language["AssignVarWithMethodWrongType"].format(
+                    variableInitialiser.toString(),
+                    variable.nameAsString,
+                    variableInitialiser.asMethodCallExpr().nameAsString
+                )),
+                listOf(
+                    WhichVariableType(this).generate(unit, language),
+                    WhichMethodCallReturnType(this).generate(unit, language)
+                )
+            )
+        else null
 
     override fun message(): String = "Variable ${variable.nameAsString} is of type ${expected.asString()}, but is " +
             "initialised with expression of type ${actual.describe()}: ${variable.initializer.get()}"

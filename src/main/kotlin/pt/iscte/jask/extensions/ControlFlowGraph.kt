@@ -15,6 +15,8 @@ import com.github.javaparser.ast.nodeTypes.NodeWithStatements
 import com.github.javaparser.ast.stmt.*
 import java.util.*
 
+typealias ControlFlowPath = List<ControlFlowGraph.CFGEdge>
+
 data class ControlFlowGraph(
     private val method: MethodDeclaration
 ) {
@@ -376,13 +378,13 @@ data class ControlFlowGraph(
         override fun toString(): String = statements.joinToString("; ")
     }
 
-    private data class VirtualStartNode(
+    data class VirtualStartNode(
         override val id: UUID, override val depth: Int, override val next: CFGNode
     ) : CFGNode {
         override fun toString(): String = "BEGIN"
     }
 
-    private data class VirtualEndNode(
+    data class VirtualEndNode(
         override val id: UUID, override val depth: Int
     ) : CFGNode {
         override fun toString(): String = "END"
@@ -404,17 +406,16 @@ data class ControlFlowGraph(
             else -> true
         }
 
-    // TODO inefficient
-    fun findBranchesWithMissingReturn(): List<List<CFGEdge>> {
+    private fun findBranches(condition: (CFGEdge) -> Boolean): List<ControlFlowPath> {
         val all = edges()
-        val endingInEmpty = all.filter { it.to is EmptyNode && it.to.isTerminating }
+        val endingInCondition = all.filter(condition)
 
-        if (endingInEmpty.isEmpty())
+        if (endingInCondition.isEmpty())
             return emptyList()
 
         val paths = mutableListOf<List<CFGEdge>>()
 
-        endingInEmpty.forEach { final ->
+        endingInCondition.forEach { final ->
             val path = mutableListOf(final)
             while (path.last().from != begin) {
                 val previous = all.firstOrNull { it.to == path.last().from }
@@ -427,7 +428,29 @@ data class ControlFlowGraph(
 
         return paths
     }
+
+    fun findBranchesWithMissingReturn(): List<ControlFlowPath> =
+        findBranches { it.to is EmptyNode && it.to.isTerminating }
+
+    fun findValidBranches(): List<ControlFlowPath> =
+        findBranches { it.to is VirtualEndNode }
 }
+
+fun ControlFlowPath.condition(): Expression {
+    var condition: Expression? = null
+
+    this.filter { it.condition.isPresent }.forEach { edge ->
+        condition = if (condition == null)
+            edge.condition.get()
+        else
+            BinaryExpr(condition, edge.condition.get(), BinaryExpr.Operator.AND)
+    }
+
+    return condition ?: BooleanLiteralExpr(true)
+}
+
+inline fun <reified T : ControlFlowGraph.CFGNode> ControlFlowPath.endsWith(): Boolean =
+    this.isNotEmpty() && this.last().to is T
 
 fun main() {
     val source = """
@@ -457,11 +480,18 @@ fun main() {
     println(flow.existsPathTo(ExpressionStmt(MethodCallExpr("NOPE"))))
     println()
     println(flow.toDOTString())
-    println()
+    println("INVALID:\n")
     flow.findBranchesWithMissingReturn().forEach { branch ->
         println(branch.joinToString(" ") { (from, to, condition) ->
             "$from ---${condition.map { "($it)" }.orElse("")}--->${if (to is ControlFlowGraph.EmptyNode) " $to"   else ""}"
         })
-        println()
+        println(branch.endsWith<ControlFlowGraph.EmptyNode>())
+    }
+    println("VALID:\n")
+    flow.findValidBranches().forEach { branch ->
+        println(branch.joinToString(" ") { (from, to, condition) ->
+            "$from ---${condition.map { "($it)" }.orElse("")}--->${if (to is ControlFlowGraph.EmptyNode) " $to"   else ""}"
+        })
+        println(branch.endsWith<ControlFlowGraph.VirtualEndNode>())
     }
 }

@@ -1,6 +1,7 @@
 package pt.iscte.jask.errors.compiler.templates
 
 import com.github.javaparser.ast.body.TypeDeclaration
+import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName
 import pt.iscte.jask.Language
 import pt.iscte.jask.errors.CompilerErrorFinder
@@ -30,7 +31,7 @@ class WhichVariablesUsableAtLine(
         if (error == null)
             CompilerErrorFinder(element).findUnknownVariables().any { it.scope.getUsableVariables().size >= 2 }
         else
-            element == error.expr || element.isAncestorOf(error.expr)
+            element.isAncestorOf(error.expr) || error.expr in element.findAll(NameExpr::class.java)
 
     override fun build(
         sources: List<SourceCode>,
@@ -52,9 +53,10 @@ class WhichVariablesUsableAtLine(
                 c < column
             } else l < line
         }.toSet()
-        val unusable: Set<NodeWithSimpleName<*>> = scope.enclosed.flatMap {
-            it.getUsableVariables()
-        }.minus(usable).toSet()
+
+        val unusable: Set<NodeWithSimpleName<*>> =
+            scope.getRootScope().node.findAll(NameExpr::class.java).toSet()
+                .minus(usable.map(NodeWithSimpleName<*>::getNameAsExpression).toSet())
 
         return Question(
             source = source,
@@ -64,7 +66,7 @@ class WhichVariablesUsableAtLine(
             ),
             options = // TODO better distractors
                 usable.associate { SimpleTextOption(it.nameAsString) to true } +
-                        unusable.associate { SimpleTextOption(it.nameAsString) to false },
+                unusable.associate { SimpleTextOption(it.nameAsString) to false },
             language = language,
             choice = QuestionChoiceType.MULTIPLE,
             relevantSourceCode = listOf(SourceLocation(name))
